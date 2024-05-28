@@ -22,10 +22,14 @@ app.permanent_session_lifetime = timedelta(days=1)
 # def loadUser(user_id):
 #     return User.query.get(int(user_id))
 
-if __name__ == "__main__":
-    app.run(debug=True, port = 2000)
-
 #Endpoints
 @app.route("/")
 def home():
     return render_template('home.html')
+
+@app.route("/templatetest")
+def template():
+    return render_template('baseTemplate.html')
+
+if __name__ == "__main__":
+    app.run(debug=True, port = 6900)

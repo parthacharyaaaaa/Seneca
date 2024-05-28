@@ -1,0 +1,127 @@
+/* IMPORTS */
+
+/* RESET */
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* VARIABLES */
+:root{
+    /* BACKGROUND IMAGES */
+    --BGIMG: url('assets/background.png');
+    --BGIMG-ALT: url('assets/background.png');
+    --BGCOLOR: rgb(59, 59, 59);
+
+    --FSIZE--SMALLEST: 0.8rem;
+    --FSIZE-XL: 4rem;
+    --TEXT-COLOR-LIGHT: antiquewhite;
+    --TEXT-COLOR-LIGHTER: white;
+    /* TYPOGRAPHY */
+    /* --FF-MAIN:
+    --FF-ALT-1
+    --FF-ALT-2
+
+    --FSIZE
+    --FSIZE-L
+    --FSIZE-LARGEST
+    --FSIZE-S
+
+    --TEXT-COLOR-DARK
+    --TEXT-COLOR-DARK-ALT-1
+    --TEXT-COLOR-DARK-ALT-2
+    --TEXT-COLOR-LIGHT-ALT-1
+    --TEXT-COLOR-LIGHT-ALT-2
+    */
+
+    /* SPACING [MARGIN, PADDING, FLEX] */
+    
+}
+/* GLOBAL STYLES */
+body{
+    background-image: var(--BGIMG);
+    height: 100vh;
+    position: relative;
+}
+
+/* Navbar */
+.navbar{
+    background-color: var(--BGCOLOR);
+    color: var(--TEXT-COLOR-LIGHT);
+} 
+
+#navbarSupportedContent a{
+    /* background-color: aqua; */
+    color: var(--TEXT-COLOR-LIGHT);
+}
+
+.navbar input{
+    color: antiquewhite;
+}
+
+/* Footer */
+footer{
+    position: absolute;
+    bottom: 0;
+    background-color: var(--BGCOLOR);
+    width: 100%;
+
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    padding: 0.5rem 1rem 0rem 1rem;
+
+    color: var(--TEXT-COLOR-LIGHT)
+}
+
+footer ul{
+    list-style: none;
+    list-style-position: inside;
+    padding-left: 0;
+}
+
+.left-footer-title{
+    font-size: var(--FSIZE-XL);
+}
+
+.logo-italic{
+    font-style: italic;
+}
+
+.left-footer-promo ul{
+    display: flex;
+    justify-content: space-evenly;
+    border: 2px red solid;
+}
+
+.right-footer{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    gap: 4rem;
+    align-items: center;
+    align-content: first baseline;
+    /* gap: 30%; */
+    text-align: right;
+}
+
+.right-footer a{
+    text-decoration: none;
+    color: var(--TEXT-COLOR-LIGHT);
+    font-size: var(--FSIZE--SMALLEST);
+}
+
+.right-footer li:first-child{
+    /* margin-top: 6.9px; */
+}
+
+.right-footer div:last-child{
+    margin-right: 15px;
+}
+
+footer a:is(:hover, :focus){
+    color: var(--TEXT-COLOR-LIGHTER);
+    text-decoration: underline;
+    /* font-weight: bold; */
+}
