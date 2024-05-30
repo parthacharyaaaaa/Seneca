@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Signup</h1>
-    <form action="/signup" method="POST">
+    <form id="signupForm" method="POST">
         <label for="first_name">First Name:</label><br>
         <input type="text" id="first_name" name="first_name" required><br>
         
@@ -25,8 +25,15 @@
         
         <label for="password">Password:</label><br>
         <input type="password" id="password" name="password" required><br>
+
+        <label for="confirm_password">Confirm Password:</label><br>
+        <input type="password" id="confirm_password" name="confirm_password" required><br>
         
-        <input type="submit" value="Signup">
+        <button type="submit">Signup</button>
     </form>
+
+    <div id="message"></div>
+
+    <script src="{{url_for('static', filename='scripts/signupValidation.js')}}"></script>
 </body>
 </html>
