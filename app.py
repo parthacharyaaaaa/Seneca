@@ -57,7 +57,7 @@ def home():
 
 @app.route("/templatetest")
 def template():
-    return render_template('baseTemplate.html')
+    return render_template('baseTemplate.html', signedIn = current_user)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -139,7 +139,6 @@ def login():
 def amd():
     session.clear()
     return redirect(url_for('signup'))
-
 
 if __name__ == "__main__":
     with app.app_context():
