@@ -13,6 +13,7 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
             alert('submitted');
             form.removeEventListener('submit', arguments.callee);
             form.submit();
+            window.location.href = 'http://127.0.0.1:6900';
         } else {
             return response.json();
         }
