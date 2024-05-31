@@ -1,36 +1,19 @@
-<!DOCTYPE html>
-<html>
+{% extends 'baseTemplate.html' %}
 
 <head>
-    <title>Enhanced Labs- EpiMuscle- Epicatechin (Muscle Builder)</title>
-    <!-- Make sure you've downloaded all of this before -->
-    <link rel="stylesheet" type="text/css" href="global.css">
-    <link rel="stylesheet" type="text/css" href="texts.css">
-    <link rel="stylesheet" type="text/css" href="buttonStyles.css">
-    <link rel="stylesheet" type="text/css" href="indivPageStyles.css">
+    {% block title %} Enhanced Labs- EpiMuscle- Epicatechin (Muscle Builder) {% endblock %}
 
-
+    {% block additionalDependencies %}
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="indivProductEffects.js"></script>
+    <!-- <script src="indivProductEffects.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="charts.js"></script>
+    <!-- <script src="charts.js"></script> -->
+    {% endblock %}
 </head>
-
-<body>
+    {% block content %}
     <!-- Header -->
-    <div class="header">
-        <div class="logo">
-            TVS
-        </div>
 
-        <div class="links">
-            <a href="index.html" target="_blank">Home</a>
-            <a href="index.html#options" style="color: red" target="_blank">Catalog</a>
-            <a href= "contact.html"target="_blank">Contact</a>
-            <a href="checkoutPage.html" target="_blank">Checkout</a>
-        </div>
-    </div>
     <!-- Actual container, divided into two segments -->
     <div id="pageContainer">
         <div id="productContainer">
@@ -146,6 +129,4 @@
     <script>
         AOS.init();
     </script>
-</body>
-
-</html>
+{% endblock %}

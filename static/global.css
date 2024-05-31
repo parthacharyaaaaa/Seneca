@@ -46,6 +46,8 @@
 body{
     background-image: var(--BGIMG);
     height: 100vh;
+}
+html{
     position: relative;
 }
 

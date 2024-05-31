@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_required, login_user, current_user, LoginManager
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
+from sqlalchemy.dialects.postgresql import JSON
 
 from datetime import timedelta, datetime
 import re as regex
@@ -40,7 +41,45 @@ class User(UserMixin, db.Model):
         self.password = password
         self.time_created = datetime.now()
 
-        
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String(40), nullable = False, unique = True)
+    summary = db.Column(db.String(100), nullable = False)
+    description = db.Column(db.String(300), nullable = False)
+    rating = db.Column(db.Float, nullable = False, default = 0.0)
+    servings = db.Column(db.Integer, nullable = True)
+    flavour = db.Column(db.String(30), nullable = True)
+    specs = db.Column(JSON, nullable = True)
+    unitSold = db.Column(db.Integer, nullable=False, default = 0)
+    image1 = db.Column(db.String(69), nullable = False)
+    image2 = db.Column(db.String(69), nullable = False)
+    image3 = db.Column(db.String(69), nullable = False)
+    image4 = db.Column(db.String(69), nullable = False)
+    nutritional_label_main = db.Column(db.String(69), nullable = False)
+    nutritional_label_second = db.Column(db.String(69), nullable = True)
+    discount = db.Column(db.Float, nullable=True, default = 0.0)
+    allergy_label = db.Column(db.String(100), nullable = True, default = None)
+
+    def __init__(self, title, summary, description, rating=0.0, servings=None, flavour=None, 
+                 specs=None, unitSold=0, image1='', image2='', image3='', image4='', 
+                 nutritional_label_main='', nutritional_label_second=None, discount=0.0, allergy_label=None):
+        self.title = title
+        self.summary = summary
+        self.description = description
+        self.rating = rating
+        self.servings = servings
+        self.flavour = flavour
+        self.specs = specs
+        self.unitSold = unitSold
+        self.image1 = image1
+        self.image2 = image2
+        self.image3 = image3
+        self.image4 = image4
+        self.nutritional_label_main = nutritional_label_main
+        self.nutritional_label_second = nutritional_label_second
+        self.discount = discount
+        self.allergy_label = allergy_label
+
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
