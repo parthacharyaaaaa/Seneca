@@ -145,9 +145,6 @@ def signup():
 @app.route("/login", methods = ['POST', 'GET'])
 def login():
     if request.method == 'POST':
-        print(request, request.url)
-        # print(body)
-
         identity = request.form['emailPhone']
         password = request.form['password']
 
@@ -168,16 +165,20 @@ def login():
             print("User found")
             if bcrypt.check_password_hash(registeredUser.password, password):
                 print("Pass matches, authenticated")
+
                 print(session)
                 login_user(registeredUser)
                 print('logged in')
+
                 print(session)
                 if 'Temporary_Cart' in session:
                     print("Guest user had a temporary cart before logging in")
                     session['cart'] = session['Temporary_Cart']
                     session.pop('Temporary_Cart')
+                    print("----REDIR: FROM LOGIN TO CART")
                     return redirect(url_for('cart'))
-                print("Big problem >:(")
+                
+                print("No temporary cart found, redirecting to home")
                 return redirect(url_for("home"))
             else:
                 return jsonify({'authenticated' : False,
@@ -185,13 +186,14 @@ def login():
         else:
             return jsonify({'authenticated' : False,
                     'message' : 'No account with the given email address/phone number exists with Haki'})
-        
-    return render_template('login.html')
+    else:
+        print("Rendering Login")
+        return render_template('login.html')
 
 @app.route("/products/view/id=<product_id>", methods=['POST', 'GET'])
 def product(product_id):
     #Rendering the page
-    requestedProduct = Product.query.get(product_id)
+    requestedProduct = Product.query.filter_by(id = product_id).first()
     print(requestedProduct)
     print(current_user.is_authenticated)
 
@@ -210,7 +212,8 @@ def cart():
     if 'cart' not in session:
         session['cart'] = {}
         session.permanent = True
-
+    else:
+        print("cart in session")
     return render_template("cart.html", cart = session['cart'])
 
 @app.route('/addToCart', methods=['POST', 'GET'])
@@ -248,10 +251,6 @@ def addToCart():
 @app.route('/purchaseThenCheckout', methods=['POST'])
 def purchaseThenCheckout():
     if request.method == 'POST':
-        try:
-            print(session['cart'])
-        except:
-            print("Cart doesm't exist")
         product_id = request.form['id']
         quantity = int(request.form['quantity'])
         print("Incoming product (API): ", product_id, quantity)
@@ -262,8 +261,8 @@ def purchaseThenCheckout():
             session['Temporary_Cart'] = {}
             session['Temporary_Cart'][product_id] = [quantity]
             session.permanent = True
-            print(session)
-            return redirect(url_for('signup'))
+            print("Temp Session: ", session, "\nNow, we redirect to login-----------------------")
+            return redirect(url_for('login'))
 
         if 'cart' not in session:
             session['cart'] = {}
@@ -293,4 +292,4 @@ def amd():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True, port = 6900)
+    app.run(debug=False, port = 6900)
