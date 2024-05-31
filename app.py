@@ -49,6 +49,7 @@ class Product(db.Model):
     rating = db.Column(db.Float, nullable = False, default = 0.0)
     servings = db.Column(db.Integer, nullable = True)
     flavour = db.Column(db.String(30), nullable = True)
+    weight = db.Column(db.Float, nullable = False)
     specs = db.Column(JSON, nullable = True)
     unitSold = db.Column(db.Integer, nullable=False, default = 0)
     image1 = db.Column(db.String(69), nullable = False)
@@ -176,7 +177,7 @@ def login():
 
 @app.route("/product", methods=['POST', 'GET'])
 def product():
-    return render_template('productTemplate.html')
+    return render_template('productTemplate.html', signedIn = current_user)
 @app.route("/logout")
 def amd():
     session.clear()

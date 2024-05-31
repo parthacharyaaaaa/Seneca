@@ -6,7 +6,11 @@
     margin: 0;
     box-sizing: border-box;
 }
-
+/* UTILITY */
+.utility-readable-text{
+    position: absolute;
+    left: -10000px;
+}
 /* VARIABLES */
 :root{
     /* BACKGROUND IMAGES */
@@ -43,9 +47,11 @@
     */
 }
 /* GLOBAL STYLES */
-body{
+html body{
     background-image: var(--BGIMG);
     height: 100vh;
+
+    color: var(--TEXT-COLOR-LIGHT);
 }
 html{
     position: relative;
@@ -55,6 +61,8 @@ html{
 .navbar{
     background-color: var(--BGCOLOR);
     color: var(--TEXT-COLOR-LIGHT);
+    box-shadow: 0px 3px 3px rgba(0,0,0,0.7);
+    margin-bottom: 1rem;
 } 
 
 #navbarSupportedContent a{
@@ -68,7 +76,6 @@ html{
 
 /* Footer */
 footer{
-    position: absolute;
     bottom: 0;
     background-color: var(--BGCOLOR);
     width: 100%;
@@ -77,6 +84,7 @@ footer{
     flex-flow: row nowrap;
     justify-content: space-between;
     padding: 0.5rem 1rem 0rem 1rem;
+    margin-top: 1rem;
 
     color: var(--TEXT-COLOR-LIGHT)
 }
