@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Enhanced Labs- EpiMuscle- Epicatechin (Muscle Builder)</title>
+    <!-- Make sure you've downloaded all of this before -->
+    <link rel="stylesheet" type="text/css" href="global.css">
+    <link rel="stylesheet" type="text/css" href="texts.css">
+    <link rel="stylesheet" type="text/css" href="buttonStyles.css">
+    <link rel="stylesheet" type="text/css" href="indivPageStyles.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="indivProductEffects.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="charts.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            TVS
+        </div>
+
+        <div class="links">
+            <a href="index.html" target="_blank">Home</a>
+            <a href="index.html#options" style="color: red" target="_blank">Catalog</a>
+            <a href= "contact.html"target="_blank">Contact</a>
+            <a href="checkoutPage.html" target="_blank">Checkout</a>
+        </div>
+    </div>
+    <!-- Actual container, divided into two segments -->
+    <div id="pageContainer">
+        <div id="productContainer">
+            <img id="prodImg" src="s6.png"></img>
+            <button id="addItem" class="subButton">Add to cart</button>
+            <script>
+                document.getElementById("addItem").addEventListener("click", function () {
+                    var newWindow = window.open("checkoutPage.html", "_blank");
+
+                });
+            </script>
+        </div>
+        <div id="productInfo">
+            <div id="infoHeader">
+                <h3>CrazyBulk DECA (Mega Strength & Endurance)</h3>
+                <h5> Flavour : Unflavoured <br> Quantity : 60 Capsules <br> MRP ₹4,099 Inclusive of all taxes</h5>
+            </div>
+            <!-- Pie chart [EDIT VALUES] -->
+            <div id="chartContainer">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <script>
+                setTimeout(function(){
+                    const ctx = document.getElementById("pieChart").getContext("2d");
+                const pieChart = new Chart(ctx, {
+                    type: "pie",
+                    data: {
+                        labels: ["Extremely satisfied", "satisfied", "neutral", "dissatisfied"],
+                        datasets: [{
+                            data: [30, 40, 28, 2], // TO EDIT
+                            backgroundColor: ["green", "darkGreen", "yellow", "red"]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                }, 1000)
+                
+             </script>
+            <div id="disclaimer" style="font-size: x-small;">
+                <!-- If you're making a page for creatine, add some disclaimer for creatine use instead of the steroid one here -->
+                Note: Steroid usage must always be considered after proper consultation with
+                certified medical professionals. TVS is not responsible for any health complications caused due to
+                negligence in steroid use.
+            </div>
+            <div id="info">
+                <h5 style="margin-top: -30px;">About</h5><br>
+                <!-- TO EDIT: Replace text with product info, add <br> tags as necessary -->
+                SCIENTIFICALLY PROVEN MUSCLE & STRENGTH GAINS – EPIMUSCLE is one of the newest and strongest natural muscle building supplement available on the market. Expect to see increases in Strength, Stamina, Lean Muscle, and Vascularity
+                <br><br>NATURALLY INCREASE TESTOSTERONE – Help blast through workouts with 250MG of pure EPICATECHIN per serving. This means a high dose, premium supplement that was formulated specifically to deliver results
+                <br><br>REDUCE MYSOTATIN AND INCREASE ENDURANCE – EPIMUSCLE ingredients have been found to possibly reduce the amount of myostatin in the body to help muscle growth occur at the fastest rate possible. This means greater endurance and strength gains for the end user
+                <br><br>OPTIMIZE YOUR WORKOUTS – Nobody likes to waste time and only get the minimum out of there workouts. EPIMUSCLE helps give the “edge” the user needs to optimize the hard work put in the gym
+
+
+
+                    <h5>Product details</h5>
+                    <small>
+                        <!-- Same here, paste product details and add a <br> tag after each line, two after last line -->
+                    Product Dimensions ‏ : ‎   3.2 x 3.2 x 5.6 inches; 5.6 Ounces <br>
+                    Date First Available ‏ : ‎ 3 December 2020 <br>
+                    Manufacturer ‏ : ‎ Enhanced Lab Ltd <br>
+                    ASIN ‏ : ‎ B07LDD6S4Q <br>
+                    Item model number ‏ : ‎ 90200177 <br>
+                    Country of Origin ‏ : ‎ USA <br>
+                    Packer ‏ : ‎ Nutrafy Wellness Private Limited
+                    1st Floor, Wing-B, AIHP Signature, 418 & 419, Udyog Vihar Phase 4, Gurugram, 122015, Haryana, India
+                    FSSAI License No: 10019064001806<br>
+                    Item Weight ‏ : ‎ 5.6 Ounces <br>
+                    Item Dimensions LxWxH ‏ : ‎ 3.2 x 3.2 x 5.6 inches <br>
+                    Net Quantity ‏ : ‎ 5.6 Ounces <br>
+                    #1,342 in Health & Household (See Top 100 in Health & Household)
+                    #4 in Sports Nutrition Testosterone Boosters<br><br>
+                </small>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="suggestedProducts">
+        <div id="sugHeader" data-aos="slide-up" data-aos-duration="1500" data-aos-delay="200" data-aos-once="true">
+            Suggested Products <br>
+            We think you might also like these products
+        </div>
+        <!-- Final product image se koi bhi 3 randomly daaldo. If you have already made some other individual page, link it for an image too -->
+        <div id="suggestedList" data-aos="slide-up" data-aos-duration="1500" data-aos-delay="690" data-aos-once="true">
+            <a href="sipg1.html"><img src="s1.png"></a>
+            <a href="sipg2.html"><img src = "s2.png"></a>
+            <a href="sipg3.html"><img src="s3.png"></a>
+        </div>
+    </div>
+    <!-- Feet >:) -->
+    <div class="footer">
+        <div id="leftFooter">
+            <div id="copyright">&copy 2023 TVS Corporation India</div>
+            <div> <a> Terms and Conditions</a> &nbsp&nbsp&nbsp&nbsp&nbsp
+                <a>Privacy Policy</a> &nbsp&nbsp&nbsp&nbsp&nbsp
+                <a>Shipping Policy</a>
+            </div>
+        </div>
+        <div id="rightFooter">
+            <img src="ling.webp" class="toInvert" style="filter: invert(100%);"> &nbsp&nbsp
+            <img src="new-Instagram-logo-white-glyph.webp"> &nbsp&nbsp
+            <img src="facebook-logo-icon-best-facebook-logo-icons-gif-transparent-png-images-21.webp"
+                style="height: 30px; width: 30px;"> &nbsp&nbsp
+            <img src="reddit.png" style="filter: invert(100%);"> &nbsp&nbsp
+            <img src="utub.png" style="filter: invert(100%);">
+        </div>
+    </div>
+    <!-- VERY IMP: Let this code segment stay at the bottom of <body>, idk how but it works so we ain't changing this -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init();
+    </script>
+</body>
+
+</html>

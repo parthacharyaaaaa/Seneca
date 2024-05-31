@@ -15,20 +15,21 @@
     --BGIMG: url('assets/background.png');
     --BGIMG-ALT: url('assets/background.png');          /*  Light mode background */
     --BGCOLOR: rgb(59, 59, 59);
-
+    
+    /* Font sizes */
     --FSIZE--SMALLEST: 0.8rem;
     --FSIZE: 1rem;
     --FSIZE-L: 1.8rem;
     --FSIZE-XL: 4rem;
     --FSIZE-LARGEST: 6rem;
-
+    /* Font Families */
     --FF-MAIN: 'Times New Roman', Times, serif;
     
     /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
     --TEXT-COLOR-LIGHTER: white;
     
-    /* TYPOGRAPHY */
+    /* TYPOGRAPHY: To be added later */
     /*--FF-ALT-1
     --FF-ALT-2
 
@@ -40,9 +41,6 @@
     --TEXT-COLOR-LIGHT-ALT-1
     --TEXT-COLOR-LIGHT-ALT-2
     */
-
-    /* SPACING [MARGIN, PADDING, FLEX] */
-    
 }
 /* GLOBAL STYLES */
 body{

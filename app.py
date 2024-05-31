@@ -135,6 +135,9 @@ def login():
         
     return render_template('login.html')
 
+@app.route("/product", methods=['POST', 'GET'])
+def product():
+    return render_template('productTemplate.html')
 @app.route("/logout")
 def amd():
     session.clear()
