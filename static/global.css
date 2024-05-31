@@ -10,22 +10,28 @@
 /* VARIABLES */
 :root{
     /* BACKGROUND IMAGES */
+    /* Alt: Light mode
+       Main: Dark mode */
     --BGIMG: url('assets/background.png');
-    --BGIMG-ALT: url('assets/background.png');
+    --BGIMG-ALT: url('assets/background.png');          /*  Light mode background */
     --BGCOLOR: rgb(59, 59, 59);
 
     --FSIZE--SMALLEST: 0.8rem;
+    --FSIZE: 1rem;
+    --FSIZE-L: 1.8rem;
     --FSIZE-XL: 4rem;
+    --FSIZE-LARGEST: 6rem;
+
+    --FF-MAIN: 'Times New Roman', Times, serif;
+    
+    /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
     --TEXT-COLOR-LIGHTER: white;
+    
     /* TYPOGRAPHY */
-    /* --FF-MAIN:
-    --FF-ALT-1
+    /*--FF-ALT-1
     --FF-ALT-2
 
-    --FSIZE
-    --FSIZE-L
-    --FSIZE-LARGEST
     --FSIZE-S
 
     --TEXT-COLOR-DARK
@@ -114,6 +120,7 @@ footer ul{
 
 .right-footer li:first-child{
     /* margin-top: 6.9px; */
+    /* Kafi gay lag raha chee */
 }
 
 .right-footer div:last-child{
