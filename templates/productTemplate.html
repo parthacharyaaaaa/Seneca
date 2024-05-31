@@ -1,19 +1,14 @@
 {% extends 'baseTemplate.html' %}
 
 <head>
-    {% block title %} Enhanced Labs- EpiMuscle- Epicatechin (Muscle Builder) {% endblock %}
+    {% block title %} {{ title }} {% endblock %}
 
     {% block additionalDependencies %}
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <!-- <script src="indivProductEffects.js"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- <script src="charts.js"></script> -->
-
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='product.css')}}">
     {% endblock %}
 </head>
     {% block content %}
+    <meta name="signed-in" content="{{ signedIn }}">
     <section class = "container">
         <div class="left-container">
             <figure>
@@ -24,9 +19,9 @@
         
         <div class = "right-container">
             <div class="info-header">
-                <h2>Product Title</h2>
-                <span class="rating">Rating</span>
-                <span class="Price">Price</span>
+                <h2>{{title}}</h2>
+                <span class="rating">{{rating}}</span>
+                <span class="Price" id="price">{{price}}</span>
                 <br>
                 Inclusive of all taxes
             </div>
@@ -37,12 +32,12 @@
             <div class = "ordering-section">
                 <div class="right-ordering-section">
                     <button>+</button>
-                    <input>
+                    <input id="quantity" value="1">
                     <button>-</button>
                 </div>
                 <div class="left-ordering-section">
-                    <button>Add To Cart</button>
-                    <button>Buy Now</button>
+                    <button id="add-to-cart" data-product-id="{{id}}">Add To Cart</button>
+                    <button id="purchase" data-product-id="{{id}}">Buy Now</button>
                 </div>
             </div>
             <div class = "perks">
@@ -53,7 +48,7 @@
     <section class="info">
         <div class="description">
             <h3>Description</h3>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit neque voluptatum sequi unde possimus perspiciatis. Ratione dolor nostrum quo blanditiis, voluptatem aspernatur assumenda quibusdam necessitatibus aliquam sapiente iste officiis sed! Lorem ipsum dolor sit amet consectetur adipisicing elit. Est, iusto alias at quod enim, neque tempora illo libero, odit iste vitae deserunt distinctio vel cumque maxime atque odio sit molestias. Lorem ipsum dolor sit amet consectetur, adipisicing elit. Rerum quibusdam voluptatum molestias eius, blanditiis vero sunt laborum quis reiciendis molestiae saepe sint mollitia enim iure? Quia a eos autem numquam? Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt vero natus exercitationem, placeat nulla reprehenderit dolore fugit provident voluptatem laudantium. Nesciunt quod adipisci nostrum reprehenderit asperiores omnis, obcaecati incidunt porro! Lorem ipsum dolor sit amet consectetur adipisicing elit. Numquam temporibus nostrum praesentium nemo facilis earum illum distinctio doloremque, dignissimos ullam tempora et perspiciatis delectus voluptatibus veritatis fugit eligendi voluptatum illo.
+            {{description}}
         </div>
 
         <div class = "reviews">
@@ -63,8 +58,5 @@
     </section>
     
     <!-- VERY IMP: Let this code segment stay at the bottom of <body>, idk how but it works so we ain't changing this -->
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init();
-    </script>
+    <script src="{{url_for('static', filename = 'scripts/orderHandler.js')}}"></script>
 {% endblock %}

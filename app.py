@@ -93,11 +93,12 @@ def loadUser(user_id):
 #Endpoints
 @app.route("/")
 def home():
-    return render_template('home.html')
+    print(current_user)
+    return render_template('home.html', signedIn = current_user.is_authenticated)
 
 @app.route("/templatetest")
 def template():
-    return render_template('baseTemplate.html', signedIn = current_user)
+    return render_template('baseTemplate.html', signedIn = current_user.is_authenticated)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -134,6 +135,10 @@ def signup():
         print('User added')
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
+        if 'Temporary_Cart' in session:
+            session['cart'] = session['Temporary_Cart']
+            session.pop('Temporary_Cart')
+            return redirect(url_for('cart'))
         return redirect(url_for('home'))
     return render_template('signup.html')
 
@@ -163,8 +168,16 @@ def login():
             print("User found")
             if bcrypt.check_password_hash(registeredUser.password, password):
                 print("Pass matches, authenticated")
+                print(session)
                 login_user(registeredUser)
                 print('logged in')
+                print(session)
+                if 'Temporary_Cart' in session:
+                    print("Guest user had a temporary cart before logging in")
+                    session['cart'] = session['Temporary_Cart']
+                    session.pop('Temporary_Cart')
+                    return redirect(url_for('cart'))
+                print("Big problem >:(")
                 return redirect(url_for("home"))
             else:
                 return jsonify({'authenticated' : False,
@@ -175,12 +188,106 @@ def login():
         
     return render_template('login.html')
 
-@app.route("/product", methods=['POST', 'GET'])
-def product():
-    return render_template('productTemplate.html', signedIn = current_user)
+@app.route("/products/view/id=<product_id>", methods=['POST', 'GET'])
+def product(product_id):
+    #Rendering the page
+    requestedProduct = Product.query.get(product_id)
+    print(requestedProduct)
+    print(current_user.is_authenticated)
+
+    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, id = requestedProduct.id,
+                           title = requestedProduct.title, rating = requestedProduct.rating,
+                           summary = requestedProduct.summary, description = requestedProduct.description,
+                           servings = requestedProduct.servings, flavour = requestedProduct.flavour,
+                           specs = requestedProduct.specs, unitSold = requestedProduct.unitSold,
+                           img1 = requestedProduct.image1, img2 = requestedProduct.image2, img3 = requestedProduct.image3, img4 = requestedProduct.image4,
+                           nutritionalLabel1 = requestedProduct.nutritional_label_main, nutritionalLabel2 = requestedProduct.nutritional_label_second,
+                           allergy = requestedProduct.allergy_label)
+
+@app.route('/cart')
+def cart():
+    print("Cart called")
+    if 'cart' not in session:
+        session['cart'] = {}
+        session.permanent = True
+
+    return render_template("cart.html", cart = session['cart'])
+
+@app.route('/addToCart', methods=['POST', 'GET'])
+def addToCart():
+    try:
+        print(session['cart'])
+    except:
+        print("Cart doesm't exist")
+    product_id = request.form['id']
+    quantity = int(request.form['quantity'])
+    print("Incoming product (API): ", product_id, quantity)
+
+    #Now we add >:D
+    if not(current_user.is_authenticated):
+        print("Error: Not logged in")
+        return jsonify({"message" : 'Please log in to place orders with Haki'})
+
+    if 'cart' not in session:
+        session['cart'] = {}
+        session.permanent = True
+        print("--------------------NEW CART MADE-------------------------")
+    
+    if product_id not in session['cart']:
+        session['cart'][product_id] = quantity
+        print("Not in cart, adding new")
+    else:
+        print("In cart, incrementing")
+        session['cart'][product_id] += quantity
+
+    print(session['cart'])
+    
+    print("pp")
+    return jsonify({'message' : 'Product added to cart'})
+
+@app.route('/purchaseThenCheckout', methods=['POST'])
+def purchaseThenCheckout():
+    if request.method == 'POST':
+        try:
+            print(session['cart'])
+        except:
+            print("Cart doesm't exist")
+        product_id = request.form['id']
+        quantity = int(request.form['quantity'])
+        print("Incoming product (API): ", product_id, quantity)
+
+        #Now we add >:D
+        if current_user.is_authenticated == False:
+            print("Creating temporary cart")
+            session['Temporary_Cart'] = {}
+            session['Temporary_Cart'][product_id] = [quantity]
+            session.permanent = True
+            print(session)
+            return redirect(url_for('signup'))
+
+        if 'cart' not in session:
+            session['cart'] = {}
+            session.permanent = True
+            print("--------------------NEW CART MADE-------------------------")
+        
+        if product_id not in session['cart']:
+            session['cart'][product_id] = quantity
+            print("Not in cart, adding new")
+        else:
+            print("In cart, incrementing")
+            session['cart'][product_id] += quantity
+
+        print(session['cart'])
+        
+        print("pp")
+        return redirect(url_for('cart'))
+
+    
+
 @app.route("/logout")
 def amd():
     session.clear()
+    print(session)
     return redirect(url_for('signup'))
 
 if __name__ == "__main__":

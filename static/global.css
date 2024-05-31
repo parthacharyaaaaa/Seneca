@@ -1,5 +1,18 @@
 /* IMPORTS */
-
+@font-face {
+    font-family: Horizon;
+    src: url(fonts/horizon.otf);
+  }
+  
+  @font-face{
+      font-family: montserrat;
+      src:url(fonts/MontserratRegular-RpK6l.otf);
+  }
+  
+  @font-face{
+      font-family: norm;
+      src:url(fonts/norm.otf);
+  }
 /* RESET */
 *{
     padding: 0;
@@ -27,7 +40,8 @@
     --FSIZE-XL: 4rem;
     --FSIZE-LARGEST: 6rem;
     /* Font Families */
-    --FF-MAIN: 'Times New Roman', Times, serif;
+    --FF-MAIN: montserrat;
+    --FF-BRAND: Horizon;
     
     /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
@@ -52,12 +66,21 @@ html body{
     height: 100vh;
 
     color: var(--TEXT-COLOR-LIGHT);
+    font-family: var(--FF-MAIN);
 }
 html{
     position: relative;
 }
 
 /* Navbar */
+.haki-logo{
+    font-size: var(--FSIZE-XL);
+    font-family: var(--FF-BRAND);
+    font-weight: bold;
+    color: red;
+    /* color: white; */
+
+}
 .navbar{
     background-color: var(--BGCOLOR);
     color: var(--TEXT-COLOR-LIGHT);
