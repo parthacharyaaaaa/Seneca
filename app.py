@@ -130,6 +130,14 @@ class Order_Item(db.Model):
         self.product_name = productName
         self.quantity = quantity
 
+#Auxillary Functions
+def updateCart() -> None:
+    updateUser = User.query.filter_by(id = current_user.id).first()
+    cart_data = session['cart']
+    updateUser.cart = cart_data
+
+    db.session.commit()
+
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -294,6 +302,8 @@ def addToCart():
 
     print(session['cart'])
     
+    print(current_user.cart)
+    updateCart()
     print("pp")
     return jsonify({'message' : 'Product added to cart'})
 
@@ -326,6 +336,7 @@ def purchaseThenCheckout():
             session['cart'][product_id] += quantity
 
         print(session['cart'])
+        updateCart()
         
         print("pp")
         return redirect(url_for('cart'))
