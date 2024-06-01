@@ -132,12 +132,28 @@ class Order_Item(db.Model):
 
 #Auxillary Functions
 def updateCart() -> None:
+    print("--------------UPDATING DATABASE CART------------------")
     updateUser = User.query.filter_by(id = current_user.id).first()
     cart_data = session['cart']
     updateUser.cart = cart_data
 
     db.session.commit()
 
+def syncCart() -> None:
+    print("----------------------Syncing session cart with database cart---------------")
+    signedInUser = User.query.filter_by(id = current_user.id).first()
+    session['cart'] = signedInUser.cart
+
+def mergeCarts(dict1, dict2) -> dict:
+    ("-----------MERGING TEMPORARY CART WITH DATABASE CART OF EXISTING USER------------")
+    merged_dict = dict1.copy()
+
+    for k, v in dict2.items():
+        if k in merged_dict:
+            merged_dict[k] += v
+        else:
+            merged_dict[k] = v
+    return merged_dict
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -193,8 +209,10 @@ def signup():
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
         if 'Temporary_Cart' in session:
+            print("Guest user had a temporary cart before logging in")
             session['cart'] = session['Temporary_Cart']
             session.pop('Temporary_Cart')
+            updateCart()
             return redirect(url_for('cart'))
         return redirect(url_for('home'))
     return render_template('signup.html')
@@ -226,12 +244,16 @@ def login():
                 print(session)
                 login_user(registeredUser)
                 print('logged in')
+                syncCart()
 
                 print(session)
                 if 'Temporary_Cart' in session:
                     print("Guest user had a temporary cart before logging in")
-                    session['cart'] = session['Temporary_Cart']
-                    session.pop('Temporary_Cart')
+                    # session['cart'] = session['Temporary_Cart']
+                    # session.pop('Temporary_Cart')
+                    print(session['cart'], session['Temporary_Cart'])
+                    session['cart'] = mergeCarts(session['Temporary_Cart'], session['cart'])
+                    updateCart()
                     print("----REDIR: FROM LOGIN TO CART")
                     return redirect(url_for('cart'))
                 
@@ -266,11 +288,7 @@ def product(product_id):
 @app.route('/cart')
 def cart():
     print("Cart called")
-    if 'cart' not in session:
-        session['cart'] = {}
-        session.permanent = True
-    else:
-        print("cart in session")
+    print(session['cart'])
     return render_template("cart.html", cart = session['cart'])
 
 @app.route('/addToCart', methods=['POST', 'GET'])
@@ -300,14 +318,15 @@ def addToCart():
         print("In cart, incrementing")
         session['cart'][product_id] += quantity
 
-    print(session['cart'])
+    session.modified = True
+    print("Session: ", session['cart'])
     
-    print(current_user.cart)
     updateCart()
+    print("Database: ",current_user.cart)
     print("pp")
     return jsonify({'message' : 'Product added to cart'})
 
-@app.route('/purchaseThenCheckout', methods=['POST'])
+@app.route('/purchaseThenCheckout', methods=['POST', 'GET'])
 def purchaseThenCheckout():
     if request.method == 'POST':
         product_id = request.form['id']
@@ -318,7 +337,7 @@ def purchaseThenCheckout():
         if current_user.is_authenticated == False:
             print("Creating temporary cart")
             session['Temporary_Cart'] = {}
-            session['Temporary_Cart'][product_id] = [quantity]
+            session['Temporary_Cart'][product_id] = quantity
             session.permanent = True
             print("Temp Session: ", session, "\nNow, we redirect to login-----------------------")
             return redirect(url_for('login'))
@@ -335,10 +354,13 @@ def purchaseThenCheckout():
             print("In cart, incrementing")
             session['cart'][product_id] += quantity
 
+        session.modified = True
         print(session['cart'])
         updateCart()
         
         print("pp")
+        return jsonify({"message" : "updated"})
+    else:
         return redirect(url_for('cart'))
 
 @app.route("/catalogue")
@@ -362,6 +384,9 @@ def amd():
     print(session)
     return redirect(url_for('signup'))
 
+@app.route("/checkout", methods = ['POST', 'GET'])
+def checkout():
+    return render_template("checkout.html", cart = session['cart'])
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

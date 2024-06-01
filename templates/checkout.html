@@ -1,0 +1,13 @@
+{% extends 'baseTemplate.html' %}
+{% block title %} Checkout {% endblock %}
+
+{% block content %}
+{% for item in cart %}
+{% print cart[item] %}
+<br>
+{% endfor %}
+<div class="product-container"></div>
+<script src = "{{url_for('static', filename='scripts/renderProducts.js')}}"></script>
+
+<input type="submit" value="Buy" id="confirm-purchase"/>
+{% endblock %}

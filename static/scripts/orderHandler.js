@@ -44,6 +44,7 @@ document.getElementById('purchase').addEventListener('click', function(event) {
             body : formData
         })
         .then(response => {
+            console.log("Redirecting: API")
                 window.location.href = response.url
         })
         .catch(error => console.log("Error: ", error))
