@@ -5,6 +5,7 @@ from flask_login import UserMixin, login_required, login_user, current_user, Log
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import ForeignKey
 
 from datetime import timedelta, datetime
 import re as regex
@@ -30,6 +31,8 @@ class User(UserMixin, db.Model):
     email_id = db.Column(db.String(256), nullable = False, unique=True)
     password = db.Column(db.String(128), nullable=False)
     time_created = db.Column(db.DateTime, nullable = False, default = datetime.now())
+    
+    cart = db.Column(JSON, nullable = False, default = '')
 
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
@@ -47,6 +50,7 @@ class Product(db.Model):
     summary = db.Column(db.String(100), nullable = False)
     description = db.Column(db.String(300), nullable = False)
     rating = db.Column(db.Float, nullable = False, default = 0.0)
+    total_reviews = db.Column(db.Float, nullable = False, default = 0)
     servings = db.Column(db.Integer, nullable = True)
     flavour = db.Column(db.String(30), nullable = True)
     weight = db.Column(db.Float, nullable = False)
@@ -91,6 +95,40 @@ class Product(db.Model):
             'image1': self.image1,
             'summary': self.summary
         }
+
+class Order_History(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    user = db.Column(db.String(64), ForeignKey('user.id'), nullable = False)
+    order_time = db.Column(db.DateTime, nullable = False)
+    status = db.Column(db.String(32), nullable = False, default = 'Not Processed')
+    total_price = db.Column(db.Float, nullable = False)
+    shipping_address = db.Column(db.String(256), nullable = False)
+    billing_address = db.Column(db.String(256), nullable = False)
+    payment_info = db.Column(db.String(32), nullable = False)
+    shipping_method = db.Column(db.String(16), nullable = False, default = 'Standard')
+
+    def __init__(self, user, date, status, price, ship, bill, paymentInfo, method):
+        self.user = user
+        self.order_time = date
+        self.status = status
+        self.total_price = price
+        self.shipping_address = ship
+        self.billing_address = bill
+        self.payment_info = paymentInfo
+        self.shipping_method = method
+
+class Order_Item(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    order_id = db.Column(db.Integer, nullable = False)
+    product_id = db.Column(db.Integer, nullable = False)
+    product_name = db.Column(db.String(128), nullable = False)
+    quantity = db.Column(db.Integer, nullable = False)
+
+    def __init__(self, orderID, productID, productName, quantity):
+        self.order_id = orderID
+        self.product_id = productID
+        self.product_name = productName
+        self.quantity = quantity
 
 #Login management
 login_manager = LoginManager()

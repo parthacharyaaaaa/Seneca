@@ -1,1 +1,0 @@
-                    return redirect(url_for('cart'))
