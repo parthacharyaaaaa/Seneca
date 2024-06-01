@@ -1,0 +1,9 @@
+{% extends 'baseTemplate.html' %}
+{%block title%} Catalogue {%endblock%}
+
+{% block content %}
+<div class="filter"></div>
+<div class="product-container"></div>
+
+<script src = "{{url_for('static', filename='scripts/renderProducts.js')}}"></script>
+{%endblock%}

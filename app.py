@@ -60,6 +60,7 @@ class Product(db.Model):
     nutritional_label_second = db.Column(db.String(69), nullable = True)
     discount = db.Column(db.Float, nullable=True, default = 0.0)
     allergy_label = db.Column(db.String(100), nullable = True, default = None)
+    price = db.Column(db.Float, nullable=False, default = 0.0)
 
     def __init__(self, title, summary, description, rating=0.0, servings=None, flavour=None, 
                  specs=None, unitSold=0, image1='', image2='', image3='', image4='', 
@@ -80,6 +81,16 @@ class Product(db.Model):
         self.nutritional_label_second = nutritional_label_second
         self.discount = discount
         self.allergy_label = allergy_label
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'price': self.price,
+            'rating': self.rating,
+            'image1': self.image1,
+            'summary': self.summary
+        }
 
 #Login management
 login_manager = LoginManager()
@@ -281,7 +292,20 @@ def purchaseThenCheckout():
         print("pp")
         return redirect(url_for('cart'))
 
-    
+@app.route("/catalogue")
+def catalogue():
+    return render_template("catalogue.html")
+
+@app.route("/render-products", methods=['POST', 'GET'])
+def render():
+    if request.method == "GET":
+        print("Hairy penis")
+
+    products = Product.query.all()
+    for item in products:
+        print(item.title, item.price, item.rating, item.image1, item.summary, item.price)
+    products_list = [item.to_dict() for item in products]
+    return jsonify(products_list)
 
 @app.route("/logout")
 def amd():
@@ -292,4 +316,4 @@ def amd():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=False, port = 6900)
+    app.run(debug=True, port = 6900)
