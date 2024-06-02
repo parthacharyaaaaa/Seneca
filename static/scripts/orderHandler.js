@@ -5,11 +5,6 @@ document.getElementById('add-to-cart').addEventListener('click', function(event)
     console.log(product_id)
     const amount = parseInt(document.getElementById('quantity').value)
 
-    if(signedIn == "False"){
-        alert("You must have a Haki account to use this feature");
-        return false;
-    }
-    else{
         var formData = new FormData()
         formData.append('id', product_id);
         formData.append('quantity', amount);
@@ -26,7 +21,7 @@ document.getElementById('add-to-cart').addEventListener('click', function(event)
         })
         
         .catch(error => console.error('Error: ', error));
-    }
+
 });
 
 document.getElementById('purchase').addEventListener('click', function(event) {
@@ -44,8 +39,14 @@ document.getElementById('purchase').addEventListener('click', function(event) {
             body : formData
         })
         .then(response => {
-            console.log("Redirecting: API")
-                window.location.href = response.url
+            if(response.redirected){
+                console.log("Redirecting: API");
+                    window.location.href = response.url;
+            }
+            else{
+                return response.json();
+            }
         })
+        .then(data => alert(data.message))
         .catch(error => console.log("Error: ", error))
 })

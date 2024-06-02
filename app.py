@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm.attributes import flag_modified
 
 from datetime import timedelta, datetime
 import re as regex
@@ -34,7 +35,7 @@ class User(UserMixin, db.Model):
     time_created = db.Column(db.DateTime, nullable = False, default = datetime.now())
     last_seen = db.Column(db.DateTime, nullable = False, default = datetime.now())
 
-    cart = db.Column(JSON, nullable = False, default = '{}')
+    cart = db.Column(JSON, nullable = False, default = {})
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
         self.first_name = fname
@@ -48,7 +49,6 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.email_id}>'
-
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -131,7 +131,7 @@ class Order_History(db.Model):
 
 class Order_Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    order_id = db.Column(db.Integer, db.ForeignKey('order_history.id'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey('order__history.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     product_title = db.Column(db.String(128), nullable = False)
 
@@ -144,29 +144,23 @@ class Order_Item(db.Model):
         return f"<Order_Item {self.id}>"
 
 #Auxillary Functions
-def updateCart() -> None:
-    print("--------------UPDATING DATABASE CART------------------")
+#TO-DO: Implement a check of the session's cart with the database before any merges are made, preferably through a function that would either return an error in case the product details don't match, or modifies the session with proper details while also notifying the user of any discrepencies. This is important because we need to ensure that in case data is tampered, we have a system to deal with it.
+def persistNewCart() -> None:
+    print("--------------OVERWRITING DATABASE CART WITH GUEST CART (NEW USER)------------------")
     updateUser = User.query.filter_by(id = current_user.id).first()
     cart_data = session['cart']
     updateUser.cart = cart_data
 
+    flag_modified(updateUser, 'cart')
     db.session.commit()
 
-def syncCart() -> None:
-    print("----------------------Syncing session cart with database cart---------------")
-    signedInUser = User.query.filter_by(id = current_user.id).first()
-    session['cart'] = signedInUser.cart
+def mergeCarts() -> None:
+    ("-----------MERGING DATABASE CART WITH TEMPORARY (GUEST) CART OF EXISTING USER------------")
+    targetUser = User.query.get(current_user.id)
+    targetUser.cart.update(session['cart'])
 
-def mergeCarts(dict1, dict2) -> dict:
-    ("-----------MERGING TEMPORARY CART WITH DATABASE CART OF EXISTING USER------------")
-    merged_dict = dict1.copy()
-
-    for k, v in dict2.items():
-        if k in merged_dict:
-            merged_dict[k] += v
-        else:
-            merged_dict[k] = v
-    return merged_dict
+    flag_modified(targetUser, 'cart')
+    db.session.commit()
 
 def addToGuestCart(productID) -> None:
     print("Adding item to guest (Temporary) cart")
@@ -230,12 +224,13 @@ def signup():
         print('User added')
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
-        if 'Temporary_Cart' in session:
-            print("Guest user had a temporary cart before logging in")
-            session['cart'] = session['Temporary_Cart']
-            session.pop('Temporary_Cart')
-            updateCart()
-            return redirect(url_for('cart'))
+        #Guest user had a cart before creating an account
+        if 'cart' in session:
+            persistNewCart()
+            print("Cart updated: New user <- Guest Cart")
+            session.pop('cart')
+            print(session)
+            return jsonify({'message' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
         return redirect(url_for('home'))
     return render_template('signup.html')
 
@@ -265,21 +260,14 @@ def login():
 
                 print(session)
                 login_user(registeredUser)
-                print('logged in')
-                syncCart()
-
-                print(session)
-                if 'Temporary_Cart' in session:
-                    print("Guest user had a temporary cart before logging in")
-                    # session['cart'] = session['Temporary_Cart']
-                    # session.pop('Temporary_Cart')
-                    print(session['cart'], session['Temporary_Cart'])
-                    session['cart'] = mergeCarts(session['Temporary_Cart'], session['cart'])
-                    updateCart()
-                    print("----REDIR: FROM LOGIN TO CART")
-                    return redirect(url_for('cart'))
                 
-                print("No temporary cart found, redirecting to home")
+                print('logged in')
+                #If guest user had a cart prior to loggin in, we need to merge both of them too
+                if session['cart']:
+                    mergeCarts()
+                    session.pop('cart')
+                    print(session)
+
                 return redirect(url_for("home"))
             else:
                 return jsonify({'authenticated' : False,
@@ -301,11 +289,10 @@ def product(product_id):
     return render_template('productTemplate.html',signedIn = current_user.is_authenticated, id = requestedProduct.id,
                            title = requestedProduct.title, rating = requestedProduct.rating,
                            summary = requestedProduct.summary, author = requestedProduct.author,
-                           servings = requestedProduct.servings, flavour = requestedProduct.flavour,
-                           specs = requestedProduct.specs, unitSold = requestedProduct.unitSold,
-                           img1 = requestedProduct.cover, img2 = requestedProduct.image2, img3 = requestedProduct.image3, img4 = requestedProduct.image4,
-                           nutritionalLabel1 = requestedProduct.nutritional_label_main, nutritionalLabel2 = requestedProduct.nutritional_label_second,
-                           allergy = requestedProduct.allergy_label)
+                           publisher = requestedProduct.publisher, publication_date = requestedProduct.publication_date,
+                           isbn = requestedProduct.isbn, genre = requestedProduct.genre, pages = requestedProduct.pages, language = requestedProduct.language, file_format = requestedProduct.file_format,
+                           discount = requestedProduct.discount, price = requestedProduct.price,
+                           total_reviews = requestedProduct.total_reviews, url = requestedProduct.url, units_sold = requestedProduct.units_sold)
 
 @app.route('/cart')
 def cart():
@@ -315,74 +302,89 @@ def cart():
 
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
-    try:
-        print(session['cart'])
-    except:
-        print("Cart doesm't exist")
-    product_id = request.form['id']
-    quantity = int(request.form['quantity'])
-    print("Incoming product (API): ", product_id, quantity)
+    if request.method == 'POST':
+        product_id = str(request.form['id'])
+        print("Incoming product (API): ", product_id)
 
-    #Now we add >:D
-    if not(current_user.is_authenticated):
-        print("Error: Not logged in")
-        return jsonify({"message" : 'Please log in to place orders with Haki'})
+        product = Product.query.filter_by(id = product_id).first()
+        #Guest user:
+        if not(current_user.is_authenticated):
+            print("Error: Not logged in")
+            if 'cart' not in session:
+                session.permanent = True
+                session['cart'] = {}
+                session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+                session.modified = True
+                return jsonify({'message' : "It appears you are using Seneca as a guest. While we do allow guest purchases, please note that your session data, including your cart, is only stored temporarily and will be deleted after inactivity :)"})
 
-    if 'cart' not in session:
-        session['cart'] = {}
-        session.permanent = True
-        print("--------------------NEW CART MADE-------------------------")
-    
-    if product_id not in session['cart']:
-        session['cart'][product_id] = quantity
-        print("Not in cart, adding new")
-    else:
-        print("In cart, incrementing")
-        session['cart'][product_id] += quantity
+            elif product_id in session['cart']:
+                print("Guest's cart already has all this shit")
+                return jsonify({"message" : "Item exists in cart (temp)"})
 
-    session.modified = True
-    print("Session: ", session['cart'])
-    
-    updateCart()
-    print("Database: ",current_user.cart)
-    print("pp")
-    return jsonify({'message' : 'Product added to cart'})
+            session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            print(session)
+            session.modified = True
+
+            return jsonify({"message" : 'Ye le bc guest saala mkc teri'})
+        
+        #Logged in user:
+        targetUser = User.query.filter_by(id = current_user.id).first()
+        print(targetUser.cart)
+        print("/addToCart: Current Cart")
+
+        if product_id in targetUser.cart:
+            print("This item already exists in your cart")
+            return jsonify({'message' : 'Product already in cart'})
+        else:
+            targetUser.cart.update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            print(targetUser.cart)
+
+            flag_modified(targetUser, 'cart')
+            db.session.commit()
+            print(User.query.get(current_user.id).cart)
+
+        return jsonify({'message' : 'Product added to cart'})
 
 @app.route('/purchaseThenCheckout', methods=['POST', 'GET'])
 def purchaseThenCheckout():
     if request.method == 'POST':
-        product_id = request.form['id']
-        quantity = int(request.form['quantity'])
-        print("Incoming product (API): ", product_id, quantity)
+        product_id = str(request.form['id'])
+        product = Product.query.filter_by(id = product_id).first()
+        #Guest user:
+        if not(current_user.is_authenticated):
+            print("Error: Not logged in")
+            if 'cart' not in session:
+                session.permanent = True
+                session['cart'] = {}
+                # session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+                # return redirect(url_for('cart'))
 
-        #Now we add >:D
-        if current_user.is_authenticated == False:
-            print("Creating temporary cart")
-            session['Temporary_Cart'] = {}
-            session['Temporary_Cart'][product_id] = quantity
-            session.permanent = True
-            print("Temp Session: ", session, "\nNow, we redirect to login-----------------------")
-            return redirect(url_for('login'))
+            elif product_id in session['cart']:
+                print("Guest's cart already has all this shit")
+                return jsonify({"message" : "Item exists in cart (temp)"})
 
-        if 'cart' not in session:
-            session['cart'] = {}
-            session.permanent = True
-            print("--------------------NEW CART MADE-------------------------")
+            session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            print(session)
+            session.modified = True
+
+            return redirect(url_for('cart'))
         
-        if product_id not in session['cart']:
-            session['cart'][product_id] = quantity
-            print("Not in cart, adding new")
+        #Logged in user:
+        targetUser = User.query.filter_by(id = current_user.id).first()
+        print(targetUser.cart)
+        print("/Direct Purchase: Current Cart")
+
+        if product_id in targetUser.cart:
+            print("This item already exists in your cart")
+            return jsonify({'message' : 'Product already in cart'})
         else:
-            print("In cart, incrementing")
-            session['cart'][product_id] += quantity
+            targetUser.cart.update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            print(targetUser.cart)
 
-        session.modified = True
-        print(session['cart'])
-        updateCart()
-        
-        print("pp")
-        return jsonify({"message" : "updated"})
-    else:
+            flag_modified(targetUser, 'cart')
+            db.session.commit()
+            print(User.query.get(current_user.id).cart)
+
         return redirect(url_for('cart'))
 
 @app.route("/catalogue")

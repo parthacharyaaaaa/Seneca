@@ -11,9 +11,6 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     .then(response => {
         if (response.redirected) {
             console.log("Called")
-            // alert('submitted');
-            // form.removeEventListener('submit', arguments.callee);
-            // form.submit();
             window.location.href = response.url;
         } else {
             return response.json();

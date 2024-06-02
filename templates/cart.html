@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="signed-in" content="{{ signedIn }}">
+    <meta name="cart" content="{{ cart }}">
     <title>Cart</title>
 </head>
 <body>
+    {% if cart %}
     {% for item in cart %}
     {% print cart[item] %}
     <br>
     {% endfor %}
+    {% endif %}
 </body>
 </html>
