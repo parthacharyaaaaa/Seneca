@@ -30,10 +30,11 @@ class User(UserMixin, db.Model):
     phone_number = db.Column(db.String(256), nullable = False, unique = True)
     email_id = db.Column(db.String(256), nullable = False, unique=True)
     password = db.Column(db.String(128), nullable=False)
-    time_created = db.Column(db.DateTime, nullable = False, default = datetime.now())
-    
-    cart = db.Column(JSON, nullable = False, default = '')
 
+    time_created = db.Column(db.DateTime, nullable = False, default = datetime.now())
+    last_seen = db.Column(db.DateTime, nullable = False, default = datetime.now())
+
+    cart = db.Column(JSON, nullable = False, default = '{}')
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
         self.first_name = fname
@@ -43,57 +44,67 @@ class User(UserMixin, db.Model):
         self.email_id = email
         self.password = password
         self.time_created = datetime.now()
+        self.last_seen = datetime.now()
+    
+    def __repr__(self):
+        return f'<User {self.email_id}>'
+
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(40), nullable = False, unique = True)
-    summary = db.Column(db.String(100), nullable = False)
-    description = db.Column(db.String(300), nullable = False)
-    rating = db.Column(db.Float, nullable = False, default = 0.0)
-    total_reviews = db.Column(db.Float, nullable = False, default = 0)
-    servings = db.Column(db.Integer, nullable = True)
-    flavour = db.Column(db.String(30), nullable = True)
-    weight = db.Column(db.Float, nullable = False)
-    specs = db.Column(JSON, nullable = True)
-    unitSold = db.Column(db.Integer, nullable=False, default = 0)
-    image1 = db.Column(db.String(69), nullable = False)
-    image2 = db.Column(db.String(69), nullable = False)
-    image3 = db.Column(db.String(69), nullable = False)
-    image4 = db.Column(db.String(69), nullable = False)
-    nutritional_label_main = db.Column(db.String(69), nullable = False)
-    nutritional_label_second = db.Column(db.String(69), nullable = True)
-    discount = db.Column(db.Float, nullable=True, default = 0.0)
-    allergy_label = db.Column(db.String(100), nullable = True, default = None)
+    title = db.Column(db.String(100), nullable = False, unique = True)
+    author = db.Column(db.String(64), nullable = False)
+    publisher = db.Column(db.String(100), nullable = False)
+    publication_date = db.Column(db.String(32), nullable = False, default = "Not Available")
+    isbn = db.Column(db.String(20), nullable = True)
+    genre = db.Column(JSON, nullable = False)
+    pages = db.Column(db.Integer, nullable = False)
+    language = db.Column(db.String(16), nullable = False, default = "English")
+    file_format = db.Column(db.String(4), nullable = False)
+    cover = db.Column(db.String(69), nullable = False)
+    url = db.Column(db.String(255), nullable = False, unique = True)
+    summary = db.Column(db.Text, nullable = False)
     price = db.Column(db.Float, nullable=False, default = 0.0)
+    discount = db.Column(db.Float, nullable=True, default = 0.0)
+    rating = db.Column(db.Float, nullable = False, default = 0.0)
+    total_reviews = db.Column(db.Integer, nullable = False, default = 0)
+    units_sold = db.Column(db.Integer, nullable=False, default = 0)
 
-    def __init__(self, title, summary, description, rating=0.0, servings=None, flavour=None, 
-                 specs=None, unitSold=0, image1='', image2='', image3='', image4='', 
-                 nutritional_label_main='', nutritional_label_second=None, discount=0.0, allergy_label=None):
+
+    def __init__(self, title, author, publisher, publication_date, genre, isbn, pages, language, file_format, cover, url, summary, price, discount, rating, total_reviews, units_sold):
         self.title = title
+        self.author = author
+        self.publisher = publisher
+        self.publication_date = publication_date
+        self.genre = genre
+        self.isbn = isbn
+        self.pages = pages
+        self.language = language
+        self.file_format = file_format
+        self.cover = cover
+        self.url = url
         self.summary = summary
-        self.description = description
-        self.rating = rating
-        self.servings = servings
-        self.flavour = flavour
-        self.specs = specs
-        self.unitSold = unitSold
-        self.image1 = image1
-        self.image2 = image2
-        self.image3 = image3
-        self.image4 = image4
-        self.nutritional_label_main = nutritional_label_main
-        self.nutritional_label_second = nutritional_label_second
+        self.price = price
         self.discount = discount
-        self.allergy_label = allergy_label
+        self.rating = rating
+        self.total_reviews = total_reviews
+        self.units_sold = units_sold
 
+    def __repr__(self) -> str:
+        return f"Product: {self.title}"
+    
     def to_dict(self):
         return {
             'id': self.id,
             'title': self.title,
             'price': self.price,
+            'author' : self.author,
+            'publisher' : self.publisher,
+            'publication_date' : self.publication_date,
+            'price' : self.price,
+            'file_format' : self.file_format,
             'rating': self.rating,
-            'image1': self.image1,
-            'summary': self.summary
+            'cover': self.cover,
         }
 
 class Order_History(db.Model):
@@ -104,31 +115,33 @@ class Order_History(db.Model):
     total_price = db.Column(db.Float, nullable = False)
     shipping_address = db.Column(db.String(256), nullable = False)
     billing_address = db.Column(db.String(256), nullable = False)
-    payment_info = db.Column(db.String(32), nullable = False)
     shipping_method = db.Column(db.String(16), nullable = False, default = 'Standard')
 
-    def __init__(self, user, date, status, price, ship, bill, paymentInfo, method):
+    def __init__(self, user, date, status, price, ship, bill, method):
         self.user = user
         self.order_time = date
         self.status = status
         self.total_price = price
         self.shipping_address = ship
         self.billing_address = bill
-        self.payment_info = paymentInfo
         self.shipping_method = method
+
+    def __repr__(self) -> str:
+        return f"<Order_History {self.id}>"
 
 class Order_Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    order_id = db.Column(db.Integer, nullable = False)
-    product_id = db.Column(db.Integer, nullable = False)
-    product_name = db.Column(db.String(128), nullable = False)
-    quantity = db.Column(db.Integer, nullable = False)
+    order_id = db.Column(db.Integer, db.ForeignKey('order_history.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product_title = db.Column(db.String(128), nullable = False)
 
-    def __init__(self, orderID, productID, productName, quantity):
+    def __init__(self, orderID, productID, productTitle, quantity):
         self.order_id = orderID
         self.product_id = productID
-        self.product_name = productName
-        self.quantity = quantity
+        self.product_title = productTitle
+    
+    def __repr__(self) -> str:
+        return f"<Order_Item {self.id}>"
 
 #Auxillary Functions
 def updateCart() -> None:
@@ -154,6 +167,15 @@ def mergeCarts(dict1, dict2) -> dict:
         else:
             merged_dict[k] = v
     return merged_dict
+
+def addToGuestCart(productID) -> None:
+    print("Adding item to guest (Temporary) cart")
+
+    if 'Temporary_Cart' not in session:
+        session['Temporary_Cart'] = []
+    item = Product.query.get(productID)
+    session['Temporary_Cart'].append({"id" : item.id, "title" : item.title, "author" : item.author})        
+
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -278,10 +300,10 @@ def product(product_id):
 
     return render_template('productTemplate.html',signedIn = current_user.is_authenticated, id = requestedProduct.id,
                            title = requestedProduct.title, rating = requestedProduct.rating,
-                           summary = requestedProduct.summary, description = requestedProduct.description,
+                           summary = requestedProduct.summary, author = requestedProduct.author,
                            servings = requestedProduct.servings, flavour = requestedProduct.flavour,
                            specs = requestedProduct.specs, unitSold = requestedProduct.unitSold,
-                           img1 = requestedProduct.image1, img2 = requestedProduct.image2, img3 = requestedProduct.image3, img4 = requestedProduct.image4,
+                           img1 = requestedProduct.cover, img2 = requestedProduct.image2, img3 = requestedProduct.image3, img4 = requestedProduct.image4,
                            nutritionalLabel1 = requestedProduct.nutritional_label_main, nutritionalLabel2 = requestedProduct.nutritional_label_second,
                            allergy = requestedProduct.allergy_label)
 
@@ -374,7 +396,7 @@ def render():
 
     products = Product.query.all()
     for item in products:
-        print(item.title, item.price, item.rating, item.image1, item.summary, item.price)
+        print(item.title, item.price, item.rating, item.cover, item.summary, item.price)
     products_list = [item.to_dict() for item in products]
     return jsonify(products_list)
 
