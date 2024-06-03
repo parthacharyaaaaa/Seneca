@@ -9,18 +9,20 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         body: formData
     })
     .then(response => {
-        if (response.redirected) {
-            console.log("Called")
-            window.location.href = response.url;
-        } else {
+        if(response.redirected){ window.location.href = response.url;}
+        else{
             return response.json();
         }
     })
     .then(data => {
-        if (data && !data.authenticated) {
-            alert('False');
-            document.getElementById('message').innerText = data.message; 
+        if (data.message != ""){
+            document.getElementById('message').innerText = data.message;
         }
+        if(data.alert != ""){
+            alert(data.alert)
+        }
+        window.location.href = data.redirect_url;
     })
+    
     .catch(error => console.error('Error:', error));
 });

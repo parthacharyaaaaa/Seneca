@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.orm import load_only
 
 from datetime import timedelta, datetime
 import re as regex
@@ -14,7 +15,7 @@ import re as regex
 #App configuration
 app = Flask(__name__)
 app.secret_key = 'ABCD'
-app.permanent_session_lifetime = timedelta(days=1)
+app.permanent_session_lifetime = timedelta(hours=6)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///test1.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -170,6 +171,27 @@ def addToGuestCart(productID) -> None:
     item = Product.query.get(productID)
     session['Temporary_Cart'].append({"id" : item.id, "title" : item.title, "author" : item.author})        
 
+def validateCart() -> bool:
+    if 'cart' not in session:
+        return True
+    
+    for productID, productDetails in session['cart'].items():
+        print(productID, productDetails)
+        cleanProduct = Product.query.filter_by(
+            id = productID,
+            title = productDetails['title'],
+            author = productDetails['author'],
+            file_format = productDetails['file format'],
+            price = productDetails['price']
+        ).first()
+        
+        if cleanProduct:
+            print(f"Product {productID} exists")
+        else:
+            print(f"Product not found in database. Outdated/Tampered data detected")
+            del session['cart'][productID]
+            return False
+    return True
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -226,11 +248,15 @@ def signup():
         login_user(newUser, remember=False, duration=timedelta(days=1))
         #Guest user had a cart before creating an account
         if 'cart' in session:
-            persistNewCart()
-            print("Cart updated: New user <- Guest Cart")
-            session.pop('cart')
-            print(session)
-            return jsonify({'message' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
+            if not validateCart():
+                print("Session cart data has been tampered with (Signup)")
+                return({'message' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
+            else:
+                persistNewCart()
+                print("Cart updated: New user <- Guest Cart")
+                session.pop('cart')
+                print(session)
+                return jsonify({'alert' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
         return redirect(url_for('home'))
     return render_template('signup.html')
 
@@ -264,11 +290,19 @@ def login():
                 print('logged in')
                 #If guest user had a cart prior to loggin in, we need to merge both of them too
                 if session['cart']:
-                    mergeCarts()
-                    session.pop('cart')
-                    print(session)
+                    if not validateCart():
+                        print("Session cart data has been tampered with (Login)")
+                        mergeCarts()
+                        session.pop('cart')
+                        print(session)
+                        return({'alert' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
+                    else:
+                        mergeCarts()
+                        session.pop('cart')
+                        print(session)
+                        return({'alert' : f'Your cart has been updated! Welcome back, {registeredUser.first_name}', "redirect_url" : url_for('home')})
 
-                return redirect(url_for("home"))
+                # return redirect(url_for("home"))
             else:
                 return jsonify({'authenticated' : False,
                                 'message' : 'Invalid credentials'})
