@@ -114,9 +114,9 @@ class Order_History(db.Model):
     order_time = db.Column(db.DateTime, nullable = False)
     status = db.Column(db.String(32), nullable = False, default = 'Not Processed')
     total_price = db.Column(db.Float, nullable = False)
-    shipping_address = db.Column(db.String(256), nullable = False)
+    receipt_email = db.Column(db.String(256), nullable = True)
     billing_address = db.Column(db.String(256), nullable = False)
-    shipping_method = db.Column(db.String(16), nullable = False, default = 'Standard')
+    order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
 
     def __init__(self, user, date, status, price, ship, bill, method):
         self.user = user
@@ -434,10 +434,30 @@ def render():
         print("Hairy penis")
 
     products = Product.query.all()
-    for item in products:
-        print(item.title, item.price, item.rating, item.cover, item.summary, item.price)
+    # for item in products:
+        # print(item.title, item.price, item.rating, item.cover, item.summary, item.price)
     products_list = [item.to_dict() for item in products]
     return jsonify(products_list)
+
+@app.route("/get-bill", methods = ['POST', 'GET'])
+def getBill():
+    print("Generating bill")
+    if current_user.is_authenticated:
+        billItems = []
+        print(current_user.cart)
+        for item in current_user.cart.values():
+            billItems.append(item)
+        print("Reached flag 2")
+        print(billItems)
+        return jsonify(billItems)
+
+@app.route("/gift", methods = ['GET', 'POST'])
+def gift():
+    data = request.get_json()
+    print(data)
+    receiver_email = data.get('giftEmail')
+    print(receiver_email)
+    return jsonify({'message' : 'called'})
 
 @app.route("/logout")
 def amd():
@@ -449,7 +469,7 @@ def amd():
 def checkout():
     #Logged in users
     if current_user.is_authenticated:
-        return render_template("checkout.html", cart = User.query.get(current_user.id).cart, receiptEmail = current_user.email_id)
+        return render_template("checkout.html", cart = User.query.get(current_user.id).cart, receiptEmail = current_user.email_id, signedIn = current_user.is_authenticated)
     else:
         try:
             return render_template("checkout.html", cart = session['cart'])
