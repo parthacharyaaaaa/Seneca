@@ -289,7 +289,7 @@ def login():
                 
                 print('logged in')
                 #If guest user had a cart prior to loggin in, we need to merge both of them too
-                if session['cart']:
+                if 'cart' in session:
                     if not validateCart():
                         print("Session cart data has been tampered with (Login)")
                         mergeCarts()
@@ -302,7 +302,7 @@ def login():
                         print(session)
                         return({'alert' : f'Your cart has been updated! Welcome back, {registeredUser.first_name}', "redirect_url" : url_for('home')})
 
-                # return redirect(url_for("home"))
+                return redirect(url_for("home"))
             else:
                 return jsonify({'authenticated' : False,
                                 'message' : 'Invalid credentials'})
@@ -330,9 +330,12 @@ def product(product_id):
 
 @app.route('/cart')
 def cart():
-    print("Cart called")
-    print(session['cart'])
-    return render_template("cart.html", cart = session['cart'])
+    if current_user.is_authenticated:
+        return render_template("cart.html", cart = User.query.get(current_user.id).cart)
+    else:
+        print("Cart called")
+        print(session['cart'])
+        return render_template("cart.html", cart = session['cart'])
 
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
@@ -444,7 +447,14 @@ def amd():
 
 @app.route("/checkout", methods = ['POST', 'GET'])
 def checkout():
-    return render_template("checkout.html", cart = session['cart'])
+    #Logged in users
+    if current_user.is_authenticated:
+        return render_template("checkout.html", cart = User.query.get(current_user.id).cart, receiptEmail = current_user.email_id)
+    else:
+        try:
+            return render_template("checkout.html", cart = session['cart'])
+        except KeyError as k:
+            return jsonify({"Error" : f"No cart. err_msg: {k}"})
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

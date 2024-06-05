@@ -1,13 +1,38 @@
 {% extends 'baseTemplate.html' %}
 {% block title %} Checkout {% endblock %}
-
+{% block additionalDependencies %}
+    <link rel = "stylesheet" type="text/css" href="{{url_for('static', filename='checkout.css')}}">
+{% endblock %}
 {% block content %}
-{% for item in cart %}
-{% print cart[item] %}
-<br>
-{% endfor %}
-<div class="product-container"></div>
+
+<section class="page-container">
+    <div class="product-container">
+
+    </div>
+    <div class="bill">
+        <div class = "contact-details">
+            <h3>Contact Details:</h3>
+            Email receipt to:<br>
+            <input type = email id = "receipt-email" value = '{{receiptEmail}}'>
+            <span class="utility-disclaimer-text-small">*Leave this field blank if you don't want to receive an email receipt of your purchase.</span>
+        </div>
+
+        <div class="paymentinfo">
+            <h3>Payment Summary</h3>
+            Grand Total: <span id="total-bill"></span><br>
+            <input type="submit" value="Buy" id="confirm-purchase"/>
+        </div>
+        <div class="gift">
+            <h3>Email your order to your friends :3</h3>
+            Buying for someone else? We got you covered >:3 <br>
+            Email your books in a zip file directly to someone's inbox
+            <input type="text" value="" id="gift-id"/>
+            <br>
+            <input type = "submit" value = "Gift" id="gift-button"/>
+        </div>
+    </div>
+</section>
 <script src = "{{url_for('static', filename='scripts/renderProducts.js')}}"></script>
 
-<input type="submit" value="Buy" id="confirm-purchase"/>
+
 {% endblock %}
