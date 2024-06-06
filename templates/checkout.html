@@ -10,12 +10,27 @@
 
     </div>
     <div class="bill">
+        {% if(signedIn) %}
+        <h2>Welcome to checkout</h2>
         <div class = "contact-details">
             <h3>Contact Details:</h3>
             Email receipt to:<br>
             <input type = email id = "receipt-email" value = '{{receiptEmail}}'>
-            <span class="utility-disclaimer-text-small">*Leave this field blank if you don't want to receive an email receipt of your purchase.</span>
+            <span class="utility-disclaimer-text-small">*Leave this field blank if you don't want to receive an email receipt of your purchase.</span><br>
+            Billing email<br>
+            <input type = email id = "billing-email" value = '{{receiptEmail}}' required placeholder="Billing Address (Required)"/>
+            <span class="utility-disclaimer-text-small">*Mandatory field.</span>
         </div>
+        {% else %}
+        <h2>Guest Checkout</h2>
+        <div class = "contact-details">
+            <h3>Contact Details:</h3>
+            Email receipt to:<br>
+            <input type = email id = "receipt-email" value = '{{receiptEmail}}'>
+            <input type = email id = "billing-email" placeholder="Billing address (required)" required/>
+            <span class="utility-disclaimer-text-small">*For tracking and storing our orders, we require guests to provide an address to assosciate the purchase with.</span>
+        </div>
+        {% endif %}
 
         <div class="paymentinfo">
             <h3>Payment Summary</h3>
@@ -34,6 +49,7 @@
 </section>
 <script src = "{{url_for('static', filename='scripts/billGenerator.js')}}"></script>
 <script src = "{{url_for('static', filename='scripts/giftBooks.js')}}"></script>
+<script src = "{{url_for('static', filename='scripts/purchaseProcessor.js')}}"></script>
 
 
 {% endblock %}

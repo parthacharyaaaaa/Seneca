@@ -50,6 +50,16 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.email_id}>'
+    
+    def getItemsTotal(self) -> float:
+        print("Calulating bill total: backend")
+        total = 0.0
+        for items in self.cart.values():
+            total += items['price']
+            if items['discount']:
+                total -= items['discount']
+        print(total)
+        return total
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -110,7 +120,7 @@ class Product(db.Model):
 
 class Order_History(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    user = db.Column(db.String(64), ForeignKey('user.id'), nullable = False)
+    user = db.Column(db.String(64), ForeignKey('user.id'), nullable = True)
     order_time = db.Column(db.DateTime, nullable = False)
     status = db.Column(db.String(32), nullable = False, default = 'Not Processed')
     total_price = db.Column(db.Float, nullable = False)
@@ -118,14 +128,14 @@ class Order_History(db.Model):
     billing_address = db.Column(db.String(256), nullable = False)
     order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
 
-    def __init__(self, user, date, status, price, ship, bill, method):
+    def __init__(self, user, date, status, price, receipt, bill, method):
         self.user = user
         self.order_time = date
         self.status = status
         self.total_price = price
-        self.shipping_address = ship
+        self.receipt_email = receipt
         self.billing_address = bill
-        self.shipping_method = method
+        self.order_type = method
 
     def __repr__(self) -> str:
         return f"<Order_History {self.id}>"
@@ -442,15 +452,62 @@ def render():
 @app.route("/get-bill", methods = ['POST', 'GET'])
 def getBill():
     print("Generating bill")
+    billItems = []
     if current_user.is_authenticated:
-        billItems = []
         print(current_user.cart)
         for item in current_user.cart.values():
             billItems.append(item)
-        print("Reached flag 2")
-        print(billItems)
-        return jsonify(billItems)
+    else:
+        print(session['cart'])
+        for item in session['cart'].values():
+            billItems.append(item)
 
+    print("Reached flag 2")
+    print(billItems)
+    return jsonify(billItems)
+        
+@app.route("/process-order", methods = ['POST', 'GET'])
+def processOrder():
+    data = request.get_json()
+    print(data)
+    receiptEmail = data.get('receipt_email')
+    billingEmail = data.get('billing_email')
+    print(receiptEmail, billingEmail)
+    if data.get('validation') != "True":
+        print("API call dirty >:(")
+        return jsonify({"message" : "Error processing order"})
+    else:
+        if current_user.is_authenticated:
+            print("Processing order: user")
+            price = current_user.getItemsTotal()
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Standard")
+            db.session.add(order)
+            db.session.commit()
+            print("Order committed")
+
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : {{url_for('checkout/download')}}, "flag" : "valid"})
+        else:
+            billingAddress = data.get('billing_email')
+
+            print("Processing order: user")
+            price = 0.0
+            for items in session['cart'].values():
+                price += items['price']
+                if items['discount']:
+                    price -= items['discount']
+            print(price)
+
+            order = Order_History(None, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Standard")
+            db.session.add(order)
+            db.session.commit()
+            print("Order committed")
+
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : {{url_for('checkout/download')}}, "flag" : "valid"})
+            
+
+@app.route("/checkout/download", methods = ['GET'])
+def download():
+    pass
 @app.route("/gift", methods = ['GET', 'POST'])
 def gift():
     data = request.get_json()
