@@ -13,6 +13,14 @@
       font-family: norm;
       src:url(fonts/norm.otf);
   }
+@font-face {
+    font-family: French;
+    src: url(fonts/FeFCrm2.ttf);
+}
+@font-face {
+    font-family: French2;
+    src: url(fonts/FeFCrm2.ttf);
+}
 /* RESET */
 *{
     padding: 0;
@@ -32,12 +40,13 @@
     --FSIZE-SMALLEST: 0.5rem;
     --FSIZE-S: 0.7rem;
     --FSIZE: 1rem;
-    --FSIZE-L: 1.8rem;
-    --FSIZE-XL: 4rem;
+    --FSIZE-L: 1.3rem;
+    --FSIZE-XL: 2rem;
+    --FSIZE-XXL: 4rem;
     --FSIZE-LARGEST: 6rem;
     /* Font Families */
-    --FF-MAIN: montserrat;
-    --FF-BRAND: Horizon;
+    --FF-MAIN: French;
+    --FF-BRAND: French2;
     
     /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
@@ -67,7 +76,8 @@
 }
 /* GLOBAL STYLES */
 html body{
-    background-image: var(--BGIMG);
+    /* background-image: var(--BGIMG); */
+    background-color: rgb(37, 37, 37);
     height: 100vh;
 
     color: var(--TEXT-COLOR-LIGHT);
@@ -76,10 +86,9 @@ html body{
 html{
     position: relative;
 }
-
 /* Navbar */
 .haki-logo{
-    font-size: var(--FSIZE-XL);
+    font-size: var(--FSIZE-XXL);
     font-family: var(--FF-BRAND);
     font-weight: bold;
     color: red;
@@ -124,7 +133,7 @@ footer ul{
 }
 
 .left-footer-title{
-    font-size: var(--FSIZE-XL);
+    font-size: var(--FSIZE-XXL);
 }
 
 .logo-italic{

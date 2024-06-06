@@ -1,18 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="signed-in" content="{{ signedIn }}">
-    <meta name="cart" content="{{ cart }}">
-    <title>Cart</title>
-</head>
+{% extends 'baseTemplate.html' %}
+{%block title %} Seneca: Cart {% endblock %}
+{% block additionalDependencies %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='cart.css')}}" />
+{% endblock %}
+{% block content %}
+
 <body>
-    {% if cart %}
-    {% for item in cart %}
-    {% print cart[item] %}
-    <br>
-    {% endfor %}
+    {% if isEmpty %}
+    <p class="empty-cart-msg">It looks like your cart is as empty as a writer's page before the first sip of coffee. At Seneca, we're all
+        about filling your world with words. So why not explore our shelves and add some literary treasures? After
+        all, a cart without books is like a bookshelf without stories—completely unheard of! <br>Happy reading! </p>
+    <section class="icon-container">
+        <figure class="empty-icon">
+            <img src="{{url_for('static', filename = 'assets/wind.png')}}" alt="gust swooooooosh >:O" id="gust-img"/>
+        </figure>
+        <figcaption class="utility-readable-text">Gust</figcaption>
+        <figure class="empty-icon">
+            <img src="{{url_for('static', filename = 'assets/tumbleweed.png')}}" alt="tumbleweed woaaaahhhh :D"
+                id="tumbleweed-img"/>
+            <figcaption class="utility-readable-text">Image</figcaption>
+        </figure>
+    </section>
+
+    <div class="center-container">
+        <a href="{{ url_for('home') }}">
+            <button type="button" class="browse-button">Browse</button>
+        </a>
+    </div>
+
     {% endif %}
 </body>
-</html>
+{% endblock %}

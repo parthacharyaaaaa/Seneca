@@ -340,11 +340,12 @@ def product(product_id):
 @app.route('/cart')
 def cart():
     if current_user.is_authenticated:
-        return render_template("cart.html", cart = User.query.get(current_user.id).cart)
+        if current_user.cart == {}:
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
     else:
-        print("Cart called")
-        print(session['cart'])
-        return render_template("cart.html", cart = session['cart'])
+        if 'cart' not in session or session['cart'] == {}:
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
+
 
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
@@ -485,6 +486,8 @@ def processOrder():
             for items in current_user.cart.keys():
                 orderItem = Order_Item(order.id, int(items), current_user.cart[items]['title'])
                 db.session.add(orderItem)
+            current_user.cart = {}
+            flag_modified(current_user, 'cart')
             db.session.commit()
             print("Order committed")
 
@@ -510,14 +513,16 @@ def processOrder():
                 db.session.commit()
                 print("Order committed")
 
+                del session['cart']
+
                 return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
             else:
                 return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
             
-
 @app.route("/checkout/download", methods = ['GET'])
 def download():
     return render_template('download.html')
+
 @app.route("/gift", methods = ['GET', 'POST'])
 def gift():
     data = request.get_json()
@@ -542,6 +547,7 @@ def checkout():
             return render_template("checkout.html", cart = session['cart'])
         except KeyError as k:
             return jsonify({"Error" : f"No cart. err_msg: {k}"})
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
