@@ -146,7 +146,7 @@ class Order_Item(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     product_title = db.Column(db.String(128), nullable = False)
 
-    def __init__(self, orderID, productID, productTitle, quantity):
+    def __init__(self, orderID, productID, productTitle):
         self.order_id = orderID
         self.product_id = productID
         self.product_title = productTitle
@@ -155,7 +155,6 @@ class Order_Item(db.Model):
         return f"<Order_Item {self.id}>"
 
 #Auxillary Functions
-#TO-DO: Implement a check of the session's cart with the database before any merges are made, preferably through a function that would either return an error in case the product details don't match, or modifies the session with proper details while also notifying the user of any discrepencies. This is important because we need to ensure that in case data is tampered, we have a system to deal with it.
 def persistNewCart() -> None:
     print("--------------OVERWRITING DATABASE CART WITH GUEST CART (NEW USER)------------------")
     updateUser = User.query.filter_by(id = current_user.id).first()
@@ -471,11 +470,10 @@ def processOrder():
     data = request.get_json()
     print(data)
     receiptEmail = data.get('receipt_email')
-    billingEmail = data.get('billing_email')
-    print(receiptEmail, billingEmail)
+    print(receiptEmail)
     if data.get('validation') != "True":
         print("API call dirty >:(")
-        return jsonify({"message" : "Error processing order"})
+        return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
     else:
         if current_user.is_authenticated:
             print("Processing order: user")
@@ -483,31 +481,43 @@ def processOrder():
             order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Standard")
             db.session.add(order)
             db.session.commit()
-            print("Order committed")
 
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : {{url_for('checkout/download')}}, "flag" : "valid"})
-        else:
-            billingAddress = data.get('billing_email')
-
-            print("Processing order: user")
-            price = 0.0
-            for items in session['cart'].values():
-                price += items['price']
-                if items['discount']:
-                    price -= items['discount']
-            print(price)
-
-            order = Order_History(None, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Standard")
-            db.session.add(order)
+            for items in current_user.cart.keys():
+                orderItem = Order_Item(order.id, int(items), current_user.cart[items]['title'])
+                db.session.add(orderItem)
             db.session.commit()
             print("Order committed")
 
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : {{url_for('checkout/download')}}, "flag" : "valid"})
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
+        else:
+            billingEmail = data.get('billing_email')
+            if validateCart():
+                print("Processing order: user")
+                price = 0.0
+                for items in session['cart'].values():
+                    price += items['price']
+                    if items['discount']:
+                        price -= items['discount']
+                print(price)
+
+                order = Order_History(None, datetime.now(), "Processed", price, receiptEmail, billingEmail, "Standard")
+                db.session.add(order)
+                db.session.commit()
+
+                for items in session['cart'].keys():
+                    orderItem = Order_Item(order.id, int(items), session['cart'][items]['title'])
+                    db.session.add(orderItem)
+                db.session.commit()
+                print("Order committed")
+
+                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
+            else:
+                return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
             
 
 @app.route("/checkout/download", methods = ['GET'])
 def download():
-    pass
+    return render_template('download.html')
 @app.route("/gift", methods = ['GET', 'POST'])
 def gift():
     data = request.get_json()
