@@ -37,6 +37,7 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime, nullable = False, default = datetime.now())
 
     cart = db.Column(JSON, nullable = False, default = {})
+    favourites = db.Column(JSON, nullable = True, default= {})
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
         self.first_name = fname
@@ -356,9 +357,9 @@ def getCatalogue():
     books = Product.query.all()
     if request.method == "GET":
         print("Normal catalogue, page just loaded")
-        print(books)
-        books = [item.to_dict() for item in books]
-        print(books)
+        # print(books)
+        # books = [item.to_dict() for item in books]
+        # print(books)
 
     elif request.method == "POST":
         print(request.form)
@@ -389,9 +390,9 @@ def getCatalogue():
         print("Post filter: ", books)
         
         if sort_option == '1':
-            books.sort(key=lambda x: x.title.lower(), reverse=True)
-        elif sort_option == '2':
             books.sort(key=lambda x: x.title.lower())
+        elif sort_option == '2':
+            books.sort(key=lambda x: x.title.lower(), reverse=True)
         elif sort_option == '3':
             books.sort(key= lambda x: x.price)
         elif sort_option == '4':
@@ -412,12 +413,12 @@ def getCatalogue():
             pass
         
         print("Sorted List: ", books)
-        books = [item.to_dict() for item in books]
 
-    return jsonify(books)
-
-    pass
-
+    books = [item.to_dict() for item in books]
+    if current_user.is_authenticated:
+        return jsonify({"books": books, "favourites" : current_user.favourites})
+    else:
+        return jsonify({"books" : books})
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
     if request.method == 'POST':
@@ -507,7 +508,7 @@ def purchaseThenCheckout():
 
 @app.route("/catalogue")
 def catalogue():
-    return render_template("catalogue.html")
+    return render_template("catalogue.html", signedIn = current_user.is_authenticated)
 
 @app.route("/render-products", methods=['POST', 'GET'])
 def render():
@@ -619,6 +620,27 @@ def checkout():
         except KeyError as k:
             return jsonify({"Error" : f"No cart. err_msg: {k}"})
 
+@app.route("/add-favourite", methods=["POST"])
+def addFav():
+    if request.method == "POST":
+        print("Adding favourite")
+        if not current_user.is_authenticated:
+            return jsonify({"alert" : "You must have an account to add items to favourites"})
+        productID = str(request.get_json().get('id'))
+        if productID in current_user.favourites:
+            return jsonify({"alert" : "Item already in favourites"})
+        print(current_user.favourites)
+        try:
+            product = Product.query.filter_by(id=int(productID)).first()
+        except:
+            print("Item not found in db, terminating")
+            return jsonify({"alert" : "error in adding item to favourites"})
+        current_user.favourites.update({productID : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+        
+        flag_modified(current_user, 'favourites')
+        db.session.commit()
+        return jsonify({"alert" : "Item added"})
+    
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

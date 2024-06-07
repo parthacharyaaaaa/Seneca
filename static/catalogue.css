@@ -152,6 +152,14 @@ legend {
     text-align: right justify;
 }
 
-hr{
+.filter hr{
     margin: 0;
+}
+
+.product-card .fav-button{
+    margin-left: 5rem;
+}
+.product-card-buttons{
+    display: flex;
+    flex-flow: row nowrap;
 }

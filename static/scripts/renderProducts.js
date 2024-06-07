@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
-            displayContent(data)
+            console.log(data.books)
+            displayContent(data.books)
         })
         .catch(error => console.log("Error: ", error))
 })
@@ -30,7 +30,7 @@ document.getElementById('filter-form').addEventListener('submit', function (even
             }
             else {
                 console.log(data)
-                displayContent(data)
+                displayContent(data.books)
             }
         })
         .catch(error => console.log("Error: ", error))
@@ -40,6 +40,7 @@ document.getElementById('filter-form').addEventListener('submit', function (even
 function displayContent(products) {
     const container = document.querySelector('.product-container');
     container.innerHTML = ''; // Clear the container
+    console.log(typeof(products))
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
@@ -62,13 +63,15 @@ function displayContent(products) {
                 <div class='product-card-buttons'>
                 <button class='view-button card-button' type='button' onclick='location.href = "/products/view/id=${product.id}"'>View</button>
                 <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
+                <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
                 </div>
             </div>
         `;
         container.appendChild(productCard);
     });
+    const event = new Event('contentLoaded');
+    document.dispatchEvent(event)
 }
-
 function addToCart(id){
     var formData = new FormData()
     formData.append('id', id);
