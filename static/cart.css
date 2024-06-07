@@ -1,12 +1,3 @@
-.icon-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    gap: 5rem;
-    /* position: relative; */
-}
-
 .empty-cart-msg{
     margin: 1rem auto;
     font-size: var(--FSIZE-L);
@@ -14,24 +5,6 @@
     text-align: center;
     margin-bottom: 2rem;
 }
-#gust-img{
-    width: 5rem;
-    filter: grayscale(1);
-    /* position: absolute;
-    left: 40rem;
-    bottom: -5rem; */
-    transform: rotate(-15deg) scale(180%);
-}
-
-#tumbleweed-img{
-    width: 5rem;
-    filter: grayscale(1);
-    transform: scale(140%);
-    /* position: absolute;
-    right: 42rem;
-    top: 0; */
-}
-
 .center-container {
     display: flex;
     justify-content: center;
@@ -85,4 +58,14 @@
 
 footer{
     display: none;
+}
+
+#quote::before{
+  content: open-quote;
+  font-size: 1.3em;
+}
+
+#quote::after{
+  content: close-quote;
+  font-size: 1.3em;
 }

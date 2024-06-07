@@ -1,25 +1,15 @@
 /* IMPORTS */
 @font-face {
-    font-family: Horizon;
-    src: url(fonts/horizon.otf);
-  }
-  
-  @font-face{
-      font-family: montserrat;
-      src:url(fonts/MontserratRegular-RpK6l.otf);
-  }
-  
-  @font-face{
-      font-family: norm;
-      src:url(fonts/norm.otf);
-  }
-@font-face {
     font-family: French;
     src: url(fonts/FeFCrm2.ttf);
 }
 @font-face {
     font-family: French2;
     src: url(fonts/FeFCrm2.ttf);
+}
+@font-face {
+    font-family: French-Canon-Bold;
+    src: url(fonts/im-fell-french-canon.bold.ttf);
 }
 /* RESET */
 *{
@@ -35,6 +25,7 @@
     --BGIMG: url('assets/background.png');
     --BGIMG-ALT: url('assets/background.png');          /*  Light mode background */
     --BGCOLOR: rgb(59, 59, 59);
+    --BGCOLOR-ICONS-1: black;
     
     /* Font sizes */
     --FSIZE-SMALLEST: 0.5rem;
@@ -46,7 +37,7 @@
     --FSIZE-LARGEST: 6rem;
     /* Font Families */
     --FF-MAIN: French;
-    --FF-BRAND: French2;
+    --FF-BRAND: French-Canon-Bold;
     
     /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
@@ -88,15 +79,16 @@ html{
 }
 /* Navbar */
 .haki-logo{
-    font-size: var(--FSIZE-XXL);
+    /* font-size: var(--FSIZE-LARGEST); */
     font-family: var(--FF-BRAND);
-    font-weight: bold;
+    font-weight: bolder;
+    text-shadow: 1px 1px 1px gray;
     color: red;
     /* color: white; */
 
 }
 .navbar{
-    background-color: var(--BGCOLOR);
+    background-color: var(--BGCOLOR-ICONS-1);
     color: var(--TEXT-COLOR-LIGHT);
     box-shadow: 0px 3px 3px rgba(0,0,0,0.7);
     margin-bottom: 1rem;
@@ -111,10 +103,25 @@ html{
     color: antiquewhite;
 }
 
+.nav-item .btn{
+    margin: 0 0.5rem;
+}
+
+.nav-item .icon{
+    transform: scale(110%);
+}
+.bi-person-circle{
+    height: 1.1rem; width: 1.1rem;
+}
+
+.fa-shopping-cart{
+    transform: scale(150%);
+    padding-right: 0.5rem;
+}
 /* Footer */
 footer{
     bottom: 0;
-    background-color: var(--BGCOLOR);
+    background-color: var(--BGCOLOR-ICONS-1);
     width: 100%;
 
     display: flex;
