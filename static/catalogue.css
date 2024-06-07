@@ -1,0 +1,25 @@
+.wrapper{
+    display: grid;
+    grid-template-columns: 30% 70%;
+}
+
+.filter{
+    border: 2px magenta solid;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    padding: 1rem;
+}
+.product-container{
+    border:3px solid red;
+    /* display: flex; */
+}
+
+.option-container{
+    margin: 1rem 0;
+}
+
+.product-card{
+    border: red 2px solid;
+}

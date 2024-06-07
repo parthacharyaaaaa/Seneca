@@ -22,6 +22,22 @@
         </a>
     </div>
 
+    {% else %}
+    <div class="cart-container">
+    {% for items in cart %}
+        <div class="cart-items">
+            {{cart[items]['title']}}
+            {{cart[items]['author']}}
+            {{cart[items]['price']}}
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="cart-summary">
+        total-price: {{pp}}
+    </div>
     {% endif %}
+
+
 </body>
 {% endblock %}

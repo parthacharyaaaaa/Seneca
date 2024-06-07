@@ -342,11 +342,80 @@ def cart():
     if current_user.is_authenticated:
         if current_user.cart == {}:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
+        else:
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, cart = current_user.cart)
     else:
         if 'cart' not in session or session['cart'] == {}:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
+        else:
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, cart = session['cart'])
 
+@app.route("/get-catalogue", methods = ["POST", "GET"])
+def getCatalogue():
+    books = Product.query.all()
+    if request.method == "GET":
+        print("Normal catalogue, page just loaded")
+        print(books)
+        books = [item.to_dict() for item in books]
+        print(books)
 
+    elif request.method == "POST":
+        print(request.form)
+
+        price_range_lower = request.form.get('price-range-lower')
+        price_range_upper = request.form.get('price-range-upper')
+        page_range_lower = request.form.get('page-range-lower')
+        page_range_upper = request.form.get('page-range-upper')
+        author = request.form.get('author')
+        sort_option = request.form['sort-option']
+        print(sort_option, price_range_lower)
+
+        #Managing filtering
+        #Price filters
+        if price_range_lower:
+            books = [item for item in books if int(price_range_lower) <= item.price]
+        if price_range_upper:
+            books = [item for item in books if int(price_range_upper) >= item.price]
+        #Page filters
+        if page_range_lower:
+            books = [item for item in books if int(price_range_lower) <= item.pages]
+        if page_range_upper:
+            books = [item for item in books if int(price_range_upper) >= item.pages]
+        #Author filter
+        if author:
+            books = [item for item in books if author == item.author]
+        
+        print("Post filter: ", books)
+        
+        if sort_option == '1':
+            books.sort(key=lambda x: x.title.lower(), reverse=True)
+        elif sort_option == '2':
+            books.sort(key=lambda x: x.title.lower())
+        elif sort_option == '3':
+            books.sort(key= lambda x: x.price)
+        elif sort_option == '4':
+            books.sort(key=lambda x:x.price, reverse=True)
+        elif sort_option == '5':
+            books.sort(key= lambda x: x.publication_date, reverse=True)
+        elif sort_option == '6':
+            books.sort(key=lambda x:x.publication_date)
+        elif sort_option == '7':
+            books.sort(key= lambda x: x.author)
+        elif sort_option == '8':
+            books.sort(key=lambda x:x.author, reverse=True)
+        elif sort_option == '9':
+            books.sort(key= lambda x: x.pages, reverse=True)
+        elif sort_option == '10':
+            books.sort(key=lambda x:x.pages, reverse=False)
+        else:
+            pass
+        
+        print("Sorted List: ", books)
+        books = [item.to_dict() for item in books]
+
+    return jsonify(books)
+
+    pass
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
     if request.method == 'POST':

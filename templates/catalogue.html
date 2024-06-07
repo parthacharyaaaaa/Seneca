@@ -1,9 +1,60 @@
 {% extends 'baseTemplate.html' %}
 {%block title%} Catalogue {%endblock%}
-
+{% block additionalDependencies %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='catalogue.css')}}" />
+{%endblock%}
 {% block content %}
-<div class="filter"></div>
-<div class="product-container"></div>
+<section class="wrapper">
+    <form class="filter" id="filter-form">
+        <fieldset id="filtering">
+            <legend>Filter Products</legend>
+            <div class="option-container">
+                <label for="price-range">Price Range:</label><br>
+                <input type="number" id="price-range-lower" name="price-range-lower" placeholder="Lower">
+                <input type="number" id="price-range-upper" name="price-range-upper" placeholder="Upper">
+            </div>
+            <div class="option-container">
+                <label for="page-range">Page Range:</label><br>
+                <input type="number" id="page-range-lower" name="page-range-lower" placeholder="Lower">
+                <input type="number" id="page-range-upper" name="page-range-upper" placeholder="Upper">
+            </div>
+            
+            <div class="option-container">
+                <label for="authors">Authors:</label>
+                <select id="authors" name="authors">
+                    <option value="">Select an author</option>
+                    <option value="author1">Author 1</option>
+                    <option value="author2">Author 2</option>
+                    <option value="author3">Author 3</option>
+                    <!-- Add more authors as needed -->
+                </select>
+            </div>
+        </fieldset>
+<hr>
+        <fieldset id="sorting">
+            <legend>Sort Products</legend>
+            <div class="option-container">
 
-<script src = "{{url_for('static', filename='scripts/renderProducts.js')}}"></script>
+                <label for="sort-by">Sort By:</label><br>
+                    <input type="radio" value="1" id="1" name="sort-option"> A-Z<br>
+                    <input type="radio" value="2" id="2" name="sort-option"> Z-A<br>
+                    <input type="radio" value="3" id="3" name="sort-option"> Price (Ascending)<br>
+                    <input type="radio" value="4" id="4" name="sort-option"> Price (Descending)<br>
+                    <input type="radio" value="5" id="5" name="sort-option"> Publication Date (Ascending)<br>
+                    <input type="radio" value="6" id="6" name="sort-option"> Publication Date (Descending)<br>
+                    <input type="radio" value="7" id="7" name="sort-option"> Author Name (Ascending)<br>
+                    <input type="radio" value="8" id="8" name="sort-option"> Author Name (Descending)<br>
+                    <input type="radio" value="9" id="9" name="sort-option"> Pages (Descending)<br>
+                    <input type="radio" value="10" id="10" name="sort-option"> Pages (Descending)<br>
+                </select>
+            </div>
+        </fieldset>
+
+        <button type="submit">Apply Filters</button>
+    </form>
+    <div class="product-container">
+    </div>
+</section>
+
+<script src="{{url_for('static', filename='scripts/renderProducts.js')}}"></script>
 {%endblock%}

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function(event) {
     console.log("Called")
 
-    fetch("/render-products", {
+    fetch("/get-catalogue", {
         method : "GET"
     })
     .then(response => response.json())
@@ -12,6 +12,31 @@ document.addEventListener("DOMContentLoaded", function(event) {
     .catch(error => console.log("Error: ", error))
 })
 
+document.getElementById('filter-form').addEventListener('submit', function(event){
+    event.preventDefault()
+
+    console.log("Filter called")
+    var filterOptions = new FormData(this)
+    console.log(filterOptions)
+    fetch("/get-catalogue", {
+        method : "POST",
+        body : filterOptions
+    })
+    .then(response => response.json())
+    .then(data =>{
+        if(data.error){
+            alert(data.error);
+            return false;
+        }
+        else{
+            console.log(data)
+            displayContent(data)
+        }
+    })
+    .catch(error => console.log("Error: ", error))
+})
+
+//Function to display the books
 function displayContent(products) {
     const container = document.querySelector('.product-container');
     container.innerHTML = ''; // Clear the container
@@ -24,7 +49,6 @@ function displayContent(products) {
         <p>File Type</p>
         </div>
     `
-    let total = 0.0;
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
@@ -43,10 +67,6 @@ function displayContent(products) {
                 <p>${product.file_format}</p>
             </div>
         `;
-        total += product.price
-
         container.appendChild(productCard);
     });
-
-    document.getElementById('total-bill').innerHTML = total.toFixed(2);
 }
