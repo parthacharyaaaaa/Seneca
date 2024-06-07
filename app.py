@@ -177,10 +177,9 @@ def mergeCarts() -> None:
 def addToGuestCart(productID) -> None:
     print("Adding item to guest (Temporary) cart")
 
-    if 'Temporary_Cart' not in session:
-        session['Temporary_Cart'] = []
-    item = Product.query.get(productID)
-    session['Temporary_Cart'].append({"id" : item.id, "title" : item.title, "author" : item.author})        
+    product = Product.query.get(productID)
+    session['cart'].update({productID : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+    session.modified = True   
 
 def validateCart() -> bool:
     if 'cart' not in session:
@@ -419,6 +418,7 @@ def getCatalogue():
         return jsonify({"books": books, "favourites" : current_user.favourites})
     else:
         return jsonify({"books" : books})
+
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
     if request.method == 'POST':
@@ -432,8 +432,7 @@ def addToCart():
             if 'cart' not in session:
                 session.permanent = True
                 session['cart'] = {}
-                session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
-                session.modified = True
+                addToGuestCart(product_id)
                 return jsonify({'message' : "It appears you are using Seneca as a guest. While we do allow guest purchases, please note that your session data, including your cart, is only stored temporarily and will be deleted after inactivity :)"})
 
             elif product_id in session['cart']:
@@ -475,16 +474,12 @@ def purchaseThenCheckout():
             if 'cart' not in session:
                 session.permanent = True
                 session['cart'] = {}
-                # session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
-                # return redirect(url_for('cart'))
 
             elif product_id in session['cart']:
                 print("Guest's cart already has all this shit")
                 return jsonify({"message" : "Item exists in cart (temp)"})
 
-            session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
-            print(session)
-            session.modified = True
+            addToGuestCart(product_id)
 
             return redirect(url_for('cart'))
         
