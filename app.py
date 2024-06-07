@@ -115,7 +115,8 @@ class Product(db.Model):
             'price' : self.price,
             'file_format' : self.file_format,
             'rating': self.rating,
-            'cover': self.cover,
+            'cover': url_for('static', filename=self.cover),
+            'genre' : self.genre
         }
 
 class Order_History(db.Model):
@@ -366,9 +367,9 @@ def getCatalogue():
         price_range_upper = request.form.get('price-range-upper')
         page_range_lower = request.form.get('page-range-lower')
         page_range_upper = request.form.get('page-range-upper')
-        author = request.form.get('author')
-        sort_option = request.form['sort-option']
-        print(sort_option, price_range_lower)
+        author = request.form.get('authors')
+        sort_option = request.form.get('sort-option')
+        print(sort_option, author)
 
         #Managing filtering
         #Price filters
@@ -416,6 +417,7 @@ def getCatalogue():
     return jsonify(books)
 
     pass
+
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
     if request.method == 'POST':

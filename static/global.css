@@ -36,8 +36,9 @@
     --FSIZE-XXL: 4rem;
     --FSIZE-LARGEST: 6rem;
     /* Font Families */
-    --FF-MAIN: French;
+    --FF-MAIN: Roobert,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";;
     --FF-BRAND: French-Canon-Bold;
+    --FF-BRAND-2: French;
     
     /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
@@ -141,6 +142,7 @@ footer ul{
 
 .left-footer-title{
     font-size: var(--FSIZE-XXL);
+    font-family: var(--FF-BRAND-2);
 }
 
 .logo-italic{
@@ -170,11 +172,6 @@ footer ul{
     font-size: var(--FSIZE-S);
 }
 
-.right-footer li:first-child{
-    /* margin-top: 6.9px; */
-    /* Kafi gay lag raha chee */
-}
-
 .right-footer div:last-child{
     margin-right: 15px;
 }
@@ -184,3 +181,57 @@ footer a:is(:hover, :focus){
     text-decoration: underline;
     /* font-weight: bold; */
 }
+
+.card-button {
+    appearance: none;
+    background-color: transparent;
+    border: 2px solid #1A1A1A;
+    border-radius: 7%;
+    box-sizing: border-box;
+    color: var(--TEXT-COLOR-LIGHT);
+    cursor: pointer;
+    display: inline-block;
+    font-family: Roobert,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-size: var(--FSIZE);
+    font-weight: 600;
+    line-height: normal;
+    margin: 0;
+    outline: none;
+    text-align: center;
+    text-decoration: none;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    width: fit-content;
+    will-change: transform;
+  
+    padding: 8px 8px;
+  }
+  
+  .card-button:disabled {
+    pointer-events: none;
+  }
+  
+  .card-button:hover {
+    color: #fff;
+    background-color: #1A1A1A;
+    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    transform: translateY(-2px);
+  }
+  
+  .card-button:active {
+    box-shadow: none;
+    transform: translateY(0);
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+  }
+
+  /* Remove spin buttons in Firefox */
+  input[type="number"] {
+      -moz-appearance: textfield;
+  }
