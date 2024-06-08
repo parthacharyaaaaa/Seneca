@@ -212,7 +212,7 @@ def persistNewCart() -> None:
 def mergeCarts() -> None:
     ("-----------MERGING DATABASE CART WITH TEMPORARY (GUEST) CART OF EXISTING USER------------")
     targetUser = User.query.get(current_user.id)
-    targetUser.cart = session['cart']
+    targetUser.cart = list(set(targetUser.cart + session['cart']))
 
     flag_modified(targetUser, 'cart')
     db.session.commit()
