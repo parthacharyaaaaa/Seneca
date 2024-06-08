@@ -27,7 +27,7 @@ function displayContent(products) {
     let total = 0.0;
     products.forEach(product => {
         const productCard = document.createElement('div');
-        productCard.classList.add('product-card');
+        productCard.classList.add('bill-card');
         let rating = parseFloat(product.rating).toFixed(1)
         // You can customize the HTML structure for your product card here
         productCard.innerHTML = `

@@ -1,0 +1,21 @@
+{% extends 'baseTemplate.html' %}
+{% block title %} Dashboard {% endblock %}
+{% block additionalDependencies %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dashboard.css')}}" />
+{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+
+    <div class="user-card"></div><br>
+    <h2>Favourites</h2>
+    <hr>
+    <div class="favs">
+    </div>
+    <div class="orders-container"></div>
+    <div class="cart"></div>
+</div>
+
+
+<script type="text/javascript" src="{{url_for('static', filename='scripts/dashboard.js')}}"></script>
+{% endblock %}

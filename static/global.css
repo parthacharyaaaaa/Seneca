@@ -17,6 +17,9 @@
     margin: 0;
     box-sizing: border-box;
 }
+html body::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for WebKit browsers */
+}
 /* VARIABLES */
 :root{
     /* BACKGROUND IMAGES */
@@ -74,9 +77,13 @@ html body{
 
     color: var(--TEXT-COLOR-LIGHT);
     font-family: var(--FF-MAIN);
+
+
 }
 html{
     position: relative;
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar for Internet Explorer/Edge */
 }
 /* Navbar */
 .haki-logo{
@@ -235,3 +242,91 @@ footer a:is(:hover, :focus){
   input[type="number"] {
       -moz-appearance: textfield;
   }
+
+/* Product Cards */
+.product-card {
+    width: 28%;
+    height: fit-content;
+    margin: 1rem 0;
+    background-color: var(--BGCOLOR-ICONS-1);
+    border-radius: 2.5%;
+
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+}
+
+.product-card:is(:hover, :focus) {
+    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    transform: translateY(-2px);
+}
+
+.product-card .product-image {
+    display: flex;
+    align-items: center;
+}
+
+.product-card .product-image img {
+    width: 75%;
+    margin: 0 auto;
+}
+
+.product-details{
+    padding:1rem;
+}
+.product-card :is(.product-title, .product-author){
+    text-align: center;
+}
+    
+.product-card .product-title{
+    font-size: var(--FSIZE-L);
+    margin: 0;
+}
+
+.product-card .product-author{
+    margin: 0;
+    font-size: var(--FSIZE-S);
+}
+
+.product-card .product-genre-rating {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.product-card .product-genre{
+    display: inline-flex;
+    background-color: rgb(222, 222, 222);
+    border-radius: 12px;
+    padding: 2px;
+}
+.horror{
+    color: maroon;
+}
+.fiction{
+    color: green;
+}
+.romance{
+    color: rebeccapurple;
+}
+.non-fiction{
+    color: black;
+}
+.fantasy{
+    color: blue;
+}
+
+.product-card .product-rating{
+    display: inline-flex;
+    text-align: right justify;
+}
+
+.filter hr{
+    margin: 0;
+}
+
+.product-card .fav-button{
+    margin-left: 5rem;
+}
+.product-card-buttons{
+    display: flex;
+    flex-flow: row nowrap;
+}
