@@ -1,43 +1,70 @@
 {% extends 'baseTemplate.html' %}
-{%block title %} Seneca: Cart {% endblock %}
+{% block title %} Checkout {% endblock %}
 {% block additionalDependencies %}
-<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='cart.css')}}" />
+    <link rel = "stylesheet" type="text/css" href="{{url_for('static', filename='cart.css')}}">
 {% endblock %}
 {% block content %}
 
-<body>
-    {% if isEmpty %}
-    <div class="empty-cart-msg">
+{% if isEmpty %}
+<div class="empty-cart-msg">
 
-        <h2 id="quote">Emptiness, it turns out, is just that: empty.</h2>
-        <hr>
-        <p>It looks like your cart is as empty as a writer's page before the first sip of coffee. At Seneca, we're all
-            about filling your world with words. So why not explore our shelves and add some literary treasures? After
-            all, a cart without books is like a bookshelf without stories—completely unheard of! <br>Happy reading! </p>
+    <h2 id="quote">Emptiness, it turns out, is just that: empty.</h2>
+    <hr>
+    <p>It looks like your cart is as empty as a writer's page before the first sip of coffee. At Seneca, we're all
+        about filling your world with words. So why not explore our shelves and add some literary treasures? After
+        all, a cart without books is like a bookshelf without stories—completely unheard of! <br>Happy reading! </p>
+</div>
+
+<div class="center-container">
+    <a href="{{ url_for('catalogue') }}">
+        <button type="button" class="hover-button">Browse</button>
+    </a>
     </div>
-
-    <div class="center-container">
-        <a href="{{ url_for('home') }}">
-            <button type="button" class="browse-button">Browse</button>
-        </a>
+{% else %}
+<section class="page-container">
+    <div class="product-container">
     </div>
-
-    {% else %}
-    <div class="cart-container">
-    {% for items in cart %}
-        <div class="cart-items">
-            {{cart[items]['title']}}
-            {{cart[items]['author']}}
-            {{cart[items]['price']}}
+    <div class="bill">
+        {% if(signedIn) %}
+        <h2>Checkout</h2>
+        <div class = "contact-details">
+            <h3>Contact Details:</h3>
+            Email receipt to:<br>
+            <input type = email id = "receipt-email" value = '{{receiptEmail}}'>
+            <span class="utility-disclaimer-text-small">*Leave this field blank if you don't want to receive an email receipt of your purchase.</span><br>
+            Billing email: {{receiptEmail}}
+            <span class="utility-disclaimer-text-small">*Mandatory field.</span>
         </div>
-    {% endfor %}
+        {% else %}
+        <h2>Guest Checkout</h2>
+        <div class = "contact-details">
+            <h3>Contact Details:</h3>
+            Email receipt to:<br>
+            <input type = email id = "receipt-email" value = '{{receiptEmail}}'>
+            <input type = email id = "billing-email" placeholder="Billing address (required)" required/>
+            <span class="utility-disclaimer-text-small">*For tracking and storing our orders, we require guests to provide an address to assosciate the purchase with.</span>
+        </div>
+        {% endif %}
+
+        <div class="paymentinfo">
+            <h3>Payment Summary</h3>
+            Grand Total: <span id="total-bill"></span><br>
+            <input type="submit" value="Buy" id="confirm-purchase"/>
+        </div>
+        <div class="gift">
+            <h3>Email your order to your friends :3</h3>
+            Buying for someone else? We got you covered >:3 <br>
+            Email your books in a zip file directly to someone's inbox
+            <input type="text" value="" id="gift-id"/>
+            <br>
+            <input type = "submit" value = "Gift" id="gift-button"/>
+        </div>
     </div>
+</section>
+<script src = "{{url_for('static', filename='scripts/billGenerator.js')}}"></script>
+<script src = "{{url_for('static', filename='scripts/giftBooks.js')}}"></script>
+<script src = "{{url_for('static', filename='scripts/purchaseProcessor.js')}}"></script>
 
-    <div class="cart-summary">
-        total-price: {{pp}}
-    </div>
-    {% endif %}
 
-
-</body>
+{% endif %}
 {% endblock %}

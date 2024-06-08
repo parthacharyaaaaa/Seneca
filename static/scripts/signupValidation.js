@@ -8,21 +8,16 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
         method: 'POST',
         body: formData
     })
-    .then(response => {
-        if(response.redirected){ window.location.href = response.url;}
-        else{
-            return response.json();
-        }
-    })
+    .then(response => response.json())
     .then(data => {
-        if (data.message != ""){
-            document.getElementById('message').innerText = data.message;
-        }
         if(data.alert != ""){
             alert(data.alert)
         }
-        window.location.href = data.redirect_url;
+        if(data.redirect_url){
+            window.location.href = data.redirect_url
+        }
     })
+    
     
     .catch(error => console.error('Error:', error));
 });
