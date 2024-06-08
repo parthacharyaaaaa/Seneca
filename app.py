@@ -37,7 +37,7 @@ class User(UserMixin, db.Model):
     last_seen = db.Column(db.DateTime, nullable = False, default = datetime.now())
 
     cart = db.Column(JSON, nullable = False, default = {})
-    favourites = db.Column(JSON, nullable = True, default= {})
+    favourites = db.Column(JSON, nullable = True, default= [])
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
         self.first_name = fname
@@ -51,6 +51,15 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.email_id}>'
+    
+    def to_dict(self):
+        return{
+        "first_name" : self.first_name,
+        "last_name" : self.last_name,
+        "phone_number" : self.phone_number,
+        "email_id" : self.email_id,
+        "time_created" : self.time_created
+        }
     
     def getItemsTotal(self) -> float:
         print("Calulating bill total: backend")
@@ -117,7 +126,8 @@ class Product(db.Model):
             'file_format' : self.file_format,
             'rating': self.rating,
             'cover': url_for('static', filename=self.cover),
-            'genre' : self.genre
+            'genre' : self.genre,
+            'discount' : self.discount
         }
 
 class Order_History(db.Model):
@@ -129,8 +139,9 @@ class Order_History(db.Model):
     receipt_email = db.Column(db.String(256), nullable = True)
     billing_address = db.Column(db.String(256), nullable = False)
     order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
+    order_quantity = db.Column(db.Integer, nullable = False)
 
-    def __init__(self, user, date, status, price, receipt, bill, method):
+    def __init__(self, user, date, status, price, receipt, bill, method, quantity):
         self.user = user
         self.order_time = date
         self.status = status
@@ -138,23 +149,42 @@ class Order_History(db.Model):
         self.receipt_email = receipt
         self.billing_address = bill
         self.order_type = method
+        self.order_quantity = quantity
 
     def __repr__(self) -> str:
         return f"<Order_History {self.id}>"
+    
+    def to_dict(self):
+        return {
+            "order_id" : self.id,
+            "order_time" : self.order_time,
+            "order_quantity" : self.order_quantity,
+            "order_type" : self.order_type,
+            "order_price" : self.total_price
+        }
 
 class Order_Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     order_id = db.Column(db.Integer, db.ForeignKey('order__history.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     product_title = db.Column(db.String(128), nullable = False)
+    product_price = db.Column(db.Float, nullable = False)
 
-    def __init__(self, orderID, productID, productTitle):
+    def __init__(self, orderID, productID, productTitle, price):
         self.order_id = orderID
         self.product_id = productID
         self.product_title = productTitle
+        self.product_price = price
     
     def __repr__(self) -> str:
         return f"<Order_Item {self.id}>"
+    
+    def to_dict(self):
+        return {
+            "product_id" : self.product_id,
+            "product_title" : self.product_title,
+            "product_price" : self.product_price,
+        }
 
 #Auxillary Functions
 def persistNewCart() -> None:
@@ -507,12 +537,7 @@ def catalogue():
 
 @app.route("/render-products", methods=['POST', 'GET'])
 def render():
-    if request.method == "GET":
-        print("Hairy penis")
-
     products = Product.query.all()
-    # for item in products:
-        # print(item.title, item.price, item.rating, item.cover, item.summary, item.price)
     products_list = [item.to_dict() for item in products]
     return jsonify(products_list)
 
@@ -546,12 +571,12 @@ def processOrder():
         if current_user.is_authenticated:
             print("Processing order: user")
             price = current_user.getItemsTotal()
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Standard")
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Personal", len(current_user.cart))
             db.session.add(order)
             db.session.commit()
 
             for items in current_user.cart.keys():
-                orderItem = Order_Item(order.id, int(items), current_user.cart[items]['title'])
+                orderItem = Order_Item(order.id, int(items), current_user.cart[items]['title'], current_user.cart[items]['price'] - current_user.cart[items]['discount'])
                 db.session.add(orderItem)
             current_user.cart = {}
             flag_modified(current_user, 'cart')
@@ -630,11 +655,46 @@ def addFav():
         except:
             print("Item not found in db, terminating")
             return jsonify({"alert" : "error in adding item to favourites"})
-        current_user.favourites.update({productID : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+        current_user.favourites.append(productID)
         
         flag_modified(current_user, 'favourites')
         db.session.commit()
         return jsonify({"alert" : "Item added"})
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template('dashboard.html', signedIn = current_user.is_authenticated)
+
+@app.route("/get-user-info", methods = ["GET"])
+@login_required
+def getUserInfo():
+    if request.method == "GET":
+        print("Loading dashboard")
+
+        target = User.query.filter_by(id = current_user.id).first()
+        userInfo = target.to_dict()
+        favourites = target.favourites
+        favourites = {}
+        for item in target.favourites:
+            product = Product.query.filter_by(id = int(item)).first()
+            favourites.update({int(item):product.to_dict()})
+        print(favourites)
+
+        orderHolder = {}
+        orderHistory = Order_History.query.filter_by(user = target.id).all()
+        for orders in orderHistory:
+            orderHistoryItems = Order_Item.query.filter_by(order_id = orders.id).all()
+
+            orderHolder[orders.id] = {
+                'order_id': orders.id,
+                'time_of_purchase': orders.order_time,
+                'total_items': orders.order_quantity,
+                'total_amount': orders.total_price,
+                'items': [item.to_dict() for item in orderHistoryItems]
+            }
+        print(orderHolder)
+        return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
     
 if __name__ == "__main__":
     with app.app_context():

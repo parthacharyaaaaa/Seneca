@@ -32,7 +32,7 @@
     /* border: 2px solid white; */
 }
 
-.product-card {
+.bill-card {
     break-inside: avoid; /* Prevents breaking of columns within a single product card */
     padding: 10px;
     margin: 5px 0;
