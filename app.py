@@ -36,7 +36,7 @@ class User(UserMixin, db.Model):
     time_created = db.Column(db.DateTime, nullable = False, default = datetime.now())
     last_seen = db.Column(db.DateTime, nullable = False, default = datetime.now())
 
-    cart = db.Column(JSON, nullable = False, default = {})
+    cart = db.Column(JSON, nullable = False, default = [])
     favourites = db.Column(JSON, nullable = True, default= [])
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
@@ -127,7 +127,9 @@ class Product(db.Model):
             'rating': self.rating,
             'cover': url_for('static', filename=self.cover),
             'genre' : self.genre,
-            'discount' : self.discount
+            'discount' : self.discount,
+            'reviews' : self.total_reviews,
+            'sold' : self.units_sold
         }
 
 class Order_History(db.Model):
@@ -167,26 +169,37 @@ class Order_Item(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     order_id = db.Column(db.Integer, db.ForeignKey('order__history.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    product_title = db.Column(db.String(128), nullable = False)
-    product_price = db.Column(db.Float, nullable = False)
+    price = db.Column(db.Integer, nullable = False)
 
-    def __init__(self, orderID, productID, productTitle, price):
+    def __init__(self, orderID, productID, price):
         self.order_id = orderID
         self.product_id = productID
-        self.product_title = productTitle
-        self.product_price = price
-    
+        self.price = price
+
     def __repr__(self) -> str:
         return f"<Order_Item {self.id}>"
     
     def to_dict(self):
         return {
+            "order_id" : self.order_id,
             "product_id" : self.product_id,
-            "product_title" : self.product_title,
-            "product_price" : self.product_price,
+            "price" : self.price
         }
 
 #Auxillary Functions
+def loadCart() -> dict:
+    if current_user.is_authenticated:
+        itemKeys = current_user.cart
+    else:
+        itemKeys = session['cart']
+
+    cart = {}
+    for itemKey in itemKeys:
+        item = Product.query.filter_by(id = int(itemKey)).first()
+        cart.update({str(item.id) : item.to_dict()})
+    print(cart)
+    return cart
+
 def persistNewCart() -> None:
     print("--------------OVERWRITING DATABASE CART WITH GUEST CART (NEW USER)------------------")
     updateUser = User.query.filter_by(id = current_user.id).first()
@@ -199,38 +212,27 @@ def persistNewCart() -> None:
 def mergeCarts() -> None:
     ("-----------MERGING DATABASE CART WITH TEMPORARY (GUEST) CART OF EXISTING USER------------")
     targetUser = User.query.get(current_user.id)
-    targetUser.cart.update(session['cart'])
+    targetUser.cart = session['cart']
 
     flag_modified(targetUser, 'cart')
     db.session.commit()
 
-def addToGuestCart(productID) -> None:
-    print("Adding item to guest (Temporary) cart")
-
-    product = Product.query.get(productID)
-    session['cart'].update({productID : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
-    session.modified = True   
-
 def validateCart() -> bool:
+    print("ValidateCart called")
     if 'cart' not in session:
         return True
     
-    for productID, productDetails in session['cart'].items():
-        print(productID, productDetails)
-        cleanProduct = Product.query.filter_by(
-            id = productID,
-            title = productDetails['title'],
-            author = productDetails['author'],
-            file_format = productDetails['file format'],
-            price = productDetails['price']
-        ).first()
+    for productID in session['cart']:
+        print(productID)
+        cleanProduct = Product.query.filter_by(id = int(productID)).first()
         
         if cleanProduct:
             print(f"Product {productID} exists")
         else:
             print(f"Product not found in database. Outdated/Tampered data detected")
-            del session['cart'][productID]
+            session['cart'].pop(productID)
             return False
+    print("ValidateCart ended")
     return True
 #Login management
 login_manager = LoginManager()
@@ -263,13 +265,12 @@ def signup():
             flash("This email and/or phone number already exists")
 
             return jsonify({'exists' : True,
-                            'message' : 'A Haki account with this email already exists'})
+                            'alert' : 'A Haki account with this email already exists'})
         elif User.query.filter_by(phone_number = phone).first() != None:
             print("User already exists (phone number)")
-            flash("This phone number already exists")
 
             return jsonify({'exists' : True,
-                            'message' : 'A Haki account with this phone number already exists'})
+                            'alert' : 'A Haki account with this phone number already exists'})
         
         #Register user into database
         fname = request.form['first_name']
@@ -290,14 +291,15 @@ def signup():
         if 'cart' in session:
             if not validateCart():
                 print("Session cart data has been tampered with (Signup)")
-                return({'message' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
+                return({'alert' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
             else:
                 persistNewCart()
                 print("Cart updated: New user <- Guest Cart")
                 session.pop('cart')
                 print(session)
                 return jsonify({'alert' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
-        return redirect(url_for('home'))
+       
+        return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
     return render_template('signup.html')
 
 @app.route("/login", methods = ['POST', 'GET'])
@@ -317,7 +319,7 @@ def login():
         else:
             print("Invalid identity data sent from client\nTERMINATING----------------------------")
             return jsonify({'authenticated' : False,
-                            'message' : 'Error: Invalid identity syntax'})      #Ideally, this message should never pop up since input validation is performed at clinet-side itself
+                            'alert' : 'Error: Invalid identity syntax'})      #Ideally, this message should never pop up since input validation is performed at clinet-side itself
         
         if registeredUser:
             print("User found")
@@ -342,13 +344,14 @@ def login():
                         print(session)
                         return({'alert' : f'Your cart has been updated! Welcome back, {registeredUser.first_name}', "redirect_url" : url_for('home')})
 
-                return redirect(url_for("home"))
+                return({'alert' : f' Welcome back, {registeredUser.first_name}', "redirect_url" : url_for('home')})
+
             else:
                 return jsonify({'authenticated' : False,
-                                'message' : 'Invalid credentials'})
+                                'alert' : 'Invalid credentials'})
         else:
             return jsonify({'authenticated' : False,
-                    'message' : 'No account with the given email address/phone number exists with Haki'})
+                    'alert' : 'No account with the given email address/phone number exists with Haki'})
     else:
         print("Rendering Login")
         return render_template('login.html')
@@ -371,15 +374,15 @@ def product(product_id):
 @app.route('/cart')
 def cart():
     if current_user.is_authenticated:
-        if current_user.cart == {}:
+        if current_user.cart == []:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
         else:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, cart = current_user.cart)
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, receiptEmail = current_user.email_id)
     else:
-        if 'cart' not in session or session['cart'] == {}:
+        if 'cart' not in session or session['cart'] == []:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
         else:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, cart = session['cart'])
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False)
 
 @app.route("/get-catalogue", methods = ["POST", "GET"])
 def getCatalogue():
@@ -456,20 +459,23 @@ def addToCart():
         print("Incoming product (API): ", product_id)
 
         product = Product.query.filter_by(id = product_id).first()
+        if not product:
+            return jsonify({"message" : "Error in validating product authenticity :/"})
         #Guest user:
         if not(current_user.is_authenticated):
             print("Error: Not logged in")
             if 'cart' not in session:
                 session.permanent = True
-                session['cart'] = {}
-                addToGuestCart(product_id)
+                session['cart'] = []
+                session['cart'].append(product_id)
+                session.modified = True  
                 return jsonify({'message' : "It appears you are using Seneca as a guest. While we do allow guest purchases, please note that your session data, including your cart, is only stored temporarily and will be deleted after inactivity :)"})
 
             elif product_id in session['cart']:
                 print("Guest's cart already has all this shit")
                 return jsonify({"message" : "Item exists in cart (temp)"})
 
-            session['cart'].update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            session['cart'].append(product_id)
             print(session)
             session.modified = True
 
@@ -484,7 +490,7 @@ def addToCart():
             print("This item already exists in your cart")
             return jsonify({'message' : 'Product already in cart'})
         else:
-            targetUser.cart.update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            targetUser.cart.append(product_id)
             print(targetUser.cart)
 
             flag_modified(targetUser, 'cart')
@@ -496,40 +502,45 @@ def addToCart():
 @app.route('/purchaseThenCheckout', methods=['POST', 'GET'])
 def purchaseThenCheckout():
     if request.method == 'POST':
+        #Get product details and query it from the database
         product_id = str(request.form['id'])
         product = Product.query.filter_by(id = product_id).first()
+
+        #Handle case when product id is invalid
+        if not product:
+            return jsonify({"message" : "Error in validating product authenticity :/"})
+        
         #Guest user:
         if not(current_user.is_authenticated):
             print("Error: Not logged in")
             if 'cart' not in session:
                 session.permanent = True
-                session['cart'] = {}
+                session['cart'] = []
 
             elif product_id in session['cart']:
                 print("Guest's cart already has all this shit")
                 return jsonify({"message" : "Item exists in cart (temp)"})
 
-            addToGuestCart(product_id)
+            session['cart'].append(product_id)
 
-            return redirect(url_for('cart'))
-        
         #Logged in user:
-        targetUser = User.query.filter_by(id = current_user.id).first()
-        print(targetUser.cart)
-        print("/Direct Purchase: Current Cart")
-
-        if product_id in targetUser.cart:
-            print("This item already exists in your cart")
-            return jsonify({'message' : 'Product already in cart'})
         else:
-            targetUser.cart.update({product_id : {"title" : product.title, "author" : product.author, "isbn" : product.isbn, "file format" : product.file_format, "price" : product.price, "discount" : product.discount}})
+            targetUser = User.query.filter_by(id = current_user.id).first()
             print(targetUser.cart)
+            print("/Direct Purchase: Current Cart")
 
-            flag_modified(targetUser, 'cart')
-            db.session.commit()
-            print(User.query.get(current_user.id).cart)
+            if product_id in targetUser.cart:
+                print("This item already exists in your cart")
+                return jsonify({'message' : 'Product already in cart'})
+            else:
+                targetUser.cart.append(product_id)
+                print(targetUser.cart)
 
-        return redirect(url_for('cart'))
+                flag_modified(targetUser, 'cart')
+                db.session.commit()
+                print(User.query.get(current_user.id).cart)
+
+        return redirect(url_for('checkout'))
 
 @app.route("/catalogue")
 def catalogue():
@@ -541,21 +552,10 @@ def render():
     products_list = [item.to_dict() for item in products]
     return jsonify(products_list)
 
-@app.route("/get-bill", methods = ['POST', 'GET'])
-def getBill():
-    print("Generating bill")
-    billItems = []
-    if current_user.is_authenticated:
-        print(current_user.cart)
-        for item in current_user.cart.values():
-            billItems.append(item)
-    else:
-        print(session['cart'])
-        for item in session['cart'].values():
-            billItems.append(item)
-
-    print("Reached flag 2")
-    print(billItems)
+@app.route("/get-cart", methods = ['POST', 'GET'])
+def getCart():
+    billItems = loadCart()
+    print("Final bill: ", billItems)
     return jsonify(billItems)
         
 @app.route("/process-order", methods = ['POST', 'GET'])
@@ -568,44 +568,44 @@ def processOrder():
         print("API call dirty >:(")
         return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
     else:
+        temp_storage = loadCart()                   #Load cart items
+        #Calculate total price
+        price = 0.0
+        for items in temp_storage.values():
+            print(items)
+            price += items['price'] - items['discount']
+
         if current_user.is_authenticated:
             print("Processing order: user")
-            price = current_user.getItemsTotal()
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Personal", len(current_user.cart))
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Personal", len(temp_storage))
             db.session.add(order)
             db.session.commit()
-
-            for items in current_user.cart.keys():
-                orderItem = Order_Item(order.id, int(items), current_user.cart[items]['title'], current_user.cart[items]['price'] - current_user.cart[items]['discount'])
+            print(temp_storage)
+            for item in temp_storage.keys():
+                orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
                 db.session.add(orderItem)
-            current_user.cart = {}
+            current_user.cart = []
             flag_modified(current_user, 'cart')
             db.session.commit()
             print("Order committed")
 
             return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
+        #Guest Transaction
         else:
             billingEmail = data.get('billing_email')
             if validateCart():
-                print("Processing order: user")
-                price = 0.0
-                for items in session['cart'].values():
-                    price += items['price']
-                    if items['discount']:
-                        price -= items['discount']
-                print(price)
+                print("Processing order: guest")
 
-                order = Order_History(None, datetime.now(), "Processed", price, receiptEmail, billingEmail, "Standard")
+                order = Order_History(None, datetime.now(), "Processed", price, receiptEmail, billingEmail, "(Guest) Personal", len(temp_storage))
                 db.session.add(order)
                 db.session.commit()
 
-                for items in session['cart'].keys():
-                    orderItem = Order_Item(order.id, int(items), session['cart'][items]['title'])
+                for item in temp_storage.keys():
+                    orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
                     db.session.add(orderItem)
                 db.session.commit()
                 print("Order committed")
-
-                del session['cart']
+                session['cart'] = []
 
                 return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
             else:
@@ -628,17 +628,6 @@ def amd():
     session.clear()
     print(session)
     return redirect(url_for('signup'))
-
-@app.route("/checkout", methods = ['POST', 'GET'])
-def checkout():
-    #Logged in users
-    if current_user.is_authenticated:
-        return render_template("checkout.html", cart = User.query.get(current_user.id).cart, receiptEmail = current_user.email_id, signedIn = current_user.is_authenticated)
-    else:
-        try:
-            return render_template("checkout.html", cart = session['cart'])
-        except KeyError as k:
-            return jsonify({"Error" : f"No cart. err_msg: {k}"})
 
 @app.route("/add-favourite", methods=["POST"])
 def addFav():

@@ -1,6 +1,4 @@
 document.getElementById('add-to-cart').addEventListener('click', function(event) {
-    // Check if the user is signed in using a server-side templating language
-    const signedIn = document.querySelector('meta[name="signed-in"]').getAttribute('content');
     const product_id = event.currentTarget.getAttribute('data-product-id');
     console.log(product_id)
     const amount = parseInt(document.getElementById('quantity').value)

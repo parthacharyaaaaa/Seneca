@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function(event) {
     console.log("Creating bill")
 
-    fetch("/get-bill", {
+    fetch("/get-cart", {
         method : "GET"
     })
     .then(response => response.json())
@@ -16,36 +16,41 @@ function displayContent(products) {
     const container = document.querySelector('.product-container');
     container.innerHTML = ''; // Clear the container
     container.innerHTML = `
-        <div class="product-header">
-        <p>Title</p>
-        <p>Author</p>
-        <p>Price ($)</p>
-        <p>File Type</p>
-        <p>Discount</p>
-        </div>
+    <div class="product-header">
+        <div>Cover</div>
+        <div>Title</div>
+        <div>Author</div>
+        <div>Price ($)</div>
+        <div>File Type</div>
+        <div>Discount</div>
+    </div>
     `
     let total = 0.0;
-    products.forEach(product => {
+    Object.keys(products).forEach(key => {
+        const product = products[key];
         const productCard = document.createElement('div');
         productCard.classList.add('bill-card');
-        let rating = parseFloat(product.rating).toFixed(1)
+        let rating = parseFloat(product.rating).toFixed(1);
         // You can customize the HTML structure for your product card here
         productCard.innerHTML = `
-            <div class="product-image">
-                <img src="${product.image1}" alt="${product.title}">
-            </div>
-            <div class="product-details">
-                <p>${product.title}</p>
-                <p>${product.author}</p>
-                <p>${product.price}</p>
-                <p>${product['file format']}</p>
-                <p>${product.discount}</p>
-            </div>
+        <div class="product-image">
+            <img src="${product.cover}" alt="${product.title}">
+        </div>
+            <div>${product.title}</div>
+            <div>${product.author}</div>
+            <div>${product.price}</div>
+            <div>${product.file_format}</div>
+            <div>${product.discount}</div>
         `;
-        total += product.price
-
+        total = total + product.price - product.discount;
+        console.log(total)
+    
         container.appendChild(productCard);
     });
-
-    document.getElementById('total-bill').innerHTML = total.toFixed(2);
+    
+    try {
+        document.getElementById('total-bill').innerHTML = "Total Price: ", total.toFixed(2);
+    } catch (error) {
+        return false;
+    }
 }
