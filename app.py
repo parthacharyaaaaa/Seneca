@@ -1,7 +1,7 @@
 #Import dependencies
 from flask import Flask, jsonify, redirect, request, render_template, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, login_required, login_user, current_user, LoginManager
+from flask_login import UserMixin, login_required, login_user, current_user, LoginManager, logout_user
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
@@ -234,6 +234,13 @@ def validateCart() -> bool:
             return False
     print("ValidateCart ended")
     return True
+
+def setLastSeen(time) -> None:
+    print(time, datetime.now())
+    date_format = "%m/%d/%Y, %I:%M:%S %p"
+    time = datetime.strptime(time, date_format)
+    current_user.last_seen = time
+    db.session.commit()
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -258,6 +265,7 @@ def signup():
     if request.method == 'POST':
         email = request.form['email_id']
         phone = str(request.form['phone_number'])
+        time = request.form['formattedDateTime']
 
         #Handle existing user trying to sign up
         if User.query.filter_by(email_id = email).first() != None:
@@ -287,6 +295,7 @@ def signup():
         print('User added')
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
+        setLastSeen(time)
         #Guest user had a cart before creating an account
         if 'cart' in session:
             if not validateCart():
@@ -307,6 +316,7 @@ def login():
     if request.method == 'POST':
         identity = request.form['emailPhone']
         password = request.form['password']
+        time = request.form['formattedDateTime']
 
         email_regex = r"[^@]+@[^@]+\.[^@]+"
         phone_regex = r"^\+?[\d\s\-()]+$"
@@ -328,6 +338,7 @@ def login():
 
                 print(session)
                 login_user(registeredUser)
+                setLastSeen(time)
                 
                 print('logged in')
                 #If guest user had a cart prior to loggin in, we need to merge both of them too
@@ -636,11 +647,19 @@ def gift():
     print(receiver_email)
     return jsonify({'message' : 'called'})
 
-@app.route("/logout")
-def amd():
-    session.clear()
-    print(session)
-    return redirect(url_for('signup'))
+@app.route("/logout", methods = ['POST'])
+def logout():
+    if request.method == 'POST':
+        print("Logging Out user")
+        if not current_user.is_authenticated:
+            return jsonify({"alert" : "Error: User not logged in"})
+        else:
+            setLastSeen(request.get_json().get('formattedDateTime'))
+            logout_user()
+            session.clear()
+            
+            print(session)
+            return jsonify({"redirect_url" : url_for('home')})
 
 @app.route("/add-favourite", methods=["POST"])
 def addFav():
@@ -681,7 +700,7 @@ def getUserInfo():
         for item in target.favourites:
             product = Product.query.filter_by(id = int(item)).first()
             favourites.update({int(item):product.to_dict()})
-        print(favourites)
+        # print(favourites)
 
         orderHolder = {}
         orderHistory = Order_History.query.filter_by(user = target.id).all()
@@ -695,7 +714,7 @@ def getUserInfo():
                 'total_amount': orders.total_price,
                 'items': [item.to_dict() for item in orderHistoryItems]
             }
-        print(orderHolder)
+        # print(orderHolder)
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
     
 if __name__ == "__main__":

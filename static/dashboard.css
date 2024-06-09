@@ -110,3 +110,8 @@
 .fav-card .fav-button:is(:hover, :focus){
     background-color: maroon;
 }
+
+.hover-button{
+    background-color: white;
+    color: var(--BGCOLOR-ICONS-1)
+}

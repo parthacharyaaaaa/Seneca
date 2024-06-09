@@ -356,7 +356,7 @@ footer a:is(:hover, :focus){
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-    width: 100%;
+    width: fit-content;
     will-change: transform;
   }
   

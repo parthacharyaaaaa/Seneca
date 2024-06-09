@@ -28,8 +28,32 @@ function renderUserInfo(userInfo) {
         <p><b>Name</b>: ${userInfo.first_name + ' ' + userInfo.last_name}</p>
         <p><b>Email</b>: ${userInfo.email_id}</p>
         <p><b>Phone Number</b>: ${userInfo.phone_number}</p>
-        
+        <button type="button" id='logout' class="hover-button">Logout</button>
     `;
+
+    document.getElementById('logout').addEventListener('click', function(event){
+        console.log("logging out")
+        const logout_time = new Date();
+        const formattedDateTime = logout_time.toLocaleString();
+        console.log(formattedDateTime);
+        fetch('/logout', {
+            method : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ formattedDateTime: formattedDateTime })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.alert){
+                alert(data.alert)
+            }
+            if(data.redirect_url){
+                window.location.href = data.redirect_url
+            }
+        })
+        .catch(error => alert("Error: ", error))
+    })
 }
 
 function renderFavourites(favInfo) {
@@ -71,6 +95,7 @@ function renderFavourites(favInfo) {
         }
     }
 }
+
 function renderOrders(orderInfo) {
     console.log("Order Info: ", orderInfo)
     const ordersContainer = document.querySelector('.orders-container');
