@@ -49,7 +49,8 @@ function displayContent(products) {
     });
     
     try {
-        document.getElementById('total-bill').innerHTML = "Total Price: ", total.toFixed(2);
+        document.getElementById('total-items').innerHTML = "Total Items: " + Object.keys(products).length;
+        document.getElementById('total-bill').innerHTML = "Total Price: $" + total.toFixed(2);
     } catch (error) {
         return false;
     }

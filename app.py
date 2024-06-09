@@ -373,16 +373,22 @@ def product(product_id):
 
 @app.route('/cart')
 def cart():
+    fallback = loadCart()
+    backup_price = 0.0
+    for items in fallback.values():
+        print(items)
+        backup_price += items['price'] - items['discount']
+    backup_quantity = len(fallback)
     if current_user.is_authenticated:
         if current_user.cart == []:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
         else:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, receiptEmail = current_user.email_id)
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, receiptEmail = current_user.email_id , backup_price = backup_price, backup_quantity = backup_quantity)
     else:
         if 'cart' not in session or session['cart'] == []:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True)
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
         else:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False)
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, backup_price = backup_price, backup_quantity = backup_quantity)
 
 @app.route("/get-catalogue", methods = ["POST", "GET"])
 def getCatalogue():
@@ -564,6 +570,10 @@ def processOrder():
     print(data)
     receiptEmail = data.get('receipt_email')
     print(receiptEmail)
+
+    email_regex = r"[^@]+@[^@]+\.[^@]+"
+    if receiptEmail != "" and not regex.match(email_regex, receiptEmail):
+        return jsonify({"alert" : "Invalid receipt email provided"})
     if data.get('validation') != "True":
         print("API call dirty >:(")
         return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
@@ -592,7 +602,11 @@ def processOrder():
             return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
         #Guest Transaction
         else:
+            if receiptEmail != "" and not regex.match(email_regex, receiptEmail):
+                return jsonify({"alert" : "Invalid receipt email provided"})
             billingEmail = data.get('billing_email')
+            if receiptEmail != "" and not regex.match(email_regex, receiptEmail):
+                return jsonify({"alert" : "Invalid billing email provided"})
             if validateCart():
                 print("Processing order: guest")
 
@@ -613,8 +627,7 @@ def processOrder():
             
 @app.route("/checkout/download", methods = ['GET'])
 def download():
-    return render_template('download.html')
-
+    return render_template('download.html', signedIn = current_user.is_authenticated)
 @app.route("/gift", methods = ['GET', 'POST'])
 def gift():
     data = request.get_json()
