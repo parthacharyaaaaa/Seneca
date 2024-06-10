@@ -7,10 +7,11 @@ from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm.attributes import flag_modified
-from sqlalchemy.orm import load_only
 
 from datetime import timedelta, datetime
 import re as regex
+
+from mail_sender import sendReceipt, sendSalutation
     
 #App configuration
 app = Flask(__name__)
@@ -296,6 +297,7 @@ def signup():
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
         setLastSeen(time)
+        sendSalutation(current_user.first_name)
         #Guest user had a cart before creating an account
         if 'cart' in session:
             if not validateCart():
@@ -610,6 +612,8 @@ def processOrder():
             db.session.commit()
             print("Order committed")
 
+            #Sending receipt
+            sendReceipt(str(current_user.email_id), temp_storage, order)
             return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
         #Guest Transaction
         else:
@@ -631,6 +635,9 @@ def processOrder():
                 db.session.commit()
                 print("Order committed")
                 session['cart'] = []
+
+                #Sending receipt
+                sendReceipt(str(billingEmail), temp_storage, order)
 
                 return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
             else:
