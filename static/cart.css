@@ -3,17 +3,15 @@
     flex-flow: row wrap;
     flex-basis: 100px;
 
-    justify-content: space-between;
+    /* justify-content: space-between; */
     padding: 0 2rem;
 }
 
 .product-container{
-    /* border: 2px solid white; */
     border-right: 1px solid white;
-    column-count: 1; /* Number of columns */
-    column-gap: 3rem; /* Space between columns */
+    column-count: 1; 
+    column-gap: 3rem; 
     padding: 20px;
-    /* background-color: #f8f8f8; */
     width: 60%;
 }
 
@@ -27,7 +25,7 @@
 .product-header,
 .bill-card {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1fr 0.5fr;
     gap: 10px;
     align-items: center;
     padding: 10px;
@@ -136,4 +134,14 @@
 .text-span{
     display: block;
     margin-bottom: 1rem;
+}
+
+.subtract-icon{
+    width: fit-content;
+    padding: 0.5rem 1rem;
+    background-color: red;
+    outline: none;
+    border: none;
+    font-weight: 1000;
+    border-radius: 50%;
 }

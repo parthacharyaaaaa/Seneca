@@ -22,7 +22,7 @@
 </div>
 {% else %}
 <section class="page-container">
-    <div class="product-container">
+    <div class="product-container" id="product-container">
     </div>
     <div class="bill">
         {% if(signedIn) %}
@@ -54,8 +54,10 @@
         <hr>
         <div class="paymentinfo">
             <h3>Payment Summary</h3>
-            <span id="total-items" class="text-span">Total Items: {{backup_quantity}}</span>
-            <span id="total-bill" class="text-span">Total Price: ${{backup_price}}</span>
+            <label for="total-items">Total-items: </label>
+            <span id="total-items" class="text-span">{{backup_quantity}}</span>
+            <label for="total-bill">Total: </label>
+            <span id="total-bill" class="text-span">${{backup_price}}</span>
             <input type="submit" value="Confirm purchase" id="confirm-purchase" class="hover-button" />
             <hr>
         </div>

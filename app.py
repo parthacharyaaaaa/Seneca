@@ -389,7 +389,6 @@ def cart():
     fallback = loadCart()
     backup_price = 0.0
     for items in fallback.values():
-        print(items)
         backup_price += items['price'] - items['discount']
     backup_quantity = len(fallback)
     if current_user.is_authenticated:
@@ -402,6 +401,26 @@ def cart():
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
         else:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, backup_price = backup_price, backup_quantity = backup_quantity)
+
+@app.route("/remove-from-cart", methods = ['POST'])
+def removeFromCart():
+    if request.method == 'POST':
+        productID = request.get_json().get('id')
+        print(productID)
+        # Logged in user
+        if current_user.is_authenticated:
+            print("Before removing: ",current_user.cart)
+            current_user.cart.remove(productID)
+
+            flag_modified(current_user, 'cart')
+            db.session.commit()
+
+        else:
+            print(session['cart'])
+            session['cart'].remove(productID)
+            session.modified = True
+        product = Product.query.filter_by(id = productID).first()
+        return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
 @app.route("/get-catalogue", methods = ["POST", "GET"])
 def getCatalogue():
@@ -646,6 +665,7 @@ def processOrder():
 @app.route("/checkout/download", methods = ['GET'])
 def download():
     return render_template('download.html', signedIn = current_user.is_authenticated)
+
 @app.route("/gift", methods = ['GET', 'POST'])
 def gift():
     data = request.get_json()
