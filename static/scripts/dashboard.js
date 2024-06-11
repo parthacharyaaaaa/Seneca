@@ -108,15 +108,17 @@ function renderOrders(orderInfo) {
             <span>Order ID: ${orderDetails.order_id}</span>
             <span>Time of Purchase: ${orderDetails.time_of_purchase}</span>
             <span>Total Items: ${orderDetails.total_items}</span>
-            <span>Total Amount: $${orderDetails.total_amount}</span>
+            <span>Total Amount: $${(orderDetails.total_amount).toFixed(2)}</span>
         </div>
         <div class="order-items">
             <div class = "item-container">
-                ${orderDetails.items.map(item => `
+            ${orderDetails.items.map(item => `
                     <div class='item'>
-                        <span>Title: ${item.product_title}</span><br>
                         <span>ID: ${item.product_id}</span>
-                        <span>Price: $${item.product_price}</span>
+                        <span>Title: ${item.title}</span><br>
+                        <span>Author: ${item.author}</span>
+                        <span>ISBN: ${item.isbn}</span><br>
+                        <span>Price: $${(item.price).toFixed(2)}</span>
                     </div>
                 `).join('')}
                 </div>
