@@ -91,6 +91,30 @@ function renderFavourites(favInfo) {
             </div>
         `;
                 favsContainer.appendChild(favItem);
+
+                var removeButton = favItem.querySelector('.fav-button');
+                removeButton.addEventListener('click', function(event){
+                    console.log("Removing faavourite: " + this.id);
+
+                    fetch("/remove-fav", {
+                        method : 'POST',
+                        headers : {
+                            "Content-Type" : "application/json"
+                        },
+                        body : JSON.stringify({id : this.id})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.valid === 0){
+                            alert(data.alert);
+                        }
+                        else{
+                            favItem.remove()
+                            alert("Removed item from favourites")
+                        }
+                    })
+                    .catch(error => console.log("Error: ", error))
+                })
             };
         }
     }

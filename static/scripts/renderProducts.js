@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log(data.books)
-            displayContent(data.books)
+            console.log(data)
+            displayContent(data.books, data.favourites)
         })
         .catch(error => console.log("Error: ", error))
 })
@@ -37,15 +37,15 @@ document.getElementById('filter-form').addEventListener('submit', function (even
 })
 
 //Function to display the books
-function displayContent(products) {
+function displayContent(products, favourites) {
+    var current_favourites = favourites
     const container = document.querySelector('.product-container');
-    container.innerHTML = ''; // Clear the container
-    console.log(typeof(products))
+    container.innerHTML = '';
+    console.log(typeof (products))
     products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         let rating = parseFloat(product.rating).toFixed(1)
-        // You can customize the HTML structure for your product card here
         productCard.innerHTML = `
             <div class="product-image">
                 <img src="${product.cover}" alt="${product.title}"/>
@@ -68,11 +68,49 @@ function displayContent(products) {
             </div>
         `;
         container.appendChild(productCard);
+
+        var favButton = productCard.querySelector('.fav-button')
+        if (favourites.includes(favButton.id)) {
+            favButton.style.color = 'red'
+        }
+        favButton.addEventListener('click', function (event) {
+            const productID = event.target.id
+            console.log(productID)
+            if (current_favourites.includes(favButton.id)) {
+                var endpoint = '/remove-favourite'
+            }
+            else {
+                var endpoint = '/add-favourite'
+            }
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: productID })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.alert) {
+                        alert(data.alert)
+                    }
+                    if ((data.updated_favourites).length > current_favourites.length) {
+                        favButton.style.color = 'red'
+                    }
+                    else {
+                        favButton.style.color = 'white'
+                    }
+
+                    current_favourites = data.updated_favourites
+                })
+                .catch(error => alert(error))
+        })
+
     });
     const event = new Event('contentLoaded');
     document.dispatchEvent(event)
 }
-function addToCart(id){
+function addToCart(id) {
     var formData = new FormData()
     formData.append('id', id);
 
@@ -80,11 +118,11 @@ function addToCart(id){
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if(data.message){
-            alert(data.message)
-        }
-    })
-    .catch(error => alert("Error: ", error))
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message)
+            }
+        })
+        .catch(error => alert("Error: ", error))
 }
