@@ -115,3 +115,8 @@
     background-color: white;
     color: var(--BGCOLOR-ICONS-1)
 }
+
+.item{
+    /* border: 1px dotted gray; */
+    width: 80%;
+}

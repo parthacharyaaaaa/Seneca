@@ -713,13 +713,18 @@ def getUserInfo():
         orderHistory = Order_History.query.filter_by(user = target.id).all()
         for orders in orderHistory:
             orderHistoryItems = Order_Item.query.filter_by(order_id = orders.id).all()
+            orderItemHolder = [item.to_dict() for item in orderHistoryItems]
+            print(orderItemHolder)
+            for item in orderItemHolder:
+                x = Product.query.filter_by(id = item['product_id']).first()
+                item.update({"title" : x.title,"author": x.author, "isbn" : x.isbn})
 
             orderHolder[orders.id] = {
                 'order_id': orders.id,
                 'time_of_purchase': orders.order_time,
                 'total_items': orders.order_quantity,
                 'total_amount': orders.total_price,
-                'items': [item.to_dict() for item in orderHistoryItems]
+                'items': orderItemHolder
             }
         # print(orderHolder)
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
