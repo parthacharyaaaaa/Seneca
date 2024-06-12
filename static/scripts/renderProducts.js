@@ -54,9 +54,8 @@ function displayContent(products, favourites) {
                 <div class = "book-credentials">
                     <section class='product-title'>${product.title}</section>
                     <section class='product-author'>${product.author}</section>
-                <hr style='margin: 0.3rem;'>
-                </div>
-
+                    </div>
+                    
                 <div class="product-genre-rating">
                     <div class = 'product-genre-container'>
                         ${product.genre.map(genre => `<section class='product-genre ${genre}'>${genre}</section>`).join('')}
@@ -67,7 +66,6 @@ function displayContent(products, favourites) {
                     <section class='product-file'>${product.file_format}</section>
                     <section class='product-price'>$${product.price}</section>
                 </div>
-                </div>
                 <div class='card-buttons'>
                 <div>
                         <button class='view-button card-button' type='button' onclick='location.href = "/products/view/id=${product.id}"'>View</button>
@@ -76,6 +74,7 @@ function displayContent(products, favourites) {
                     <div>
                         <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
                     </div>
+                </div>
                 </div>
         `;
         container.appendChild(productCard);

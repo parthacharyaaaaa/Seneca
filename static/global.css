@@ -252,10 +252,11 @@ footer a:is(:hover, :focus){
     margin: 1rem 0;
     background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 2.5%;
-
-    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     padding-bottom: 0;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .product-card:is(:hover, :focus) {
@@ -265,39 +266,48 @@ footer a:is(:hover, :focus){
 
 /* Product Card: Image */
 .product-card .product-image {
+    flex: 0 0 60%; 
     display: flex;
     align-items: center;
+    justify-content: center;
     border-bottom: 1px solid white;
 }
 
 .product-card .product-image img {
     width: 75%;
-    margin: 0 auto;
-    height: 23rem;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Other details */
-.product-details{
-    padding: 0.2rem 1rem;
+.product-details {
+    flex: 0 0 40%; 
+    padding: 0 1rem;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
 }
 
 /* Author and Title */
-.book-credentials{
-    height: 18%
+.book-credentials {
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    /* border-bottom: 1px solid var(--TEXT-COLOR-LIGHT); */
+    line-height: 1.3rem;
+    
 }
 
-.product-card :is(.product-title, .product-author){
+.product-card :is(.product-title, .product-author) {
     text-align: center;
 }
-    
-.product-card .product-title{
+
+.product-card .product-title {
     font-size: var(--FSIZE-L);
-    margin: 0;
+    margin-top: 0.5rem;
 }
 
-.product-card .product-author{
+.product-card .product-author {
     margin: 0;
     font-size: var(--FSIZE-SLIGHTLY-SMALLER);
     margin-bottom: 0.5rem;
@@ -308,17 +318,17 @@ footer a:is(:hover, :focus){
     display: flex;
     justify-content: space-between;
     width: 100%;
-    height: 20%;
-    margin: 0.4rem;
+    /* border: 1px red solid; */
+    height: 28%;
 }
 
-.product-card .product-genre-container{
+.product-card .product-genre-container {
     display: flex;
     flex-flow: row wrap;
     width: 70%;
 }
 
-.product-card .product-genre{
+.product-card .product-genre {
     display: inline-flex;
     background-color: rgb(222, 222, 222);
     border-radius: 12px;
@@ -333,28 +343,38 @@ footer a:is(:hover, :focus){
     font-size: var(--FSIZE-SLIGHTLY-SMALLER);
 }
 
-.product-card .product-rating{
+.product-card .product-rating {
     display: inline-flex;
-    text-align: right justify;
+    text-align: right;
     font-size: var(--FSIZE-SLIGHTLY-LARGER);
     margin-right: 0.5rem;
 }
 
 /* Download Details */
-.download-details{margin-left: 0.5rem;}
-.product-file{font-size: var(--FSIZE-SLIGHTLY-LARGER);}
-/* Buttons */
-.card-buttons{
-    position: absolute;
-    bottom: 0;
-    padding: 1rem;
-    width: 100%;
-
+.download-details {
+    /* margin-left: 0.6rem; */
     display: flex;
     justify-content: space-between;
+    /* border: 1px red solid; */
+
+}
+
+.product-file {
+    font-size: var(--FSIZE-SLIGHTLY-LARGER);
+}
+
+/* Buttons */
+.card-buttons {
+    padding: 1rem 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start; /* Pushes the buttons to the bottom */
 }
 
 
+.fav-button{
+    margin-left: 5.5rem;
+}
 /* Button Styles */
 .hover-button {
     appearance: none;
