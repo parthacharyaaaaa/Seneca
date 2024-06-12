@@ -33,7 +33,9 @@ html body::-webkit-scrollbar {
     /* Font sizes */
     --FSIZE-SMALLEST: 0.5rem;
     --FSIZE-S: 0.7rem;
+    --FSIZE-SLIGHTLY-SMALLER: 0.8rem;
     --FSIZE: 1rem;
+    --FSIZE-SLIGHTLY-LARGER: 1.15rem;
     --FSIZE-L: 1.3rem;
     --FSIZE-XL: 2rem;
     --FSIZE-XXL: 4rem;
@@ -246,12 +248,14 @@ footer a:is(:hover, :focus){
 /* Product Cards */
 .product-card {
     width: 28%;
-    height: fit-content;
+    height: 42rem;
     margin: 1rem 0;
     background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 2.5%;
 
-    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
+    font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    padding-bottom: 0;
+    position: relative;
 }
 
 .product-card:is(:hover, :focus) {
@@ -259,19 +263,31 @@ footer a:is(:hover, :focus){
     transform: translateY(-2px);
 }
 
+/* Product Card: Image */
 .product-card .product-image {
     display: flex;
     align-items: center;
+    border-bottom: 1px solid white;
 }
 
 .product-card .product-image img {
     width: 75%;
     margin: 0 auto;
+    height: 23rem;
 }
 
+/* Other details */
 .product-details{
-    padding:1rem;
+    padding: 0.2rem 1rem;
+    display: flex;
+    flex-direction: column;
 }
+
+/* Author and Title */
+.book-credentials{
+    height: 18%
+}
+
 .product-card :is(.product-title, .product-author){
     text-align: center;
 }
@@ -283,53 +299,61 @@ footer a:is(:hover, :focus){
 
 .product-card .product-author{
     margin: 0;
-    font-size: var(--FSIZE-S);
+    font-size: var(--FSIZE-SLIGHTLY-SMALLER);
+    margin-bottom: 0.5rem;
 }
 
+/* Genres and Rating */
 .product-card .product-genre-rating {
     display: flex;
     justify-content: space-between;
     width: 100%;
+    height: 20%;
+    margin: 0.4rem;
+}
+
+.product-card .product-genre-container{
+    display: flex;
+    flex-flow: row wrap;
+    width: 70%;
 }
 
 .product-card .product-genre{
     display: inline-flex;
     background-color: rgb(222, 222, 222);
     border-radius: 12px;
-    padding: 2px;
-}
-.horror{
-    color: maroon;
-}
-.fiction{
-    color: green;
-}
-.romance{
-    color: rebeccapurple;
-}
-.non-fiction{
-    color: black;
-}
-.fantasy{
-    color: blue;
+    padding: 5px;
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+    color: var(--BGCOLOR-ICONS-1);
+    width: fit-content;
+    height: fit-content;
+    text-align: center;
+    font-weight: bold;
+    font-size: var(--FSIZE-SLIGHTLY-SMALLER);
 }
 
 .product-card .product-rating{
     display: inline-flex;
     text-align: right justify;
+    font-size: var(--FSIZE-SLIGHTLY-LARGER);
+    margin-right: 0.5rem;
 }
 
-.filter hr{
-    margin: 0;
-}
+/* Download Details */
+.download-details{margin-left: 0.5rem;}
+.product-file{font-size: var(--FSIZE-SLIGHTLY-LARGER);}
+/* Buttons */
+.card-buttons{
+    position: absolute;
+    bottom: 0;
+    padding: 1rem;
+    width: 100%;
 
-.product-card .fav-button{
-    margin-left: 5rem;
-}
-.product-card-buttons{
     display: flex;
-    flex-flow: row nowrap;
+    justify-content: space-between;
 }
+
 
 /* Button Styles */
 .hover-button {

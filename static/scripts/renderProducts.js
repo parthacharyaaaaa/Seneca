@@ -51,24 +51,39 @@ function displayContent(products, favourites) {
                 <img src="${product.cover}" alt="${product.title}"/>
             </div>
             <div class="product-details">
-                <section class='product-title'>${product.title}</section>
-                <section class='product-author'>${product.author}</section>
+                <div class = "book-credentials">
+                    <section class='product-title'>${product.title}</section>
+                    <section class='product-author'>${product.author}</section>
+                <hr style='margin: 0.3rem;'>
+                </div>
+
                 <div class="product-genre-rating">
-                    <section class='product-genre ${product.genre['category']}'>${product.genre['category']}</section>
-                    <section class='product-rating '>${rating}</section>
+                    <div class = 'product-genre-container'>
+                        ${product.genre.map(genre => `<section class='product-genre ${genre}'>${genre}</section>`).join('')}
+                    </div>
+                    <section class='product-rating '>★ ${rating}</section>
                 </div>
-                <section class='product-file'>${product.file_format}</section>
-                <section class='product-price'>$${product.price}</section>
-                <hr>
-                <div class='product-card-buttons'>
-                <button class='view-button card-button' type='button' onclick='location.href = "/products/view/id=${product.id}"'>View</button>
-                <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
-                <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
+                <div class = "download-details">
+                    <section class='product-file'>${product.file_format}</section>
+                    <section class='product-price'>$${product.price}</section>
                 </div>
-            </div>
+                </div>
+                <div class='card-buttons'>
+                <div>
+                        <button class='view-button card-button' type='button' onclick='location.href = "/products/view/id=${product.id}"'>View</button>
+                        <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
+                    </div
+                    <div>
+                        <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
+                    </div>
+                </div>
         `;
         container.appendChild(productCard);
-
+        const imageContainer = productCard.querySelector('.product-image')
+        imageContainer.style.backgroundImage = `url(${product.image})`
+        imageContainer.style.backgroundSize = 'cover';
+        // imageContainer.style.filter = 'blur(5px)'
+        // imageContainer.style.backgroundColor = 'red';
         var favButton = productCard.querySelector('.fav-button')
         if (favourites.includes(favButton.id)) {
             favButton.style.color = 'red'

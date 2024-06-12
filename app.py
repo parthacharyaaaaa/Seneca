@@ -10,6 +10,7 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from datetime import timedelta, datetime
 import re as regex
+import os
 
 from mail_sender import sendReceipt, sendSalutation
     
@@ -116,6 +117,7 @@ class Product(db.Model):
         return f"Product: {self.title}"
     
     def to_dict(self):
+        print(os.environ.get('library'))
         return {
             'id': self.id,
             'title': self.title,
@@ -126,7 +128,7 @@ class Product(db.Model):
             'price' : self.price,
             'file_format' : self.file_format,
             'rating': self.rating,
-            'cover': url_for('static', filename=self.cover),
+            'cover': url_for('static', filename=f"{os.environ.get('library')}{self.cover}"),
             'genre' : self.genre,
             'discount' : self.discount,
             'reviews' : self.total_reviews,
