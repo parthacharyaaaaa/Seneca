@@ -255,15 +255,16 @@ def loadUser(user_id):
     return User.query.get(int(user_id))
 
 #Endpoints
+@app.route("/templatetest")
+def template():
+    return render_template('baseTemplate.html', signedIn = current_user.is_authenticated)
+
 @app.route("/")
 def home():
     print(current_user)
     return render_template('home.html', signedIn = current_user.is_authenticated)
 
-@app.route("/templatetest")
-def template():
-    return render_template('baseTemplate.html', signedIn = current_user.is_authenticated)
-
+#---------------------------------------------------------------User Management
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -372,6 +373,61 @@ def login():
         print("Rendering Login")
         return render_template('login.html')
 
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template('dashboard.html', signedIn = current_user.is_authenticated)
+
+@app.route("/get-user-info", methods = ["GET"])
+@login_required
+def getUserInfo():
+    if request.method == "GET":
+        print("Loading dashboard")
+
+        target = User.query.filter_by(id = current_user.id).first()
+        userInfo = target.to_dict()
+        favourites = target.favourites
+        favourites = {}
+        for item in target.favourites:
+            product = Product.query.filter_by(id = int(item)).first()
+            favourites.update({int(item):product.to_dict()})
+        # print(favourites)
+
+        orderHolder = {}
+        orderHistory = Order_History.query.filter_by(user = target.id).all()
+        for orders in orderHistory:
+            orderHistoryItems = Order_Item.query.filter_by(order_id = orders.id).all()
+            orderItemHolder = [item.to_dict() for item in orderHistoryItems]
+            print(orderItemHolder)
+            for item in orderItemHolder:
+                x = Product.query.filter_by(id = item['product_id']).first()
+                item.update({"title" : x.title,"author": x.author, "isbn" : x.isbn})
+
+            orderHolder[orders.id] = {
+                'order_id': orders.id,
+                'time_of_purchase': orders.order_time,
+                'total_items': orders.order_quantity,
+                'total_amount': orders.total_price,
+                'items': orderItemHolder
+            }
+        # print(orderHolder)
+        return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
+
+@app.route("/logout", methods = ['POST'])
+def logout():
+    if request.method == 'POST':
+        print("Logging Out user")
+        if not current_user.is_authenticated:
+            return jsonify({"alert" : "Error: User not logged in"})
+        else:
+            setLastSeen(request.get_json().get('formattedDateTime'))
+            logout_user()
+            session.clear()
+            
+            print(session)
+            return jsonify({"redirect_url" : url_for('home')})
+
+#------------------------------------------------------------------Cart Management
 @app.route("/products/view/id=<product_id>", methods=['POST', 'GET'])
 def product(product_id):
     #Rendering the page
@@ -425,74 +481,6 @@ def removeFromCart():
         product = Product.query.filter_by(id = productID).first()
         return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
-@app.route("/get-catalogue", methods = ["POST", "GET"])
-def getCatalogue():
-    books = Product.query.all()
-    if request.method == "GET":
-        print("Normal catalogue, page just loaded")
-        # print(books)
-        # books = [item.to_dict() for item in books]
-        # print(books)
-
-    elif request.method == "POST":
-        print(request.form)
-
-        price_range_lower = request.form.get('price-range-lower')
-        price_range_upper = request.form.get('price-range-upper')
-        page_range_lower = request.form.get('page-range-lower')
-        page_range_upper = request.form.get('page-range-upper')
-        author = request.form.get('authors')
-        sort_option = request.form.get('sort-option')
-        print(sort_option, author)
-
-        #Managing filtering
-        #Price filters
-        if price_range_lower:
-            books = [item for item in books if int(price_range_lower) <= item.price]
-        if price_range_upper:
-            books = [item for item in books if int(price_range_upper) >= item.price]
-        #Page filters
-        if page_range_lower:
-            books = [item for item in books if int(price_range_lower) <= item.pages]
-        if page_range_upper:
-            books = [item for item in books if int(price_range_upper) >= item.pages]
-        #Author filter
-        if author:
-            books = [item for item in books if author == item.author]
-        
-        print("Post filter: ", books)
-        
-        if sort_option == '1':
-            books.sort(key=lambda x: x.title.lower())
-        elif sort_option == '2':
-            books.sort(key=lambda x: x.title.lower(), reverse=True)
-        elif sort_option == '3':
-            books.sort(key= lambda x: x.price)
-        elif sort_option == '4':
-            books.sort(key=lambda x:x.price, reverse=True)
-        elif sort_option == '5':
-            books.sort(key= lambda x: x.publication_date, reverse=True)
-        elif sort_option == '6':
-            books.sort(key=lambda x:x.publication_date)
-        elif sort_option == '7':
-            books.sort(key= lambda x: x.author)
-        elif sort_option == '8':
-            books.sort(key=lambda x:x.author, reverse=True)
-        elif sort_option == '9':
-            books.sort(key= lambda x: x.pages, reverse=True)
-        elif sort_option == '10':
-            books.sort(key=lambda x:x.pages, reverse=False)
-        else:
-            pass
-        
-        print("Sorted List: ", books)
-
-    books = [item.to_dict() for item in books]
-    if current_user.is_authenticated:
-        return jsonify({"books": books, "favourites" : current_user.favourites})
-    else:
-        return jsonify({"books" : books})
-
 @app.route('/addToCart', methods=['POST', 'GET'])
 def addToCart():
     if request.method == 'POST':
@@ -540,6 +528,130 @@ def addToCart():
 
         return jsonify({'message' : 'Product added to cart'})
 
+@app.route("/get-cart", methods = ['POST', 'GET'])
+def getCart():
+    billItems = loadCart()
+    print("Final bill: ", billItems)
+    return jsonify(billItems)
+
+#-------------------------------------------------------------------Favourites Management
+@app.route("/add-favourite", methods=["POST"])
+def addFav():
+    if request.method == "POST":
+        print("Adding favourite")
+        if not current_user.is_authenticated:
+            return jsonify({"alert" : "You must have an account to add items to favourites"})
+        productID = str(request.get_json().get('id'))
+        # if productID in current_user.favourites:
+        #     return jsonify({"alert" : "Item already in favourites"})
+        print(current_user.favourites)
+        try:
+            product = Product.query.filter_by(id=int(productID)).first()
+        except:
+            print("Item not found in db, terminating")
+            return jsonify({"alert" : "error in adding item to favourites"})
+        current_user.favourites.append(productID)
+        
+        flag_modified(current_user, 'favourites')
+        db.session.commit()
+        return jsonify({"alert" : "Item added", "updated_favourites" : current_user.favourites})
+
+@app.route("/remove-favourite", methods = ['POST'])
+def removeFav():
+    if request.method == "POST":
+        if not current_user.is_authenticated:
+            return jsonify({"valid" : 0, "error" : "User not recognised"})
+        
+        productID = str(request.get_json().get('id'))
+        if productID in current_user.favourites:
+            current_user.favourites.remove(productID)
+            print(current_user.favourites)
+            flag_modified(current_user, 'favourites')
+            db.session.commit()
+            return jsonify({"valid" : 1, "updated_favourites" : current_user.favourites})
+        else:
+            return jsonify({"valid" : 0, "alert" : "Not found"})
+
+#--------------------------------------------------------------------Product Management
+@app.route("/catalogue")
+def catalogue():
+    return render_template("catalogue.html", signedIn = current_user.is_authenticated)
+
+@app.route("/render-products", methods=['POST', 'GET'])
+def render():
+    products = Product.query.all()
+    products_list = [item.to_dict() for item in products]
+    return jsonify(products_list)
+ 
+@app.route("/get-catalogue", methods = ["POST", "GET"])
+def getCatalogue():
+    books = Product.query.all()
+    if request.method == "GET":
+        print("Normal catalogue, page just loaded")
+
+    elif request.method == "POST":
+        print(request.form)
+
+        price_range_lower = request.form.get('price-range-lower')
+        price_range_upper = request.form.get('price-range-upper')
+        page_range_lower = request.form.get('page-range-lower')
+        page_range_upper = request.form.get('page-range-upper')
+        author = request.form.get('authors')
+        sort_option = request.form.get('sort-option')
+        print(sort_option, author)
+
+        #Managing filtering
+        #Price filters
+        if price_range_lower:
+            books = [item for item in books if int(price_range_lower) <= item.price]
+        if price_range_upper:
+            books = [item for item in books if int(price_range_upper) >= item.price]
+
+        #Page filters
+        if page_range_lower:
+            books = [item for item in books if int(price_range_lower) <= item.pages]
+        if page_range_upper:
+            books = [item for item in books if int(price_range_upper) >= item.pages]
+
+        #Author filter
+        if author:
+            books = [item for item in books if author == item.author]
+        
+        print("Post filter: ", books)
+        
+        if sort_option == '1':
+            books.sort(key=lambda x: x.title.lower())
+        elif sort_option == '2':
+            books.sort(key=lambda x: x.title.lower(), reverse=True)
+        elif sort_option == '3':
+            books.sort(key= lambda x: x.price)
+        elif sort_option == '4':
+            books.sort(key=lambda x:x.price, reverse=True)
+        elif sort_option == '5':
+            books.sort(key= lambda x: x.publication_date, reverse=True)
+        elif sort_option == '6':
+            books.sort(key=lambda x:x.publication_date)
+        elif sort_option == '7':
+            books.sort(key= lambda x: x.author)
+        elif sort_option == '8':
+            books.sort(key=lambda x:x.author, reverse=True)
+        elif sort_option == '9':
+            books.sort(key= lambda x: x.pages, reverse=True)
+        elif sort_option == '10':
+            books.sort(key=lambda x:x.pages, reverse=False)
+        else:
+            pass
+        
+        print("Sorted List: ", books)
+
+
+    books = [item.to_dict() for item in books]
+    if current_user.is_authenticated:
+        return jsonify({"books": books, "favourites" : current_user.favourites})
+    else:
+        return jsonify({"books" : books})
+
+#Order Management
 @app.route('/purchaseThenCheckout', methods=['POST', 'GET'])
 def purchaseThenCheckout():
     if request.method == 'POST':
@@ -583,22 +695,6 @@ def purchaseThenCheckout():
 
         return redirect(url_for('checkout'))
 
-@app.route("/catalogue")
-def catalogue():
-    return render_template("catalogue.html", signedIn = current_user.is_authenticated)
-
-@app.route("/render-products", methods=['POST', 'GET'])
-def render():
-    products = Product.query.all()
-    products_list = [item.to_dict() for item in products]
-    return jsonify(products_list)
-
-@app.route("/get-cart", methods = ['POST', 'GET'])
-def getCart():
-    billItems = loadCart()
-    print("Final bill: ", billItems)
-    return jsonify(billItems)
-        
 @app.route("/process-order", methods = ['POST', 'GET'])
 def processOrder():
     data = request.get_json()
@@ -658,6 +754,7 @@ def processOrder():
                 print("Order committed")
                 session['cart'] = []
 
+
                 #Sending receipt
                 sendReceipt(str(billingEmail), temp_storage, order)
 
@@ -672,97 +769,6 @@ def gift():
     receiver_email = data.get('giftEmail')
     print(receiver_email)
     return jsonify({'message' : 'called'})
-
-@app.route("/logout", methods = ['POST'])
-def logout():
-    if request.method == 'POST':
-        print("Logging Out user")
-        if not current_user.is_authenticated:
-            return jsonify({"alert" : "Error: User not logged in"})
-        else:
-            setLastSeen(request.get_json().get('formattedDateTime'))
-            logout_user()
-            session.clear()
-            
-            print(session)
-            return jsonify({"redirect_url" : url_for('home')})
-
-@app.route("/add-favourite", methods=["POST"])
-def addFav():
-    if request.method == "POST":
-        print("Adding favourite")
-        if not current_user.is_authenticated:
-            return jsonify({"alert" : "You must have an account to add items to favourites"})
-        productID = str(request.get_json().get('id'))
-        # if productID in current_user.favourites:
-        #     return jsonify({"alert" : "Item already in favourites"})
-        print(current_user.favourites)
-        try:
-            product = Product.query.filter_by(id=int(productID)).first()
-        except:
-            print("Item not found in db, terminating")
-            return jsonify({"alert" : "error in adding item to favourites"})
-        current_user.favourites.append(productID)
-        
-        flag_modified(current_user, 'favourites')
-        db.session.commit()
-        return jsonify({"alert" : "Item added", "updated_favourites" : current_user.favourites})
-
-@app.route("/remove-favourite", methods = ['POST'])
-def removeFav():
-    if request.method == "POST":
-        if not current_user.is_authenticated:
-            return jsonify({"valid" : 0, "error" : "User not recognised"})
-        
-        productID = str(request.get_json().get('id'))
-        if productID in current_user.favourites:
-            current_user.favourites.remove(productID)
-            print(current_user.favourites)
-            flag_modified(current_user, 'favourites')
-            db.session.commit()
-            return jsonify({"valid" : 1, "updated_favourites" : current_user.favourites})
-        else:
-            return jsonify({"valid" : 0, "alert" : "Not found"})
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    return render_template('dashboard.html', signedIn = current_user.is_authenticated)
-
-@app.route("/get-user-info", methods = ["GET"])
-@login_required
-def getUserInfo():
-    if request.method == "GET":
-        print("Loading dashboard")
-
-        target = User.query.filter_by(id = current_user.id).first()
-        userInfo = target.to_dict()
-        favourites = target.favourites
-        favourites = {}
-        for item in target.favourites:
-            product = Product.query.filter_by(id = int(item)).first()
-            favourites.update({int(item):product.to_dict()})
-        # print(favourites)
-
-        orderHolder = {}
-        orderHistory = Order_History.query.filter_by(user = target.id).all()
-        for orders in orderHistory:
-            orderHistoryItems = Order_Item.query.filter_by(order_id = orders.id).all()
-            orderItemHolder = [item.to_dict() for item in orderHistoryItems]
-            print(orderItemHolder)
-            for item in orderItemHolder:
-                x = Product.query.filter_by(id = item['product_id']).first()
-                item.update({"title" : x.title,"author": x.author, "isbn" : x.isbn})
-
-            orderHolder[orders.id] = {
-                'order_id': orders.id,
-                'time_of_purchase': orders.order_time,
-                'total_items': orders.order_quantity,
-                'total_amount': orders.total_price,
-                'items': orderItemHolder
-            }
-        # print(orderHolder)
-        return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
 
 @app.route("/checkout/download", methods = ['GET'])
 def download():
