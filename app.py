@@ -118,7 +118,6 @@ class Product(db.Model):
         return f"Product: {self.title}"
     
     def to_dict(self):
-        print(os.environ.get('library'))
         return {
             'id': self.id,
             'title': self.title,
@@ -536,43 +535,70 @@ def getCart():
     return jsonify(billItems)
 
 #-------------------------------------------------------------------Favourites Management
-@app.route("/add-favourite", methods=["POST"])
-def addFav():
-    if request.method == "POST":
-        print("Adding favourite")
-        if not current_user.is_authenticated:
-            return jsonify({"alert" : "You must have an account to add items to favourites"})
-        productID = str(request.get_json().get('id'))
-        # if productID in current_user.favourites:
-        #     return jsonify({"alert" : "Item already in favourites"})
-        print(current_user.favourites)
-        try:
-            product = Product.query.filter_by(id=int(productID)).first()
-        except:
-            print("Item not found in db, terminating")
-            return jsonify({"alert" : "error in adding item to favourites"})
-        current_user.favourites.append(productID)
+# @app.route("/add-favourite", methods=["POST"])
+# def addFav():
+#     if request.method == "POST":
+#         print("Adding favourite")
+#         if not current_user.is_authenticated:
+#             return jsonify({"alert" : "You must have an account to add items to favourites"})
+#         productID = str(request.get_json().get('id'))
+#         # if productID in current_user.favourites:
+#         #     return jsonify({"alert" : "Item already in favourites"})
+#         print(current_user.favourites)
+#         try:
+#             product = Product.query.filter_by(id=int(productID)).first()
+#         except:
+#             print("Item not found in db, terminating")
+#             return jsonify({"alert" : "error in adding item to favourites"})
+#         current_user.favourites.append(productID)
         
+#         flag_modified(current_user, 'favourites')
+#         db.session.commit()
+#         return jsonify({"alert" : "Item added", "updated_favourites" : current_user.favourites})
+
+# @app.route("/remove-favourite", methods = ['POST'])
+# def removeFav():
+#     if request.method == "POST":
+#         if not current_user.is_authenticated:
+#             return jsonify({"valid" : 0, "error" : "User not recognised"})
+        
+#         productID = str(request.get_json().get('id'))
+#         if productID in current_user.favourites:
+#             current_user.favourites.remove(productID)
+#             print(current_user.favourites)
+#             flag_modified(current_user, 'favourites')
+#             db.session.commit()
+#             return jsonify({"valid" : 1, "updated_favourites" : current_user.favourites})
+#         else:
+#             return jsonify({"valid" : 0, "alert" : "Not found"})
+
+@app.route("/toggle-favourites", methods = ['POST'])
+def toggleFav():
+    if not current_user.is_authenticated:
+        return jsonify({'alert' : 'You must have an account to keep favourites'})
+    
+    item = request.get_json().get('id')
+    print(item, current_user.favourites)
+    if item in current_user.favourites:
+        (current_user.favourites).remove(item)
+        print(current_user.favourites)
         flag_modified(current_user, 'favourites')
         db.session.commit()
-        return jsonify({"alert" : "Item added", "updated_favourites" : current_user.favourites})
+        return jsonify({'alert' : 'Item removed from favourites', 'action' : 'remove'})
+    
+    else:
+        (current_user.favourites).append(item)
+        flag_modified(current_user, 'favourites')
+        db.session.commit()
+        return jsonify({'alert' : 'Item added to favourites', 'action' : 'add'})
 
-@app.route("/remove-favourite", methods = ['POST'])
-def removeFav():
-    if request.method == "POST":
-        if not current_user.is_authenticated:
-            return jsonify({"valid" : 0, "error" : "User not recognised"})
-        
-        productID = str(request.get_json().get('id'))
-        if productID in current_user.favourites:
-            current_user.favourites.remove(productID)
-            print(current_user.favourites)
-            flag_modified(current_user, 'favourites')
-            db.session.commit()
-            return jsonify({"valid" : 1, "updated_favourites" : current_user.favourites})
-        else:
-            return jsonify({"valid" : 0, "alert" : "Not found"})
-
+@app.route("/get-favourites", methods = ['GET'])
+def getFavs():
+    if not current_user.is_authenticated:
+        print("Guest User, No favourites")
+        return jsonify({"isGuest" : 1})
+    else:
+        return jsonify({'favs' : current_user.favourites})
 #--------------------------------------------------------------------Product Management
 @app.route("/catalogue")
 def catalogue():
