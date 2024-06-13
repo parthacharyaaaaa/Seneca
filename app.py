@@ -12,12 +12,12 @@ from datetime import timedelta, datetime
 import re as regex
 import os
 
-from mail_sender import sendReceipt, sendSalutation
-from utils import createZip
+from mail_sender import sendReceipt, sendSalutation, sendOrder
+from utils import createZip, generateToken, validateToken
     
 #App configuration
 app = Flask(__name__)
-app.secret_key = 'ABCD'
+app.secret_key = os.environ.get('Seneca_Key')
 app.permanent_session_lifetime = timedelta(hours=6)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///test1.db"
@@ -142,7 +142,6 @@ class Order_History(db.Model):
     order_time = db.Column(db.DateTime, nullable = False)
     status = db.Column(db.String(32), nullable = False, default = 'Not Processed')
     total_price = db.Column(db.Float, nullable = False)
-    receipt_email = db.Column(db.String(256), nullable = True)
     billing_address = db.Column(db.String(256), nullable = False)
     order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
     order_quantity = db.Column(db.Integer, nullable = False)
@@ -450,6 +449,7 @@ def cart():
     for items in fallback.values():
         backup_price += items['price'] - items['discount']
     backup_quantity = len(fallback)
+    print(session)
     if current_user.is_authenticated:
         if current_user.cart == []:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
@@ -699,12 +699,8 @@ def purchaseThenCheckout():
 def processOrder():
     data = request.get_json()
     print(data)
-    receiptEmail = data.get('receipt_email')
-    print(receiptEmail)
-
     email_regex = r"[^@]+@[^@]+\.[^@]+"
-    if receiptEmail != "" and not regex.match(email_regex, receiptEmail):
-        return jsonify({"alert" : "Invalid receipt email provided"})
+
     if data.get('validation') != "True":
         print("API call dirty >:(")
         return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
@@ -718,7 +714,7 @@ def processOrder():
 
         if current_user.is_authenticated:
             print("Processing order: user")
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, receiptEmail, current_user.email_id, "Personal", len(temp_storage))
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Personal", len(temp_storage))
             db.session.add(order)
             db.session.commit()
             print(temp_storage)
@@ -735,15 +731,13 @@ def processOrder():
             return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
         #Guest Transaction
         else:
-            if receiptEmail != "" and not regex.match(email_regex, receiptEmail):
-                return jsonify({"alert" : "Invalid receipt email provided"})
             billingEmail = data.get('billing_email')
-            if receiptEmail != "" and not regex.match(email_regex, receiptEmail):
+            if billingEmail != "" and not regex.match(email_regex, billingEmail):
                 return jsonify({"alert" : "Invalid billing email provided"})
             if validateCart():
                 print("Processing order: guest")
 
-                order = Order_History(None, datetime.now(), "Processed", price, receiptEmail, billingEmail, "(Guest) Personal", len(temp_storage))
+                order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Personal", len(temp_storage))
                 db.session.add(order)
                 db.session.commit()
 
@@ -773,11 +767,6 @@ def gift():
 @app.route("/checkout/download", methods = ['GET'])
 def download():
     return render_template('download.html', signedIn = current_user.is_authenticated)
-
-@app.route('/serve-order')
-def serveOrder():
-    order = createZip()
-
 
 if __name__ == "__main__":
     with app.app_context():

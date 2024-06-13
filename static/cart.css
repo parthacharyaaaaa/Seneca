@@ -92,15 +92,6 @@
     width: fit-content;
 }
 
-.input-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-    padding: 20px;
-}
-
 .bg-field {
     width: 60%;
     padding: 10px 15px;
