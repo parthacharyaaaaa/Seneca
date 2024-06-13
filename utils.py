@@ -10,7 +10,10 @@ def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
         receipt_lines.append(f'Publisher: {book_info["publisher"]}')
         receipt_lines.append(f'Publication Date: {book_info["publication_date"]}')
         receipt_lines.append(f'File Format: {book_info["file_format"]}')
-        receipt_lines.append(f'Genre: {book_info["genre"]["category"]}')
+        receipt_lines.append('Genre: ')
+        for items in book_info["genre"]:
+            receipt_lines.append(f'{items}')
+        receipt_lines.append('--------------------------------')
         receipt_lines.append(f'Price: ${book_info["price"]:.2f}')
         receipt_lines.append(f'Discount: ${book_info["discount"]:.2f}')
         receipt_lines.append('-' * 40)  # Add a separator for each book

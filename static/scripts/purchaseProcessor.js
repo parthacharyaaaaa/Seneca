@@ -4,14 +4,14 @@ document.getElementById('confirm-purchase').addEventListener('click', function(e
     try {
         billing_email = document.getElementById('billing-email').value
     } catch (error) {
-        billing_email = null
+        billing_email = document.getElementById('billing-email').innerHTML
     }
     fetch('/process-order', {
         headers: {
             "Content-type" : 'application/json'
         },
         method : "POST",
-        body : JSON.stringify({validation : "True", receipt_email : document.getElementById('receipt-email').value, billing_email : billing_email})
+        body : JSON.stringify({validation : "True", billing_email : billing_email})
     })
     .then(response => response.json())
     .then(data => {

@@ -30,7 +30,7 @@
         <hr>
         <div class="contact-details">
             <h3>Contact Details:</h3>
-            <h5 style="margin-bottom: 0; padding-bottom: 0;">Billing email: {{receiptEmail}}</h5>
+            <h5 style="margin-bottom: 0; padding-bottom: 0; ">Billing email: <span id="billing-email">{{billingEmail}}</span></h5>
         </div>
         {% else %}
         <h2>Guest Checkout</h2>
@@ -53,6 +53,7 @@
             <span id="total-items" class="text-span">{{backup_quantity}}</span>
             <label for="total-bill">Total: </label>
             <span id="total-bill" class="text-span">${{backup_price}}</span>
+            <input type="submit" value="Buy" id="confirm-purchase" class="hover-button" />
             <hr>
         </div>
         <div class="mail">

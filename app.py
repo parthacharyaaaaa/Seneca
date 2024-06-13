@@ -145,12 +145,11 @@ class Order_History(db.Model):
     order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
     order_quantity = db.Column(db.Integer, nullable = False)
 
-    def __init__(self, user, date, status, price, receipt, bill, method, quantity):
+    def __init__(self, user, date, status, price, bill, method, quantity):
         self.user = user
         self.order_time = date
         self.status = status
         self.total_price = price
-        self.receipt_email = receipt
         self.billing_address = bill
         self.order_type = method
         self.order_quantity = quantity
@@ -454,7 +453,7 @@ def cart():
         if current_user.cart == []:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
         else:
-            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, receiptEmail = current_user.email_id , backup_price = backup_price, backup_quantity = backup_quantity)
+            return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, billingEmail = current_user.email_id , backup_price = backup_price, backup_quantity = backup_quantity)
     else:
         if 'cart' not in session or session['cart'] == []:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
