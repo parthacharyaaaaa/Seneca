@@ -71,6 +71,12 @@ html body::-webkit-scrollbar {
     font-size: var(--FSIZE-SMALLEST);
     display: inline-block;
 }
+
+.single-line-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 /* GLOBAL STYLES */
 html body{
     /* background-image: var(--BGIMG); */
@@ -130,7 +136,6 @@ html{
 }
 /* Footer */
 footer{
-    bottom: 0;
     background-color: var(--BGCOLOR-ICONS-1);
     width: 100%;
 
@@ -442,4 +447,48 @@ footer a:is(:hover, :focus){
     box-shadow: none;
     transform: translateY(0);
   }
-  
+
+
+@media screen and (min-width: 480px){
+    footer{
+        flex-flow: column nowrap;
+        text-align: center;
+    }
+    header .icon{
+        margin-left: 1.5rem;
+    }
+    header .fa-shopping-cart{
+        transform: scale(95%);
+    }
+    .left-footer{
+        display: flex;
+        justify-content: center;
+    }
+  }
+
+@media screen and (min-width: 768px){
+    header .icon{
+        margin-left: 2.2rem;
+    }
+}
+
+@media screen and (min-width: 992px){
+    header .icon{
+        margin-left: 0rem;
+    }
+    footer{
+        flex-flow: row nowrap;
+    }
+    .left-footer{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+}
+
+@media screen and (min-width: 1200px){
+    header .fa-shopping-cart{
+        transform: scale(100%);
+    }
+}

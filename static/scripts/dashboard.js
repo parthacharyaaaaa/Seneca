@@ -134,7 +134,7 @@ function renderOrders(orderInfo) {
         orderCard.innerHTML = `
         <div class = "item-header">
             <span>Order ID: ${orderDetails.order_id}</span>
-            <span>Time of Purchase: ${orderDetails.time_of_purchase}</span>
+            <span id='order-time'>Time of Purchase: ${orderDetails.time_of_purchase}</span>
             <span>Total Items: ${orderDetails.total_items}</span>
             <span>Total Amount: $${(orderDetails.total_amount).toFixed(2)}</span>
         </div>
@@ -142,11 +142,12 @@ function renderOrders(orderInfo) {
             <div class = "item-container">
             ${orderDetails.items.map(item => `
                     <div class='item'>
-                        <span>ID: ${item.product_id}</span>
+                        <span>ID: ${item.product_id}</span><br>
                         <span>Title: ${item.title}</span><br>
-                        <span>Author: ${item.author}</span>
+                        <span>Author: ${item.author}</span><br>
                         <span>ISBN: ${item.isbn}</span><br>
                         <span>Price: $${(item.price).toFixed(2)}</span>
+                        <hr>
                     </div>
                 `).join('')}
                 </div>

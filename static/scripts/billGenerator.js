@@ -23,6 +23,7 @@ function displayContent(products) {
         <div>Price ($)</div>
         <div>File Type</div>
         <div>Discount</div>
+        <div>Remove</div>
     </div>
     `
     let total = 0.0;

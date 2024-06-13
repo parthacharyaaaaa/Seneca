@@ -19,6 +19,7 @@
     display: flex;
     justify-content: space-around;
     font-size: var(--FSIZE-L);
+    font-weight: bold;
 
     background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 6px;
@@ -36,6 +37,7 @@
     padding-left: 2rem;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
+    padding-top: 1rem;
 }
 
 .item-container{
@@ -160,4 +162,20 @@
 
 .fav-button:hover {
     color: #ff0000;
+}
+
+@media screen and (min-width: 480px) {
+    .item-header{
+        flex-flow: column nowrap;
+        padding: 1rem;
+    }
+
+    .order-items{
+        padding-left: 1rem;
+    }
+}
+@media screen and (min-width: 768px){
+    .item-header{
+        font-size: var(--FSIZE-L);
+    }
 }
