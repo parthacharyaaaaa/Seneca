@@ -53,9 +53,9 @@ def sendSalutation(receiver) -> None:
 
     email_message = MIMEMultipart()
     email_message["From"] = email_sender
-    email_message["To"] = receiver
+    email_message["To"] = receiver.email_id
     email_message['Subject'] = 'Welcome to Seneca!'
-    email_message.attach(MIMEText(getSalutations(receiver), 'plain'))
+    email_message.attach(MIMEText(getSalutations(receiver.first_name), 'plain'))
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:

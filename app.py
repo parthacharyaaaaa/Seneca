@@ -12,8 +12,8 @@ from datetime import timedelta, datetime
 import re as regex
 import os
 
-from mail_sender import sendReceipt, sendSalutation, sendOrder
-from utils import createZip, generateToken, validateToken
+from mail_sender import sendReceipt, sendSalutation
+from utils import createZip
     
 #App configuration
 app = Flask(__name__)
@@ -300,7 +300,7 @@ def signup():
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
         setLastSeen(time)
-        sendSalutation(current_user.first_name)
+        sendSalutation(current_user)
         #Guest user had a cart before creating an account
         if 'cart' in session:
             if not validateCart():
@@ -312,8 +312,9 @@ def signup():
                 session.pop('cart')
                 print(session)
                 return jsonify({'alert' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
-       
-        return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
+        else:
+            print("Account made")
+            return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
     return render_template('signup.html')
 
 @app.route("/login", methods = ['POST', 'GET'])
