@@ -100,6 +100,25 @@ function renderFavourites(favInfo) {
                     </div>
                 `;
                 favsContainer.appendChild(favItem); // Append each product card to the body or another container element
+                favButton = favItem.querySelector('.fav-button')
+                favButton.addEventListener('click', function(event){
+                    fetch('/toggle-favourites', {
+                        method : 'POST',
+                        headers : {
+                            'Content-Type' : 'application/json'
+                        },
+                        body : JSON.stringify({id : this.id})
+                    })
+                    .then(response => response.json())
+                    .then(data =>{
+                        if(data.error){
+                            alert(data.error)
+                        }
+                        else{
+                            favItem.remove()
+                        }
+                    })
+                })
             }
         }
     }
@@ -135,4 +154,21 @@ function renderOrders(orderInfo) {
         `;
         ordersContainer.appendChild(orderCard);
     }
+}
+
+function addToCart(id) {
+    var formData = new FormData()
+    formData.append('id', id);
+
+    fetch("/addToCart", {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message)
+            }
+        })
+        .catch(error => alert("Error: ", error))
 }
