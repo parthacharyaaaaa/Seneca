@@ -1,3 +1,5 @@
+import zipfile
+
 def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
     receipt_lines = []
     
@@ -19,3 +21,9 @@ def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
     print(receipt_string)
     
     return receipt_string
+
+def createZip(filename, contents):
+    with zipfile.ZipFile(filename, 'w') as zipf:
+        for file in contents:
+            zipf.write(file)
+    return filename

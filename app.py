@@ -1,5 +1,5 @@
 #Import dependencies
-from flask import Flask, jsonify, redirect, request, render_template, session, flash, url_for
+from flask import Flask, jsonify, redirect, request, render_template, session, flash, url_for, send_file, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_required, login_user, current_user, LoginManager, logout_user
 from flask_bcrypt import Bcrypt
@@ -13,6 +13,7 @@ import re as regex
 import os
 
 from mail_sender import sendReceipt, sendSalutation
+from utils import createZip
     
 #App configuration
 app = Flask(__name__)
@@ -663,10 +664,6 @@ def processOrder():
                 return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
             else:
                 return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
-            
-@app.route("/checkout/download", methods = ['GET'])
-def download():
-    return render_template('download.html', signedIn = current_user.is_authenticated)
 
 @app.route("/gift", methods = ['GET', 'POST'])
 def gift():
@@ -766,7 +763,16 @@ def getUserInfo():
             }
         # print(orderHolder)
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
-    
+
+@app.route("/checkout/download", methods = ['GET'])
+def download():
+    return render_template('download.html', signedIn = current_user.is_authenticated)
+
+@app.route('/serve-order')
+def serveOrder():
+    order = createZip()
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

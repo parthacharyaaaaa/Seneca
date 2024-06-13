@@ -69,53 +69,38 @@ function renderFavourites(favInfo) {
         for (const productId in favInfo) {
             if (favInfo.hasOwnProperty(productId)) {
                 const favItem = document.createElement('div');
-                favItem.classList.add('fav-card');
+                favItem.classList.add('product-card');
                 favItem.innerHTML = `
-            <div class="fav-image">
-                <img src="${favInfo[productId].cover}" alt="${favInfo[productId].title}"/>
-            </div>
-            <div class="fav-details">
-                <section class='fav-title'>${favInfo[productId].title}</section>
-                <section class='fav-author'>${favInfo[productId].author}</section>
-                <div class="fav-genre-rating">
-                    <section class='fav-genre ${favInfo[productId].genre['category']}'>${favInfo[productId].genre['category']}</section>
-                </div>
-                <section class='fav-file'>${favInfo[productId].file_format}</section>
-                <section class='fav-price'>$${favInfo[productId].price}</section>
-                <hr>
-                <div class='fav-card-buttons'>
-                <button class='view-button card-button' type='button' onclick='location.href = "/products/view/id=${favInfo[productId].id}"'>View</button>
-                <button class='cart-button card-button' type='button' onclick='addToCart(${favInfo[productId].id})'>Add to cart</button>
-                <button class='fav-button card-button' type='button' id='${favInfo[productId].id}'>Remove</button>
-                </div>
-            </div>
-        `;
-                favsContainer.appendChild(favItem);
-
-                var removeButton = favItem.querySelector('.fav-button');
-                removeButton.addEventListener('click', function(event){
-                    console.log("Removing faavourite: " + this.id);
-
-                    fetch("/remove-fav", {
-                        method : 'POST',
-                        headers : {
-                            "Content-Type" : "application/json"
-                        },
-                        body : JSON.stringify({id : this.id})
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.valid === 0){
-                            alert(data.alert);
-                        }
-                        else{
-                            favItem.remove()
-                            alert("Removed item from favourites")
-                        }
-                    })
-                    .catch(error => console.log("Error: ", error))
-                })
-            };
+                    <div class="product-image">
+                        <img src="${favInfo[productId].cover}" alt="${favInfo[productId].title}"/>
+                    </div>
+                    <div class="product-details">
+                        <div class="book-credentials">
+                            <section class="product-title">${favInfo[productId].title}</section>
+                            <section class="product-author">${favInfo[productId].author}</section>
+                        </div>
+                        <div class="product-genre-rating">
+                            <div class="product-genre-container">
+                                ${favInfo[productId].genre.map(genre => `<section class="product-genre ${genre}">${genre}</section>`).join('')}
+                            </div>
+                        </div>
+                        <div class="download-details">
+                            <section class="product-file">${favInfo[productId].file_format}</section>
+                            <section class="product-price">$${favInfo[productId].price}</section>
+                        </div>
+                        <div class="card-buttons">
+                            <div>
+                                <button class="view-button card-button" type="button" onclick='location.href="/products/view/id=${favInfo[productId].id}"'>View</button>
+                                <button class="cart-button card-button" type="button" onclick='addToCart(${favInfo[productId].id})'>Add to cart</button>
+                            </div>
+                            <div>
+                                <button class="fav-button card-button" type="button" id="${favInfo[productId].id}">x</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                favsContainer.appendChild(favItem); // Append each product card to the body or another container element
+            }
         }
     }
 }

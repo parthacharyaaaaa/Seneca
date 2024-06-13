@@ -321,7 +321,34 @@ footer a:is(:hover, :focus){
     /* border: 1px red solid; */
     height: 28%;
 }
+.product-genre:is(.Self-Help, .Non-Fiction, .Science) {
+    background-color: #ccf9ff;
+    color: #3369cc;
+}
 
+.product-genre:is(.Anthropology, .Autobiography, .Dystopian, .War){
+    background-color: gray;
+    color: #000000;
+}
+
+.product-genre:is(.Romance, .Horror, .Psychological, .Philosophy) {
+    background-color: #ffcccc;
+    color: #cc0000;
+}
+
+.product-genre:is(.Historical, .Commentary, .Comedy, .Survival) {
+    background-color: #ccffcc;
+    color: #009933;
+}
+.product-genre:is(.Comedy, .Business){
+    background-color: #fef2b5;
+    color: rgb(160, 160, 0)
+}
+
+.product-genre:is(.Fiction, .Fantasy, .Mythology, .Adventure){
+    color: rebeccapurple;
+    background-color: rgb(250, 213, 219);
+}
 .product-card .product-genre-container {
     display: flex;
     flex-flow: row wrap;
@@ -330,12 +357,10 @@ footer a:is(:hover, :focus){
 
 .product-card .product-genre {
     display: inline-flex;
-    background-color: rgb(222, 222, 222);
     border-radius: 12px;
     padding: 5px;
     margin-bottom: 0.5rem;
     margin-right: 0.5rem;
-    color: var(--BGCOLOR-ICONS-1);
     width: fit-content;
     height: fit-content;
     text-align: center;
