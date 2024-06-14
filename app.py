@@ -192,7 +192,11 @@ def loadCart() -> dict:
     if current_user.is_authenticated:
         itemKeys = current_user.cart
     else:
-        itemKeys = session['cart']
+        try:
+            itemKeys = session['cart']
+        #Handle uninitialized session
+        except KeyError as k:
+            itemKeys = []
 
     cart = {}
     for itemKey in itemKeys:
