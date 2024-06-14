@@ -143,6 +143,9 @@
         justify-content: flex-start;
         padding: 0;
     }
+    .empty-cart-msg{
+        width: 90%;
+    }
     .product-container{
         border-right: none;
         border-bottom: 1px solid white;
@@ -200,11 +203,17 @@
         display: block;
         padding-left: 1rem;
     }
+    .empty-cart-msg{
+        width: 75%;
+    }
 }
 
 @media screen and (min-width: 992px){
     .product-header div{
         font-size: var(--FSIZE);
+    }
+    .empty-cart-msg{
+        width: 50%;
     }
 }
 

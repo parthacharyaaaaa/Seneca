@@ -43,7 +43,8 @@ function displayContent(products) {
         let rating = parseFloat(product.rating).toFixed(1)
         productCard.innerHTML = `
             <div class="product-image">
-                <img src="${product.cover}" alt="${product.title}"/>
+            <div class = "backdrop"></div>
+                <img class = 'product-image-image' src="${product.cover}" alt="${product.title}"/>
             </div>
             <div class="product-details">
                 <div class = "book-credentials">
@@ -73,9 +74,11 @@ function displayContent(products) {
                 </div>
         `;
         container.appendChild(productCard);
-        const imageContainer = productCard.querySelector('.product-image')
-        imageContainer.style.backgroundImage = `url(${product.image})`
+        const imageContainer = productCard.querySelector('.backdrop')
+        imageContainer.style.backgroundImage = `url(${product.cover})`
         imageContainer.style.backgroundSize = 'cover';
+        imageContainer.style.filter = 'blur(50px)';
+        productCard.querySelector('.product-image-image').style.filter = 'blur(0px)';
     });
     const event = new Event('contentLoaded');
     document.dispatchEvent(event)
