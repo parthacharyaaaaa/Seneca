@@ -1,4 +1,4 @@
-document.getElementById('confirm-purchase').addEventListener('click', function(event){
+document.getElementById('confirm-purchase').addEventListener('click', function (event) {
     console.log("Processing payment")
 
     try {
@@ -8,18 +8,30 @@ document.getElementById('confirm-purchase').addEventListener('click', function(e
     }
     fetch('/process-order', {
         headers: {
-            "Content-type" : 'application/json'
+            "Content-type": 'application/json'
         },
-        method : "POST",
-        body : JSON.stringify({validation : "True", billing_email : billing_email})
+        method: "POST",
+        body: JSON.stringify({ validation: "True", billing_email: billing_email })
     })
-    .then(response => response.json())
-    .then(data => {
-        if(data.alert){
-            alert(data.alert)
-        }
-        if(data.flag === "valid")
-            window.location.href = data.redirect_url
-    })
-    .catch(error => console.log("Error: ", error)) 
+        .then(response => response.json())
+        .then(data => {
+            if (data.alert) {
+                alert(data.alert)
+            }
+            if (data.flag === "valid") {
+                window.location.href = data.redirect_url
+                return data
+            }
+        })
+        //Sending the actual shit to the user
+        .then( data =>{
+            fetch('/validate-download', {
+                method : "POST",
+                headers : {
+                    'Content-Type' : 'application/json'
+                },
+                body : JSON.stringify({ id : data.order_id, download_url : data.token_download_url})
+            })}
+        )
+    .catch (error => console.log("Error: ", error)) 
 })

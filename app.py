@@ -11,6 +11,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from datetime import timedelta, datetime
 import re as regex
 import os
+import secrets
 
 from mail_sender import sendReceipt, sendSalutation
 from utils import createZip
@@ -145,6 +146,12 @@ class Order_History(db.Model):
     order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
     order_quantity = db.Column(db.Integer, nullable = False)
 
+    #Retrieval Tokens
+    token = db.Column(db.JSON, nullable = False, default = {})
+
+    #Keep track of whether order has been requested
+    email_requested = db.Column(db.Boolean, nullable = False, default = 0)
+
     def __init__(self, user, date, status, price, bill, method, quantity):
         self.user = user
         self.order_time = date
@@ -246,6 +253,17 @@ def setLastSeen(time) -> None:
     time = datetime.strptime(time, date_format)
     current_user.last_seen = time
     db.session.commit()
+
+def generateDownloadToken(orderID, userID = 'guest'):
+    download_url = secrets.token_urlsafe(16)
+    expiration_time = datetime.now() + timedelta(minutes=30)
+    return{
+        "order_id" : orderID,
+        "user_id" : userID,
+        "download_url" : download_url,
+        "expiration_time" : expiration_time.isoformat()
+    }
+
 #Login management
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -747,18 +765,24 @@ def processOrder():
             order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Personal", len(temp_storage))
             db.session.add(order)
             db.session.commit()
-            print(temp_storage)
+            # print(temp_storage)
             for item in temp_storage.keys():
                 orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
                 db.session.add(orderItem)
             current_user.cart = []
-            flag_modified(current_user, 'cart')
+            flag_modified(current_user, 'cart')            
             db.session.commit()
             print("Order committed")
 
+            #Generating download token
+            token = generateDownloadToken(orderID=order.id, userID=current_user.id)
+            order.token = token
+            flag_modified(order, 'token')
+            db.session.commit()
+
             #Sending receipt
             sendReceipt(str(current_user.email_id), temp_storage, order)
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download"), "flag" : "valid", 'order_id' : order.id, 'token_download_url' : token['download_url']})
         #Guest Transaction
         else:
             billingEmail = data.get('billing_email')
@@ -794,10 +818,31 @@ def gift():
     print(receiver_email)
     return jsonify({'message' : 'called'})
 
-@app.route("/checkout/download", methods = ['GET'])
+@app.route('/download')
 def download():
     return render_template('download.html', signedIn = current_user.is_authenticated)
 
+@app.route('/validate-download', methods = ['POST'])
+def validateDownload():
+    if request.method == 'POST':
+        print("Final Step: Verifying Download")
+        order_id = request.get_json().get('id')
+        token_download_url = request.get_json().get('download_url')
+
+        token = (Order_History.query.filter_by(id = order_id).first()).token
+        print(token)
+
+        if token['expiration_time'] < datetime.now().isoformat():
+            print("Expired Token")
+            return jsonify({'error' : "Expired Token"})
+
+        if int(order_id) != token['order_id'] or token_download_url != token['download_url']:
+            print("Invalid token")
+            print(type(order_id), type(token['order_id']))
+            return jsonify({'error' : 'Invalid Token'})
+        
+        print("Processing download")
+        return(send_file('C:\\Users\\Parth Acharya\\Documents\\TVS SEM V\\static\\assets\\background.png'))
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
