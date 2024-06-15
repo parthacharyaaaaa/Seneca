@@ -782,7 +782,7 @@ def processOrder():
 
             #Sending receipt
             sendReceipt(str(current_user.email_id), temp_storage, order)
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download"), "flag" : "valid", 'order_id' : order.id, 'token_download_url' : token['download_url']})
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
         #Guest Transaction
         else:
             billingEmail = data.get('billing_email')
@@ -806,7 +806,7 @@ def processOrder():
                 #Sending receipt
                 sendReceipt(str(billingEmail), temp_storage, order)
 
-                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download'), "flag" : "valid"})
+                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']), "flag" : "valid"})
             else:
                 return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
 
@@ -818,31 +818,31 @@ def gift():
     print(receiver_email)
     return jsonify({'message' : 'called'})
 
-@app.route('/download')
-def download():
-    return render_template('download.html', signedIn = current_user.is_authenticated)
+@app.route('/download/id=<order_id>/<download_url>')
+def download(order_id, download_url):
+        return render_template('download.html', signedIn = current_user.is_authenticated)
 
-@app.route('/validate-download', methods = ['POST'])
+@app.route('/validate-download')
 def validateDownload():
-    if request.method == 'POST':
-        print("Final Step: Verifying Download")
-        order_id = request.get_json().get('id')
-        token_download_url = request.get_json().get('download_url')
+    print("Final Step: Verifying Download")
+    order_id = str(request.args.get('order_id'))
+    token_download_url = request.args.get('token_download_url')
+    print(order_id, token_download_url)
 
-        token = (Order_History.query.filter_by(id = order_id).first()).token
-        print(token)
+    token = (Order_History.query.filter_by(id = order_id).first()).token
+    print(token)
 
-        if token['expiration_time'] < datetime.now().isoformat():
-            print("Expired Token")
-            return jsonify({'error' : "Expired Token"})
+    if token['expiration_time'] < datetime.now().isoformat():
+        print("Expired Token")
+        return jsonify({'error' : "Expired Token"})
 
-        if int(order_id) != token['order_id'] or token_download_url != token['download_url']:
-            print("Invalid token")
-            print(type(order_id), type(token['order_id']))
-            return jsonify({'error' : 'Invalid Token'})
-        
-        print("Processing download")
-        return(send_file('C:\\Users\\Parth Acharya\\Documents\\TVS SEM V\\static\\assets\\background.png'))
+    if order_id != str(token['order_id']) or token_download_url != token['download_url']:
+        print("Invalid token")
+        print(type(order_id), type(token['order_id']))
+        return jsonify({'error' : 'Invalid Token'})
+    
+    print("Processing download")
+    return send_file('C:\\Users\Parth Acharya\Documents\TVS SEM V\static\library\color scheme.jpg', as_attachment=True, download_name='pp.jpg')
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

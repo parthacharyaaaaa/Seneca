@@ -1,6 +1,6 @@
 document.getElementById('confirm-purchase').addEventListener('click', function (event) {
     console.log("Processing payment")
-
+    let billing_email
     try {
         billing_email = document.getElementById('billing-email').value
     } catch (error) {
@@ -16,7 +16,7 @@ document.getElementById('confirm-purchase').addEventListener('click', function (
         .then(response => response.json())
         .then(data => {
             if (data.alert) {
-                alert(data.alert)
+                alert("Alert: ", data.alert)
             }
             if (data.flag === "valid") {
                 window.location.href = data.redirect_url
@@ -24,14 +24,6 @@ document.getElementById('confirm-purchase').addEventListener('click', function (
             }
         })
         //Sending the actual shit to the user
-        .then( data =>{
-            fetch('/validate-download', {
-                method : "POST",
-                headers : {
-                    'Content-Type' : 'application/json'
-                },
-                body : JSON.stringify({ id : data.order_id, download_url : data.token_download_url})
-            })}
-        )
-    .catch (error => console.log("Error: ", error)) 
+
+        .catch(error => console.log("Error: ", error))
 })
