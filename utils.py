@@ -1,4 +1,5 @@
-import zipfile
+from zipfile import ZipFile as zipf
+import os
 
 def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
     receipt_lines = []
@@ -26,7 +27,21 @@ def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
     return receipt_string
 
 def createZip(filename, contents):
-    with zipfile.ZipFile(filename, 'w') as zipf:
+    pathPrefix = os.environ.get('books')
+    zipPathPrefix = os.environ.get('zip dumps')
+
+    if not pathPrefix:
+        raise ValueError("CRITICAL: ENVIRONMENT VARIABLE FOR BOOKS IS NOT SET")
+    if not zipPathPrefix:
+        raise ValueError("CRITICAL: ENVIRONMENT VARIABLE FOR ZIP FOLDER IS NOT SET")
+    
+    print(pathPrefix, zipPathPrefix)
+    zip_path = os.path.join(zipPathPrefix, filename) + ".zip"
+    print(zip_path)
+
+    with zipf(zip_path, "w") as zipPackage:
         for file in contents:
-            zipf.write(file)
-    return filename
+            full_path = os.path.join(pathPrefix, file[1:])
+            arcname = os.path.basename(full_path)
+            zipPackage.write(filename=full_path, arcname=arcname)
+    return zip_path

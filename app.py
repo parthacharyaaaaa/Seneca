@@ -261,7 +261,8 @@ def generateDownloadToken(orderID, userID = 'guest'):
         "order_id" : orderID,
         "user_id" : userID,
         "download_url" : download_url,
-        "expiration_time" : expiration_time.isoformat()
+        "expiration_time" : expiration_time.isoformat(),
+        "used" : 0
     }
 
 #Login management
@@ -556,43 +557,6 @@ def getCart():
     return jsonify(billItems)
 
 #-------------------------------------------------------------------Favourites Management
-# @app.route("/add-favourite", methods=["POST"])
-# def addFav():
-#     if request.method == "POST":
-#         print("Adding favourite")
-#         if not current_user.is_authenticated:
-#             return jsonify({"alert" : "You must have an account to add items to favourites"})
-#         productID = str(request.get_json().get('id'))
-#         # if productID in current_user.favourites:
-#         #     return jsonify({"alert" : "Item already in favourites"})
-#         print(current_user.favourites)
-#         try:
-#             product = Product.query.filter_by(id=int(productID)).first()
-#         except:
-#             print("Item not found in db, terminating")
-#             return jsonify({"alert" : "error in adding item to favourites"})
-#         current_user.favourites.append(productID)
-        
-#         flag_modified(current_user, 'favourites')
-#         db.session.commit()
-#         return jsonify({"alert" : "Item added", "updated_favourites" : current_user.favourites})
-
-# @app.route("/remove-favourite", methods = ['POST'])
-# def removeFav():
-#     if request.method == "POST":
-#         if not current_user.is_authenticated:
-#             return jsonify({"valid" : 0, "error" : "User not recognised"})
-        
-#         productID = str(request.get_json().get('id'))
-#         if productID in current_user.favourites:
-#             current_user.favourites.remove(productID)
-#             print(current_user.favourites)
-#             flag_modified(current_user, 'favourites')
-#             db.session.commit()
-#             return jsonify({"valid" : 1, "updated_favourites" : current_user.favourites})
-#         else:
-#             return jsonify({"valid" : 0, "alert" : "Not found"})
-
 @app.route("/toggle-favourites", methods = ['POST'])
 def toggleFav():
     if not current_user.is_authenticated:
@@ -786,7 +750,7 @@ def processOrder():
         #Guest Transaction
         else:
             billingEmail = data.get('billing_email')
-            if billingEmail != "" and not regex.match(email_regex, billingEmail):
+            if billingEmail == "" or not regex.match(email_regex, billingEmail):
                 return jsonify({"alert" : "Invalid billing email provided"})
             if validateCart():
                 print("Processing order: guest")
@@ -802,6 +766,10 @@ def processOrder():
                 print("Order committed")
                 session['cart'] = []
 
+                token = generateDownloadToken(orderID=order.id)
+                order.token = token
+                flag_modified(order, 'token')
+                db.session.commit()
 
                 #Sending receipt
                 sendReceipt(str(billingEmail), temp_storage, order)
@@ -825,16 +793,22 @@ def download(order_id, download_url):
 @app.route('/validate-download')
 def validateDownload():
     print("Final Step: Verifying Download")
+    print(session)
     order_id = str(request.args.get('order_id'))
     token_download_url = request.args.get('token_download_url')
     print(order_id, token_download_url)
 
-    token = (Order_History.query.filter_by(id = order_id).first()).token
+    order = Order_History.query.filter_by(id = order_id).first()
+    token = order.token
     print(token)
 
     if token['expiration_time'] < datetime.now().isoformat():
         print("Expired Token")
         return jsonify({'error' : "Expired Token"})
+    
+    if token['used'] != 0:
+        print("Used token")
+        return jsonify({"error" : "This token has already been redeemed"})
 
     if order_id != str(token['order_id']) or token_download_url != token['download_url']:
         print("Invalid token")
@@ -842,7 +816,21 @@ def validateDownload():
         return jsonify({'error' : 'Invalid Token'})
     
     print("Processing download")
-    return send_file('C:\\Users\Parth Acharya\Documents\TVS SEM V\static\library\color scheme.jpg', as_attachment=True, download_name='pp.jpg')
+
+    #Creating zip file
+    packageItems = Order_Item.query.filter_by(order_id = order.id).all()
+    zipList = []
+    print(packageItems)
+    for packageItem in packageItems:
+        zipList.append(Product.query.filter_by(id = packageItem.product_id).first().url)
+    print(zipList)
+    package = createZip(f"Seneca: Order-{order_id}", zipList)
+    # print(package)
+    token["used"] = 1
+    flag_modified(order, "token")
+    db.session.commit()
+    return send_file(package, as_attachment=True, download_name=f"Seneca: Order-{order_id}.zip")
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
