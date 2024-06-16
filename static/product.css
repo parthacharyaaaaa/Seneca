@@ -1,50 +1,97 @@
-.container{
+.product-container{
+    display: grid;
+    grid-template-columns: 0.6fr 1.1fr;
+    grid-template-rows: auto;
+}
+.product-image{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-image > .backdrop{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+
+    object-fit: contain;
+    z-index: -100;
+}
+
+.product-image > img{
+    object-fit: contain;
+}
+
+.product-info{
+    background-color: black;
+    padding: 1rem;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.upper-specs{
+    display: flex;
+    gap: 5rem;
+    font-size: var(--FSIZE-SLIGHTLY-LARGER);
+    /* font-weight: bold; */
+}
+
+.lower-specs{
+    display: flex;
+    gap: 3rem;
+}
+
+.ratings{
     display: flex;
     gap: 1rem;
-    justify-content: space-between;
-
-    flex-flow: row nowrap;
-    border: 2px solid red;
-
-    width: 90%;
-    padding: 0;
 }
 
+.icons{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    justify-items: center;
 
-.left-container, .right-container{
-    /* background-color: rgb(170, 255, 0); */
-    border: 2px solid purple;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    text-align: center;
+
 }
 
-.ordering-section{
-    display: flex;
-    flex-flow: row nowrap;
-
-    justify-content: space-between;
-    gap: 5rem;
-    border: 2px solid red;
-    margin: 1rem;
-}
-
-.left-ordering-section{
+.icons div{
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
-.info{
-    display: flex;
-    gap: 1rem;
-    justify-content: space-between;
-
-    flex-flow: column;
-    border: 2px solid red;
-
-    width: 90%;
-    /* padding: 0; */
-    margin: 0 auto;
+.icons .fas{
+    color: var(--TEXT-COLOR-LIGHTER);
 }
 
-.description{
-    border: 2px solid blue;
+@media screen and (min-width: 320px) {
+    .product-container{
+        grid-template-columns: 1fr;
+    }
+
+    .icons{
+        font-weight: normal;
+        font-size: var(--FSIZE-SLIGHTLY-SMALLER);
+    }
+}
+
+@media screen and (min-width: 768px){
+    .icons{
+        font-weight: bold;
+        font-size: var(--FSIZE);
+    }
+}
+
+@media screen and (min-width: 1200px){
+    .product-container{
+        grid-template-columns: 0.6fr 1.1fr;
+    }
 }

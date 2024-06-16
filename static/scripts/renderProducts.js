@@ -64,7 +64,7 @@ function displayContent(products) {
                 </div>
                 <div class='card-buttons'>
                 <div>
-                        <button class='view-button card-button' type='button' onclick='location.href = "/products/view/id=${product.id}"'>View</button>
+                        <button class='view-button card-button' type='button' onclick='location.href = "/products/id=${product.id}"'>View</button>
                         <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
                     </div
                     <div>
