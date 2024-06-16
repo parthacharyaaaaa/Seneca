@@ -1,4 +1,4 @@
-INSERT INTO product VALUES
+INSERT INTO products VALUES
 (1, 'No Longer Human (Ningen Shikkaku)', 'Osamu Dazai', 'New Directions Publishing', '1958', '0811204812', '["Autobiographical Fiction", "Psychological"]', 196, 'English', 'epub', '/covers/no-longer-human.jpg', '/No Longer Human.epub', 'No Longer Human by Osamu Dazai is a deeply introspective novel that delves into the life of Ōba Yōzō, a man who feels profoundly disconnected from society and struggles with his sense of identity. The story is presented through a series of notebooks written by Yōzō, chronicling his experiences from childhood to adulthood.\n
 
 Yōzō is depicted as an outsider, unable to understand or fit in with the norms and expectations of those around him. His life is marked by a series of failed relationships, bouts of depression, and substance abuse. He often uses humor and a facade of cheerfulness to mask his inner turmoil, but this only deepens his sense of alienation.\n
