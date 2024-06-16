@@ -1,50 +1,44 @@
-document.getElementById('add-to-cart').addEventListener('click', function(event) {
-    const product_id = event.currentTarget.getAttribute('data-product-id');
-    console.log(product_id)
-    const amount = parseInt(document.getElementById('quantity').value)
+document.addEventListener('contentLoaded', function (event) {
+    const path = window.location.pathname;
+    const id = ((path.split('/'))[2].split("="))[1]
 
-        var formData = new FormData()
-        formData.append('id', product_id);
-        formData.append('quantity', amount);
 
-        console.log("Caught request for: ", product_id);
-
+    document.getElementById('add-to-cart').addEventListener('click', function (event) {
+        console.log("Caught request for: ", id);
+        var formData = new FormData
+        formData.append('id', id)
         fetch('/addToCart', {
             method: 'POST',
             body: formData
         })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message)
+            })
+
+            .catch(error => console.error('Error: ', error));
+
+    });
+
+    document.getElementById('fav-button').addEventListener('click', function (event) {
+        fetch('/toggle-favourites', {
+            method: "POST",
+            headers : {
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({id:id})
+        })
         .then(response => response.json())
         .then(data => {
-            alert(data.message)
-        })
-        
-        .catch(error => console.error('Error: ', error));
-
-});
-
-document.getElementById('purchase').addEventListener('click', function(event) {
-    const signedIn = document.querySelector('meta[name="signed-in"]').getAttribute('content');
-    const product_id = event.currentTarget.getAttribute('data-product-id');
-    console.log(product_id)
-    const amount = parseInt(document.getElementById('quantity').value)
-
-    var formData = new FormData()
-    formData.append('id', product_id);
-    formData.append('quantity', amount);
-
-        fetch('/purchaseThenCheckout',{
-            method : "POST",
-            body : formData
-        })
-        .then(response => {
-            if(response.redirected){
-                console.log("Redirecting: API");
-                    window.location.href = response.url;
+            console.log("Response data: ", data)
+            if(data.action === 'add'){
+                console.log("Added")
+                this.style.backgroundColor = 'red'
             }
             else{
-                return response.json();
+                console.log('removed')
+                this.style.backgroundColor = 'black'
             }
         })
-        .then(data => alert(data.message))
-        .catch(error => console.log("Error: ", error))
+    })
 })

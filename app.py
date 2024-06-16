@@ -145,9 +145,29 @@ class Product(db.Model):
             'genre' : self.genre,
             'discount' : self.discount,
             'reviews' : self.total_reviews,
-            'sold' : self.units_sold
+            'sold' : self.units_sold,
+            'language' : self.language
         }
-
+    def loadInfo(self) -> dict:
+        return {
+            'id': self.id,
+            'title': self.title,
+            'price': self.price,
+            'author' : self.author,
+            'publisher' : self.publisher,
+            'publication_date' : self.publication_date,
+            'price' : self.price,
+            'file_format' : self.file_format,
+            'rating': self.rating,
+            'cover': url_for('static', filename=f"{os.environ.get('library')}{self.cover}"),
+            'genre' : self.genre,
+            'discount' : self.discount,
+            'reviews' : self.total_reviews,
+            'sold' : self.units_sold,
+            'summary' : self.summary,
+            'pages' : self.pages,
+            'language' : self.language
+        }
 class Order_History(db.Model):
     __tablename__ = 'order_history'
 
@@ -500,7 +520,7 @@ def logout():
             return jsonify({"redirect_url" : url_for('home')})
 
 #------------------------------------------------------------------Cart Management
-@app.route("/products/view/id=<product_id>", methods=['POST', 'GET'])
+@app.route("/products/id=<product_id>", methods=['POST', 'GET'])
 def product(product_id):
     #Rendering the page
     requestedProduct = Product.query.filter_by(id = product_id).first()
@@ -514,6 +534,17 @@ def product(product_id):
                            isbn = requestedProduct.isbn, genre = requestedProduct.genre, pages = requestedProduct.pages, language = requestedProduct.language, file_format = requestedProduct.file_format,
                            discount = requestedProduct.discount, price = requestedProduct.price,
                            total_reviews = requestedProduct.total_reviews, url = requestedProduct.url, units_sold = requestedProduct.units_sold)
+
+@app.route("/get-product-details", methods = ['POST'])
+def getProductDetails():
+    productID = int(request.get_json().get('id'))
+    print("Retrieving product details: ", productID)
+    requestedProduct = Product.query.filter_by(id = productID).first().loadInfo()   
+    print(requestedProduct)
+    if not requestedProduct:
+        raise AssertionError('Item not found')
+    
+    return({'product' : requestedProduct})
 
 @app.route('/cart')
 def cart():
@@ -715,48 +746,48 @@ def getCatalogue():
         return jsonify({"books" : books})
 
 #Order Management
-@app.route('/purchaseThenCheckout', methods=['POST', 'GET'])
-def purchaseThenCheckout():
-    if request.method == 'POST':
-        #Get product details and query it from the database
-        product_id = str(request.form['id'])
-        product = Product.query.filter_by(id = product_id).first()
+# @app.route('/purchaseThenCheckout', methods=['POST'])
+# def purchaseThenCheckout():
+#     if request.method == 'POST':
+#         #Get product details and query it from the database
+#         product_id = str(request.form['id'])
+#         product = Product.query.filter_by(id = product_id).first()
 
-        #Handle case when product id is invalid
-        if not product:
-            return jsonify({"message" : "Error in validating product authenticity :/"})
+#         #Handle case when product id is invalid
+#         if not product:
+#             return jsonify({"message" : "Error in validating product authenticity :/"})
         
-        #Guest user:
-        if not(current_user.is_authenticated):
-            print("Error: Not logged in")
-            if 'cart' not in session:
-                session.permanent = True
-                session['cart'] = []
+#         #Guest user:
+#         if not(current_user.is_authenticated):
+#             print("Error: Not logged in")
+#             if 'cart' not in session:
+#                 session.permanent = True
+#                 session['cart'] = []
 
-            elif product_id in session['cart']:
-                print("Guest's cart already has all this shit")
-                return jsonify({"message" : "Item exists in cart (temp)"})
+#             elif product_id in session['cart']:
+#                 print("Guest's cart already has all this shit")
+#                 return jsonify({"message" : "Item exists in cart (temp)"})
 
-            session['cart'].append(product_id)
+#             session['cart'].append(product_id)
 
-        #Logged in user:
-        else:
-            targetUser = User.query.filter_by(id = current_user.id).first()
-            print(targetUser.cart)
-            print("/Direct Purchase: Current Cart")
+#         #Logged in user:
+#         else:
+#             targetUser = User.query.filter_by(id = current_user.id).first()
+#             print(targetUser.cart)
+#             print("/Direct Purchase: Current Cart")
 
-            if product_id in targetUser.cart:
-                print("This item already exists in your cart")
-                return jsonify({'message' : 'Product already in cart'})
-            else:
-                targetUser.cart.append(product_id)
-                print(targetUser.cart)
+#             if product_id in targetUser.cart:
+#                 print("This item already exists in your cart")
+#                 return jsonify({'message' : 'Product already in cart'})
+#             else:
+#                 targetUser.cart.append(product_id)
+#                 print(targetUser.cart)
 
-                flag_modified(targetUser, 'cart')
-                db.session.commit()
-                print(User.query.get(current_user.id).cart)
+#                 flag_modified(targetUser, 'cart')
+#                 db.session.commit()
+#                 print(User.query.get(current_user.id).cart)
 
-        return redirect(url_for('checkout'))
+#         return redirect(url_for('checkout'))
 
 @app.route("/process-order", methods = ['POST', 'GET'])
 def processOrder():
