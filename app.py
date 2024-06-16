@@ -5,7 +5,7 @@ from flask_login import UserMixin, login_required, login_user, current_user, Log
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, CheckConstraint, Index
 from sqlalchemy.orm.attributes import flag_modified
 
 from datetime import timedelta, datetime
@@ -29,6 +29,8 @@ bcrypt = Bcrypt(app)
 
 #Database definition
 class User(UserMixin, db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key = True)
     first_name = db.Column(db.String(30), nullable = False)
     last_name = db.Column(db.String(30), nullable = False)
@@ -43,6 +45,10 @@ class User(UserMixin, db.Model):
     cart = db.Column(JSON, nullable = False, default = [])
     favourites = db.Column(JSON, nullable = True, default= [])
 
+    __table_args__ = (
+        Index('users_email_id', 'email_id'),
+    )
+
     def __init__(self, fname, lname, age, phone, email, password) -> None:
         self.first_name = fname
         self.last_name = lname
@@ -53,10 +59,10 @@ class User(UserMixin, db.Model):
         self.time_created = datetime.now()
         self.last_seen = datetime.now()
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<User {self.email_id}>'
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return{
         "first_name" : self.first_name,
         "last_name" : self.last_name,
@@ -76,6 +82,8 @@ class User(UserMixin, db.Model):
         return total
 
 class Product(db.Model):
+    __tablename__ = 'products'
+
     id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(100), nullable = False, unique = True)
     author = db.Column(db.String(64), nullable = False)
@@ -94,6 +102,10 @@ class Product(db.Model):
     rating = db.Column(db.Float, nullable = False, default = 0.0)
     total_reviews = db.Column(db.Integer, nullable = False, default = 0)
     units_sold = db.Column(db.Integer, nullable=False, default = 0)
+
+    __table_args__ = (
+        CheckConstraint('discount <= price', name = 'check_discount_against_price'),
+    )
 
 
     def __init__(self, title, author, publisher, publication_date, genre, isbn, pages, language, file_format, cover, url, summary, price, discount, rating, total_reviews, units_sold):
@@ -118,7 +130,7 @@ class Product(db.Model):
     def __repr__(self) -> str:
         return f"Product: {self.title}"
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             'id': self.id,
             'title': self.title,
@@ -137,8 +149,10 @@ class Product(db.Model):
         }
 
 class Order_History(db.Model):
+    __tablename__ = 'order_history'
+
     id = db.Column(db.Integer, primary_key = True)
-    user = db.Column(db.String(64), ForeignKey('user.id'), nullable = True)
+    user = db.Column(db.String(64), ForeignKey('users.id'), nullable = True)
     order_time = db.Column(db.DateTime, nullable = False)
     status = db.Column(db.String(32), nullable = False, default = 'Not Processed')
     total_price = db.Column(db.Float, nullable = False)
@@ -152,6 +166,11 @@ class Order_History(db.Model):
     #Keep track of whether order has been requested
     email_requested = db.Column(db.Boolean, nullable = False, default = 0)
 
+    __table_args__ = (
+        CheckConstraint('order_quantity > 0', name = 'check_order_quantity'),
+        # CheckConstraint('total_price > 0', name = 'check_order_price')
+    )
+
     def __init__(self, user, date, status, price, bill, method, quantity):
         self.user = user
         self.order_time = date
@@ -164,7 +183,7 @@ class Order_History(db.Model):
     def __repr__(self) -> str:
         return f"<Order_History {self.id}>"
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "order_id" : self.id,
             "order_time" : self.order_time,
@@ -174,9 +193,11 @@ class Order_History(db.Model):
         }
 
 class Order_Item(db.Model):
+    __tablename__ = 'order_items'
+
     id = db.Column(db.Integer, primary_key = True)
-    order_id = db.Column(db.Integer, db.ForeignKey('order__history.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey('order_history.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     price = db.Column(db.Integer, nullable = False)
 
     def __init__(self, orderID, productID, price):
@@ -187,13 +208,43 @@ class Order_Item(db.Model):
     def __repr__(self) -> str:
         return f"<Order_Item {self.id}>"
     
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {
             "order_id" : self.order_id,
             "product_id" : self.product_id,
             "price" : self.price
         }
 
+class Review(db.Model):
+    __tablename__ = 'reviews'
+
+    id = db.Column(db.Integer, primary_key = True)
+    user = db.Column(db.Integer, db.ForeignKey("users.id"), nullable = False)
+    product = db.Column(db.Integer, db.ForeignKey("products.id"), nullable = False)
+    rating = db.Column(db.Integer, nullable = False, default = 5)
+    body = db.Column(db.Text, nullable = False)
+
+
+    __table_args__ = (
+        CheckConstraint('rating < 5', name = 'check_rating_max_value'),
+    )
+
+    def __init__(self, user, product, rating, body):
+        self.user = user
+        self.product = product
+        self.rating = rating
+        self.body = body
+
+    def __repr__(self):
+        return f"<Review: {self.id} - {self.rating}>"
+    
+    def to_dict(self) -> dict:
+        return{
+            "user" : self.user,
+            "product" : self.product,
+            "rating" : self.rating,
+            "body" : self.body 
+        }
 #Auxillary Functions
 def loadCart() -> dict:
     if current_user.is_authenticated:
@@ -732,9 +783,10 @@ def processOrder():
             # print(temp_storage)
             for item in temp_storage.keys():
                 orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+                Product.query.filter_by(id = int(item)).first().units_sold += 1
                 db.session.add(orderItem)
             current_user.cart = []
-            flag_modified(current_user, 'cart')            
+            flag_modified(current_user, 'cart')
             db.session.commit()
             print("Order committed")
 
@@ -761,6 +813,7 @@ def processOrder():
 
                 for item in temp_storage.keys():
                     orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+                    Product.query.filter_by(id = int(item)).first().units_sold += 1
                     db.session.add(orderItem)
                 db.session.commit()
                 print("Order committed")
