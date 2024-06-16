@@ -36,7 +36,7 @@ function renderPage(product) {
             <span class = "discount">Discount: ${product.discount}</span>
             </div>
             <div class = "ratings">
-            <span class = "rating">Rating: ${product.rating}</span>
+            <span class = "rating">Rating: ${(product.rating).toFixed(2)}</span>
             <span class = "reviews">Reviews: ${product.reviews}</span>
             </div>
             <span class = "sold">Sold: ${product.sold}</span>

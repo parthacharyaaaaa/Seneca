@@ -105,6 +105,7 @@ class Product(db.Model):
 
     __table_args__ = (
         CheckConstraint('discount <= price', name = 'check_discount_against_price'),
+        CheckConstraint('rating <= 5', name = 'check_max_possible_rating'),
     )
 
 
@@ -168,6 +169,7 @@ class Product(db.Model):
             'pages' : self.pages,
             'language' : self.language
         }
+
 class Order_History(db.Model):
     __tablename__ = 'order_history'
 
@@ -239,21 +241,25 @@ class Review(db.Model):
     __tablename__ = 'reviews'
 
     id = db.Column(db.Integer, primary_key = True)
+    time = db.Column(db.DateTime, nullable = False)
     user = db.Column(db.Integer, db.ForeignKey("users.id"), nullable = False)
     product = db.Column(db.Integer, db.ForeignKey("products.id"), nullable = False)
     rating = db.Column(db.Integer, nullable = False, default = 5)
+    title = db.Column(db.String(33), nullable = False)
     body = db.Column(db.Text, nullable = False)
 
 
     __table_args__ = (
-        CheckConstraint('rating < 5', name = 'check_rating_max_value'),
+        CheckConstraint('rating <= 5', name = 'check_rating_max_value'),
     )
 
-    def __init__(self, user, product, rating, body):
+    def __init__(self, user, product, rating, title, body, time=datetime.now()):
         self.user = user
         self.product = product
         self.rating = rating
+        self.title = title
         self.body = body
+        self.time = time
 
     def __repr__(self):
         return f"<Review: {self.id} - {self.rating}>"
@@ -263,8 +269,11 @@ class Review(db.Model):
             "user" : self.user,
             "product" : self.product,
             "rating" : self.rating,
-            "body" : self.body 
+            "body" : self.body,
+            "title" : self.title,
+            "time" : self.time
         }
+
 #Auxillary Functions
 def loadCart() -> dict:
     if current_user.is_authenticated:
@@ -746,49 +755,6 @@ def getCatalogue():
         return jsonify({"books" : books})
 
 #Order Management
-# @app.route('/purchaseThenCheckout', methods=['POST'])
-# def purchaseThenCheckout():
-#     if request.method == 'POST':
-#         #Get product details and query it from the database
-#         product_id = str(request.form['id'])
-#         product = Product.query.filter_by(id = product_id).first()
-
-#         #Handle case when product id is invalid
-#         if not product:
-#             return jsonify({"message" : "Error in validating product authenticity :/"})
-        
-#         #Guest user:
-#         if not(current_user.is_authenticated):
-#             print("Error: Not logged in")
-#             if 'cart' not in session:
-#                 session.permanent = True
-#                 session['cart'] = []
-
-#             elif product_id in session['cart']:
-#                 print("Guest's cart already has all this shit")
-#                 return jsonify({"message" : "Item exists in cart (temp)"})
-
-#             session['cart'].append(product_id)
-
-#         #Logged in user:
-#         else:
-#             targetUser = User.query.filter_by(id = current_user.id).first()
-#             print(targetUser.cart)
-#             print("/Direct Purchase: Current Cart")
-
-#             if product_id in targetUser.cart:
-#                 print("This item already exists in your cart")
-#                 return jsonify({'message' : 'Product already in cart'})
-#             else:
-#                 targetUser.cart.append(product_id)
-#                 print(targetUser.cart)
-
-#                 flag_modified(targetUser, 'cart')
-#                 db.session.commit()
-#                 print(User.query.get(current_user.id).cart)
-
-#         return redirect(url_for('checkout'))
-
 @app.route("/process-order", methods = ['POST', 'GET'])
 def processOrder():
     data = request.get_json()
@@ -914,6 +880,36 @@ def validateDownload():
     flag_modified(order, "token")
     db.session.commit()
     return send_file(package, as_attachment=True, download_name=f"Seneca: Order-{order_id}.zip")
+
+@app.route('/get-reviews', methods = ['POST'])
+def getReviews():
+    print("Getting reviews")
+    reviews = Review.query.order_by(Review.time.desc()).limit(3).all()
+    if reviews == None:
+        return jsonify({"noReviews" : 1})
+    reviews = [item.to_dict() for item in reviews]
+    return jsonify({"reviews" : reviews})
+
+@app.route('/add-review', methods = ["POST"])
+def addReview():
+    print("Adding review")
+    if not current_user.is_authenticated:
+        return jsonify({"error" : "penis man"})
+    
+    targetID = int(request.form.get("id"))
+    body = request.form.get("review-body")
+    title = request.form.get("review-title")
+    rating = float(request.form.get("rating3"))
+
+    newReview = Review(current_user.id, targetID, rating, title, body)
+    db.session.add(newReview)
+
+    targetProduct = Product.query.filter_by(id = targetID).first()
+    targetProduct.total_reviews += 1
+    targetProduct.rating = (targetProduct.rating*targetProduct.total_reviews + rating)/(targetProduct.total_reviews+1)
+    db.session.commit()
+
+    return jsonify({"alert" : "review added"})
 
 if __name__ == "__main__":
     with app.app_context():

@@ -4,6 +4,7 @@
 
     {% block additionalDependencies %}
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='product.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='stars.css')}}">
     {% endblock %}
 </head>
     {% block content %}
@@ -17,10 +18,40 @@
             wdcwec
         </div>
     </section>
-    <div class="reviews">
-        
+    <div class="reviews-top">
+        {% if not signedIn %}
+        <p>Wish to share your thoughts about this book? Create an account and let the world hear your critique!</p>
+        {% else %}
+        <form id="review-form">
+            <div class = 'review-top'>
+                <input id="review-title" name="review-title" maxlength="32" placeholder="Add a title"/>
+                <div id="full-stars-example-two">
+                    <div class="rating-group">
+                        <input disabled checked class="rating__input rating__input--none" name="rating3" id="rating3-none" value="0" type="radio">
+                        <label aria-label="1 star" class="rating__label" for="rating3-1"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating3" id="rating3-1" value="1" type="radio">
+                        <label aria-label="2 stars" class="rating__label" for="rating3-2"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating3" id="rating3-2" value="2" type="radio">
+                        <label aria-label="3 stars" class="rating__label" for="rating3-3"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating3" id="rating3-3" value="3" type="radio">
+                        <label aria-label="4 stars" class="rating__label" for="rating3-4"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating3" id="rating3-4" value="4" type="radio">
+                        <label aria-label="5 stars" class="rating__label" for="rating3-5"><i class="rating__icon rating__icon--star fa fa-star"></i></label>
+                        <input class="rating__input" name="rating3" id="rating3-5" value="5" type="radio">
+                    </div>
+                </div>
+
+            </div>
+            <textarea placeholder="Write a review" name = "review-body" maxlength="1024" spellcheck="true" class="review-body" form="review-form"></textarea>
+            <button type="submit" id="submit-review">Send Review</button>
+        </form>
+        {% endif %}
+        <section class="review-section">
+            
+        </section>
     </div>
     <script src="{{url_for('static', filename = 'scripts/productPageRender.js')}}" type = "text/javascript"></script>
     <script src="{{url_for('static', filename = 'scripts/orderHandler.js')}}" type = "text/javascript"></script>
     <script src="{{url_for('static', filename = 'scripts/favourites.js')}}" type = "text/javascript"></script>
+    <script src="{{url_for('static', filename = 'scripts/sendReview.js')}}" type = "text/javascript"></script>
 {% endblock %}

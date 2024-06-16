@@ -72,6 +72,45 @@
     color: var(--TEXT-COLOR-LIGHTER);
 }
 
+#review-form{
+    border: 1px solid red;
+    background-color: var(--BGCOLOR-ICONS-1);
+    margin-top: 3rem;
+}
+
+.review-top{
+    display: flex;
+    /* justify-content: space-around; */
+    gap: 3rem;
+    align-items: center;
+}
+
+.review-body{
+    display: block;
+    width: 80%;
+    height: fit-content;
+}
+#review-title{
+    width: 75%
+}
+.review-section{
+    display: flex;
+    flex-direction: column;
+}
+.review-item{
+    background-color: var(--BGCOLOR-ICONS-1);
+    padding: 1rem;
+    height: fit-content;
+
+    .review-title{
+        display: block;
+        font-size: var(--FSIZE-SLIGHTLY-LARGER);
+    }
+    .review-credentials{
+        display: block;
+        font-size: var(--FSIZE-SLIGHTLY-SMALLER);
+    }
+}
 @media screen and (min-width: 320px) {
     .product-container{
         grid-template-columns: 1fr;
