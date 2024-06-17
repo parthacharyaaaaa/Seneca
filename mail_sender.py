@@ -3,7 +3,10 @@ import ssl
 import smtplib
 
 from utils import format_receipt
+
+from email import encoders
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 
 # Create the welcome message
@@ -58,6 +61,34 @@ def sendSalutation(receiver) -> None:
     email_message.attach(MIMEText(getSalutations(receiver.first_name), 'plain'))
 
     context = ssl.create_default_context()
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.send_message(email_message)
+
+def sendOrder(receiver, payload, message) -> None:
+    email_sender = os.environ.get("email_sender")
+    email_password = os.environ.get("email_pass")
+
+    email_message = MIMEMultipart()
+    email_message["From"] = email_sender
+    email_message["To"] = receiver
+    email_message["Subject"] = "Gift: Seneca"
+    email_message.attach(MIMEText(message, 'plain'))
+
+
+    with open(payload, "rb") as attachment:
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    encoders.encode_base64(part)
+    part.add_header(
+        "Content-Disposition",
+        f"attachment; filename= {os.path.basename(payload)}",
+    )
+    email_message.attach(part)
+
+    context = ssl.create_default_context()
+
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
         smtp.login(email_sender, email_password)
         smtp.send_message(email_message)

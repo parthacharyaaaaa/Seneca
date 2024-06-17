@@ -58,19 +58,18 @@
         </div>
         <div class="mail">
             <h3>Email your order</h3>
-            <span class="text-span">Email your books in a zip file directly to your inbox</span>
-            {% if not signedIn %}
-            <span style="font-size: var(--FSIZE-S);">*Create an account to download books directly from Seneca, and enjoy the library feature for lifetime access to your purchases</span><br><br>
-            {%endif%}
-
-            <input type="text" value="" id="mail-id" class="bg-field" placeholder="Enter email address" />
-            <br>
-            <input type="submit" value="Mail" id="mail-button" class="hover-button" />
+            <span class="text-span">Email your books in a zip file directly to an email inbox, either yours or a special someone ;)</span>
+            <div class="mail-container">
+                <input type="text" value="" id="mail-id" class="mail-field" placeholder="Enter email address" />
+                <input type="text" value="" id="confirm-mail-id" class="mail-field" placeholder="Confirm email address" />
+                <textarea id="gift-message" class="bg-field" placeholder="Optionally, Enter a message to send alongside your purchase :D"></textarea>
+                <input type="submit" value="mail" id="mail-button" class="hover-button" />
+            </div>
         </div>
     </div>
 </section>
 <script src="{{url_for('static', filename='scripts/billGenerator.js')}}"></script>
-<script src="{{url_for('static', filename='scripts/giftBooks.js')}}"></script>
+<script src="{{url_for('static', filename='scripts/mailOrder.js')}}"></script>
 <script src="{{url_for('static', filename='scripts/purchaseProcessor.js')}}"></script>
 
 

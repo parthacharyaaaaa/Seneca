@@ -12,8 +12,9 @@ from datetime import timedelta, datetime
 import re as regex
 import os
 import secrets
+import asyncio
 
-from mail_sender import sendReceipt, sendSalutation
+from mail_sender import sendReceipt, sendSalutation, sendOrder
 from utils import createZip
     
 #App configuration
@@ -179,8 +180,10 @@ class Order_History(db.Model):
     status = db.Column(db.String(32), nullable = False, default = 'Not Processed')
     total_price = db.Column(db.Float, nullable = False)
     billing_address = db.Column(db.String(256), nullable = False)
-    order_type = db.Column(db.String(16), nullable = False, default = 'Personal')
+    order_type = db.Column(db.String(16), nullable = False, default = 'Download')
     order_quantity = db.Column(db.Integer, nullable = False)
+    mail_to = db.Column(db.String(64), nullable = True)
+    mail_message = db.Column(db.Text, nullable = True)
 
     #Retrieval Tokens
     token = db.Column(db.JSON, nullable = False, default = {})
@@ -193,7 +196,7 @@ class Order_History(db.Model):
         # CheckConstraint('total_price > 0', name = 'check_order_price')
     )
 
-    def __init__(self, user, date, status, price, bill, method, quantity):
+    def __init__(self, user, date, status, price, bill, method, quantity, mail_to = None, mail_message = None):
         self.user = user
         self.order_time = date
         self.status = status
@@ -201,6 +204,8 @@ class Order_History(db.Model):
         self.billing_address = bill
         self.order_type = method
         self.order_quantity = quantity
+        self.mail_to = mail_to
+        self.mail_message = mail_message
 
     def __repr__(self) -> str:
         return f"<Order_History {self.id}>"
@@ -775,6 +780,7 @@ def getCatalogue():
 def processOrder():
     data = request.get_json()
     print(data)
+    action = data.get("action")
     email_regex = r"[^@]+@[^@]+\.[^@]+"
 
     if data.get('validation') != "True":
@@ -790,7 +796,7 @@ def processOrder():
 
         if current_user.is_authenticated:
             print("Processing order: user")
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Personal", len(temp_storage))
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else data.get("recipient"), None if action == "download" else data.get("message"))
             db.session.add(order)
             db.session.commit()
             # print(temp_storage)
@@ -811,7 +817,7 @@ def processOrder():
 
             #Sending receipt
             sendReceipt(str(current_user.email_id), temp_storage, order)
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
         #Guest Transaction
         else:
             billingEmail = data.get('billing_email')
@@ -820,7 +826,7 @@ def processOrder():
             if validateCart():
                 print("Processing order: guest")
 
-                order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Personal", len(temp_storage))
+                order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else data.get("recipient"), None if action == "download" else data.get("message")) 
                 db.session.add(order)
                 db.session.commit()
 
@@ -840,18 +846,53 @@ def processOrder():
                 #Sending receipt
                 sendReceipt(str(billingEmail), temp_storage, order)
 
-                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']), "flag" : "valid"})
+                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
             else:
                 return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
 
-@app.route("/gift", methods = ['GET', 'POST'])
-def gift():
-    data = request.get_json()
-    print(data)
-    receiver_email = data.get('giftEmail')
-    print(receiver_email)
-    return jsonify({'message' : 'called'})
+@app.route("/sendMail/id=<order_id>/<download_url>")
+def sendMail(order_id, download_url):
+    print("Final Step: Verifying Download")
+    print(session)
+    print(order_id, download_url)
 
+    order = Order_History.query.filter_by(id = order_id).first()
+    token = order.token
+    print(token)
+
+    if token['expiration_time'] < datetime.now().isoformat():
+        print("Expired Token")
+        return jsonify({'error' : "Expired Token"})
+    
+    if token['used'] != 0:
+        print("Used token")
+        return jsonify({"error" : "This token has already been redeemed"})
+
+    if order_id != str(token['order_id']) or download_url != token['download_url']:
+        print("Invalid token")
+        print(type(order_id), type(token['order_id']))
+        return jsonify({'error' : 'Invalid Token'})
+    
+    print("Processing download")
+
+    #Creating zip file
+    packageItems = Order_Item.query.filter_by(order_id = order.id).all()
+    zipList = []
+    print(packageItems)
+    for packageItem in packageItems:
+        zipList.append(Product.query.filter_by(id = packageItem.product_id).first().url)
+    print(zipList)
+    package = createZip(f"Seneca: Order-{order_id}", zipList)
+    # print(package)
+    sendOrder(order.mail_to, package, order.mail_message)
+    token["used"] = 1
+    flag_modified(order, "token")
+    db.session.commit()
+    return redirect(url_for('mailConfirmation'))
+
+@app.route("/order-success")
+def mailConfirmation():
+    return "fuck you"
 @app.route('/download/id=<order_id>/<download_url>')
 def download(order_id, download_url):
         return render_template('download.html', signedIn = current_user.is_authenticated)
