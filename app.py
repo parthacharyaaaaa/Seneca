@@ -274,6 +274,22 @@ class Review(db.Model):
             "time" : self.time
         }
 
+class Feedback(db.Model):
+    __tablename__ = "feedbacks"
+
+    id = db.Column(db.Integer, primary_key = True)
+    title = db.Column(db.String(33), nullable = False)
+    description = db.Column(db.Text, nullable = False)
+    email = db.Column(db.String(32), nullable = False)
+    flag = db.Column(db.String(16), nullable = True, default = "support")
+    time = db.Column(db.DateTime, nullable = False)
+
+    def __init__(self, title, description, email, flag):
+        self.email = email
+        self.title = title
+        self.description = description
+        self.flag = flag
+        self.time = datetime.now()
 #Auxillary Functions
 def loadCart() -> dict:
     if current_user.is_authenticated:
@@ -911,6 +927,22 @@ def addReview():
 
     return jsonify({"alert" : "review added"})
 
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
+
+@app.route("/send-feedback", methods = ["POST"])
+def sendFeedback():
+    print(request.form)
+    title = request.form["title"]
+    email = request.form["email"]
+    flag = request.form["flag"]
+    query = request.form["query"]
+    newFeedback = Feedback(title, query, email, flag)
+    db.session.add(newFeedback)
+    db.session.commit()
+
+    return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

@@ -1,0 +1,78 @@
+/* General form styling */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+}
+
+/* Upper fields styling */
+.upper-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Input and select field styling */
+.contact-field,
+#flag {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+/* Focus effect */
+.contact-field:focus,
+#flag:focus {
+    border-color: #000;
+    outline: none;
+}
+
+/* Textarea styling */
+textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    resize: none;
+    transition: border-color 0.3s;
+}
+
+/* Textarea focus effect */
+textarea:focus {
+    border-color: #000;
+    outline: none;
+}
+
+/* Placeholder styling */
+::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Submit button styling (if you decide to add one) */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Submit button hover effect */
+button:hover {
+    background-color: #333;
+}

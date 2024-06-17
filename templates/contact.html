@@ -1,0 +1,25 @@
+{% extends 'baseTemplate.html' %}
+{% block title %} Seneca: Contact {% endblock %}
+{% block additionalDependencies %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='contact.css')}}">
+{%endblock%}
+{% block content %}
+<form class="container" id="contact-form">
+    <div class="upper-fields">
+        <input id = "email" name="email" class = "contact-field" placeholder="Contact Email (Required)"/>
+        <input id = "title" name="title" class="contact-field" placeholder="Query/Complaint Title"/>
+        <select name="flag" id="flag">
+            <option value="support">Support</option>
+            <option value="bug">Bug</option>
+            <option value="query">Query</option>
+            <option value="order">Orders</option>
+            <option value="legal">Legal</option>
+            <option value="api">APIs</option>
+        </select>
+    </div>
+    <textarea id="query" name="query" form="contact-form" maxlength="1024"></textarea>
+    <button type="submit">Submit</button>
+</form>
+
+<script type="text/javascript" src="{{url_for('static', filename = 'scripts/manageFeedback.js')}}"></script>
+{% endblock %}
