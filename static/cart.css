@@ -92,32 +92,6 @@
     width: fit-content;
 }
 
-.bg-field {
-    width: 60%;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 25px;
-    background-color: #ffffff; /* White background */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    font-size: 16px;
-    transition: all 0.3s ease;
-    /* margin-bottom: 0.5rem; */
-}
-
-/* Placeholder styling */
-.bg-field::placeholder {
-    color: #a9a9a9; /* Light gray placeholder text */
-}
-
-/* Focus and hover effects */
-.bg-field:focus,
-.bg-field:hover {
-    outline: 2px solid green;
-    box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.4); /* Stronger shadow */
-    background-color: #f7f7f7; /* Slightly darker background */
-    transform: translateY(-2px);
-}
-
 #total-bill,
 #total-items{
     font-size: var(--FSIZE-L);

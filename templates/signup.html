@@ -1,38 +1,54 @@
 {% extends 'baseTemplate.html' %}
 
 {% block title %} Signup {% endblock %}
-{% block content %}
 {%block additionalDependencies %}
-<link rel = "stylesheet" type="text/css" href="{{url_for('static', filename='signup-login.css')}}"/>
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='signup-login.css')}}" />
 {% endblock %}
-<h1>Signup</h1>
-<form id="signupForm" method="POST">
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-container">
+        <h1>Signup</h1>
+        <hr>
+        <form id="signupForm" method="POST">
+            <div class="input-wrapper">
+                <input type="text" id="first_name" name="first_name" required class="form-field"
+                    placeholder="First Name">
 
-            <label for="first_name">First Name:</label><br>
-            <input type="text" id="first_name" name="first_name" required><br>
-            
-            <label for="last_name">Last Name:</label><br>
-            <input type="text" id="last_name" name="last_name" required><br>
+                <input type="text" id="last_name" name="last_name" class="form-field" required placeholder="Last Name">
+            </div>
 
-        <label for="age">Age:</label><br>
-        <input type="number" id="age" name="age" required><br>
-        
-        <label for="phone_number">Phone Number:</label><br>
-        <input type="text" id="phone_number" name="phone_number" required><br>
-        
-        <label for="email_id">Email:</label><br>
-        <input type="email" id="email_id" name="email_id" required><br>
-        
-        <label for="password">Password:</label><br>
-        <input type="password" id="password" name="password" required><br>
+            <div class="input-wrapper">
+                <input type="number" id="age" name="age" required class="form-field" placeholder="Age">
+            </div>
+            <div class="input-wrapper">
 
-        <label for="confirm_password">Confirm Password:</label><br>
-        <input type="password" id="confirm_password" name="confirm_password" required><br>
-        
-        <input type="submit">         <!-- Are you fucking kidding me -->
-    </form>
+                <input type="text" id="phone_number" name="phone_number" required class="form-field"
+                    placeholder="Phone Number">
 
-    <div id="message"></div>
+                <input type="email" id="email_id" name="email_id" required class="form-field"
+                    placeholder="Email Address">
+            </div>
+            <div class="input-wrapper">
 
-    <script src="{{url_for('static', filename='scripts/signupValidation.js')}}"></script>
+                <input type="password" id="password" name="password" required class="form-field" placeholder="Password">
+
+                <input type="password" id="confirm_password" name="confirm_password" required class="form-field"
+                    placeholder="Confirm Password">
+            </div>
+
+            <input type="submit" class="hover-button"> <!-- Are you fucking kidding me -->
+        </form>
+    </div>
+    <div class="quote">
+        <h2>Join Seneca</h2><hr>
+        <h3>"The whole is greater than the sum of its parts."</h3>
+            <p class="promo">
+                Ready to elevate your reading experience? Become a member today and discover a realm of privileges designed exclusively for you! Imagine effortlessly curating your personal library with the click of a button, knowing your favorites are always at your fingertips. <br><br>Your cart? Consider it stored permanently—because convenience should never be compromised. As a trendsetter, you'll savor exclusive access to the latest book releases before they hit the shelves, setting the pace for literary aficionados everywhere. <br><br>But why stop there? Brace yourself for VIP treatment with personalized recommendations, irresistible discounts, and exclusive invites to events where fellow book enthusiasts gather to celebrate the written word. Join us now and seize the opportunity to indulge in a world where every chapter is a discovery and every page turn leaves you craving more.<br><br> It's not just membership—it's a declaration of literary sophistication. Join the club and elevate your reading game today!
+            </p>
+    </div>
+
+
+</div>
+
+<script src="{{url_for('static', filename='scripts/signupValidation.js')}}"></script>
 {%endblock%}

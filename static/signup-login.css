@@ -1,3 +1,70 @@
-header, footer{
-    display: none;
+.form-container{
+    /* background-color: var(--BGCOLOR-ICONS-1); */
+    width: 50%;
+    margin: 0 auto;
+    padding:1rem;
+    border-radius: 10px;
+}
+
+.bg-field{
+    width: fit-content;
+}
+
+#signupForm{
+    display: flex;
+    flex-flow: column nowrap;
+    /* justify-content: space-around; */
+    /* align-items: center; */
+    gap:1rem;
+
+    .input-wrapper{
+        display: flex;
+        flex-flow:row;
+        gap: 0.5rem;
+    }
+
+    .form-field{
+        /* background-color: transparent; */
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        /* border-bottom: black; */
+        height: 3rem;
+        padding: 5px;
+
+        border-radius: 10px;
+        font-size: var(--FSIZE-SLIGHTLY-LARGER);
+    }
+
+    .input-wrapper:nth-of-type(2) .form-field{
+        width: 3.5rem;
+    }
+
+}
+
+footer{
+    display: absolute;
+    bottom: 0;
+}
+
+.form-wrapper{
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    flex: 1;
+}
+body{
+    display: block;
+}
+
+.quote{
+    background-color: var(--BGCOLOR-ICONS-1);
+    border-radius: 15px;
+    padding: 1.2rem;
+}
+.desc{
+    font-size: var(--FSIZE-SLIGHTLY-SMALLER);
+}
+.promo{
+    font-size: var(--FSIZE-SLIGHTLY-LARGER);
 }
