@@ -33,22 +33,30 @@ def getSalutations(user) -> str:
     return message
 
 def sendReceipt(receiver, items, order) -> None:
-    email_sender = os.environ.get("email_sender")
-    email_password = os.environ.get("email_pass")
+    try:
+        print("Sending Receipt")
+        email_sender = os.environ.get("email_sender")
+        email_password = os.environ.get("email_pass")
 
-    receipt = format_receipt(items, order.id, order.order_quantity, order.order_time, order.total_price)
+        if not email_sender or not email_password:
+            raise ValueError("Email sender or password environment variables are not set")
 
-    email_message = MIMEMultipart()
-    email_message['From'] = email_sender
-    email_message['To'] = receiver
-    email_message['Subject'] = 'Purchase Receipt: Seneca'
-    email_message.attach(MIMEText(receipt, 'plain'))
+        receipt = format_receipt(items, order.id, order.order_quantity, order.order_time, order.total_price)
 
-    context = ssl.create_default_context()
+        email_message = MIMEMultipart()
+        email_message['From'] = email_sender
+        email_message['To'] = receiver
+        email_message['Subject'] = 'Purchase Receipt: Seneca'
+        email_message.attach(MIMEText(receipt, 'plain'))
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-        smtp.login(email_sender, email_password)
-        smtp.send_message(email_message)
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+            smtp.login(email_sender, email_password)
+            smtp.send_message(email_message)
+        print("Receipt sent successfully")
+    except Exception as e:
+        print(f"Failed to send receipt: {e}")
 
 def sendSalutation(receiver) -> None:
     email_sender = os.environ.get("email_sender")

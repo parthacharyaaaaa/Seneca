@@ -1,4 +1,13 @@
 /* General form styling */
+.letter{
+    width: 80%;
+    color: var(--TEXT-COLOR-LIGHT);
+    text-align: center;
+    font-size: var(--FSIZE-SLIGHTLY-LARGER);
+    margin: 0 auto;
+    margin-bottom: 2rem;
+}
+
 .container {
     max-width: 600px;
     margin: 0 auto;
@@ -83,6 +92,6 @@ textarea:focus {
     background-color: #333;
 }
 
-footer{
+/* footer{
     display: none;
-}
+} */

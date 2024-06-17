@@ -12,7 +12,7 @@ from datetime import timedelta, datetime
 import re as regex
 import os
 import secrets
-import asyncio
+import concurrent.futures
 
 from mail_sender import sendReceipt, sendSalutation, sendOrder
 from utils import createZip
@@ -422,7 +422,10 @@ def signup():
 
         login_user(newUser, remember=False, duration=timedelta(days=1))
         setLastSeen(time)
-        sendSalutation(current_user)
+        
+        #Sending Salutations
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(sendSalutation(current_user))
         #Guest user had a cart before creating an account
         if 'cart' in session:
             if not validateCart():
@@ -722,6 +725,7 @@ def getCatalogue():
         page_range_upper = request.form.get('page-range-upper')
         author = request.form.get('authors')
         sort_option = request.form.get('sort-option')
+        search = request.form.get("search")
         print(sort_option, author)
 
         #Managing filtering
@@ -742,7 +746,15 @@ def getCatalogue():
             books = [item for item in books if author == item.author]
         
         print("Post filter: ", books)
-        
+
+        #Search criteria
+        if search:
+            search = search.lower()
+            books = [item for item in books 
+                if search in item.author.lower().split() or
+                search in item.title.lower().split() or
+                search in item.language.lower()]
+
         if sort_option == '1':
             books.sort(key=lambda x: x.title.lower())
         elif sort_option == '2':
@@ -816,7 +828,9 @@ def processOrder():
             db.session.commit()
 
             #Sending receipt
-            sendReceipt(str(current_user.email_id), temp_storage, order)
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(sendReceipt(current_user.email_id, temp_storage, order))
+
             return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
         #Guest Transaction
         else:
@@ -884,7 +898,8 @@ def sendMail(order_id, download_url):
     print(zipList)
     package = createZip(f"Seneca: Order-{order_id}", zipList)
     # print(package)
-    sendOrder(order.mail_to, package, order.mail_message)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        sentOrder = executor.submit(sendOrder(order.mail_to, package, order.mail_message))
     token["used"] = 1
     flag_modified(order, "token")
     db.session.commit()
@@ -987,6 +1002,7 @@ def sendFeedback():
     db.session.commit()
 
     return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()

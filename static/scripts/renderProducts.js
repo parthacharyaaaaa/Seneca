@@ -11,9 +11,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
 document.getElementById('filter-form').addEventListener('submit', function (event) {
     event.preventDefault()
+    searchQuery = document.getElementById("search-field").value
 
     console.log("Filter called")
     var filterOptions = new FormData(this)
+    filterOptions.append("search", searchQuery)
     console.log(filterOptions)
     fetch("/get-catalogue", {
         method: "POST",

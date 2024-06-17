@@ -4,10 +4,18 @@
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='contact.css')}}">
 {%endblock%}
 {% block content %}
+<section class="letter">
+    <h2>Speak, so that I may see you.</h2><hr>
+    At Seneca, we are dedicated to providing the best reading experience possible. We believe in constant
+    improvement and innovation, and your feedback is a crucial part of that journey. Whether you have suggestions,
+    compliments, or concerns, we are eager to hear from you. Please fill out the form below, and rest assured, your
+    insights will help us elevate our services even further. Thank you for helping us create the ultimate ebook store
+    experience.
+</section>
 <form class="container" id="contact-form">
     <div class="upper-fields">
-        <input id = "email" name="email" class = "contact-field" placeholder="Contact Email (Required)"/>
-        <input id = "title" name="title" class="contact-field" placeholder="Query/Complaint Title"/>
+        <input id="email" name="email" class="contact-field" placeholder="Contact Email (Required)" />
+        <input id="title" name="title" class="contact-field" placeholder="Query/Complaint Title" />
         <select name="flag" id="flag">
             <option value="support">Support</option>
             <option value="bug">Bug</option>
