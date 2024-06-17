@@ -129,7 +129,6 @@
 .mail-container{
     display: flex;
     flex-direction: column;
-    border: 2px red solid;
     align-items: flex-start;
     gap: 0.5rem;
 }
@@ -176,6 +175,10 @@
     border: none;
     font-weight: 1000;
     border-radius: 50%;
+}
+
+#gift-message{
+    border-radius: 10px;
 }
 
 @media screen and (min-width: 480px){

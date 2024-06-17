@@ -444,7 +444,11 @@ footer a:is(:hover, :focus){
     transform: translateY(0);
   }
 
-
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 @media screen and (min-width: 480px){
     footer{
         flex-flow: column nowrap;
