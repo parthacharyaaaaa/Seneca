@@ -101,7 +101,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     font-size: 16px;
     transition: all 0.3s ease;
-    margin-bottom: 0.5rem;
+    /* margin-bottom: 0.5rem; */
 }
 
 /* Placeholder styling */
@@ -125,6 +125,47 @@
 .text-span{
     display: block;
     margin-bottom: 1rem;
+}
+.mail-container{
+    display: flex;
+    flex-direction: column;
+    border: 2px red solid;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.mail-field {
+    width: 100%;
+    padding: 12px 15px;
+    /* margin: 8px 0; */
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: 'Arial', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+}
+.mail-field:nth-child(2){
+    margin-bottom: 10px;
+}
+.mail-field::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+.mail-field:focus {
+    border-color: #000;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover effect */
+.mail-field:hover {
+    border-color: #888;
+}
+
+#mail-button{
+    width:max-content
 }
 
 .subtract-icon{
