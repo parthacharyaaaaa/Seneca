@@ -1,0 +1,11 @@
+.letter{
+    background-color: var(--BGCOLOR-ICONS-1);
+    padding: 1rem;
+    width: 70%;
+    margin: 0 auto;
+    border-radius: 10px;
+}
+a .hover-button{
+    margin-left: 45%;
+    margin-top: 1rem;
+}

@@ -888,11 +888,14 @@ def sendMail(order_id, download_url):
     token["used"] = 1
     flag_modified(order, "token")
     db.session.commit()
-    return redirect(url_for('mailConfirmation'))
+    return redirect(url_for('mailConfirmation', recipient = order.mail_to, order=order))
 
 @app.route("/order-success")
 def mailConfirmation():
-    return "fuck you"
+    recipient = request.args.get('recipient')
+    order = request.args.get('order')
+    return render_template('mailSuccess.html', recipient = recipient, order = order, signedIn = current_user.is_authenticated, sender = current_user.first_name if current_user.is_authenticated else "Guest")
+
 @app.route('/download/id=<order_id>/<download_url>')
 def download(order_id, download_url):
         return render_template('download.html', signedIn = current_user.is_authenticated)

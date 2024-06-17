@@ -1,0 +1,23 @@
+{% extends 'baseTemplate.html' %}
+{%block title %} Success: Mail {%endblock%}
+{% block additionalDependencies %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='letter.css')}}">
+{% endblock %}
+
+{% block content %}
+<section class="letter">
+    Dear {{sender}},<br>
+
+    We are pleased to inform you that your order has been successfully processed and sent to your designated recipient, at the address
+    {{recipient}}. Your order, identified by the reference number {{order.id}}, comprises {{order.order_quantity}} items and
+    totals {{order.total_price}}. This order was placed on {{order.order_time}}. Thank you for choosing us for your needs; we
+    look forward to serving you again soon.<br><hr>
+
+    Warm regards,<br>
+
+    Seneca
+</section>
+<a href="{{url_for('home')}}">
+    <button class="hover-button">Back To Home</button>
+</a>
+{% endblock %}

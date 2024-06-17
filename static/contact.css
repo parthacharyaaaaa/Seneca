@@ -3,7 +3,7 @@
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-family: 'Arial', sans-serif;
@@ -26,6 +26,9 @@
     border-radius: 4px;
     font-size: 16px;
     transition: border-color 0.3s;
+
+    background-color: rgb(37, 37, 37);
+    color: var(--TEXT-COLOR-LIGHT)
 }
 
 /* Focus effect */
@@ -33,6 +36,7 @@
 #flag:focus {
     border-color: #000;
     outline: none;
+
 }
 
 /* Textarea styling */
@@ -45,6 +49,8 @@ textarea {
     font-size: 16px;
     resize: none;
     transition: border-color 0.3s;
+    background-color: rgb(37, 37, 37);
+    color: var(--TEXT-COLOR-LIGHT)
 }
 
 /* Textarea focus effect */
@@ -60,7 +66,7 @@ textarea:focus {
 }
 
 /* Submit button styling (if you decide to add one) */
-button {
+.feedback-button {
     width: 100%;
     padding: 10px;
     background-color: #000;
@@ -70,9 +76,13 @@ button {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
-}
+}   
 
 /* Submit button hover effect */
-button:hover {
+.feedback-button:hover {
     background-color: #333;
+}
+
+footer{
+    display: none;
 }
