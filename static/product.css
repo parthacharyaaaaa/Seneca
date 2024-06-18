@@ -73,27 +73,32 @@
 }
 
 #review-form{
-    border: 1px solid red;
     background-color: var(--BGCOLOR-ICONS-1);
     margin-top: 3rem;
+    padding: 1rem;
 }
 
 .review-top{
     display: flex;
     /* justify-content: space-around; */
-    gap: 3rem;
+    gap: 2rem;
     align-items: center;
 }
 
 .review-body{
     display: block;
-    width: 80%;
     height: fit-content;
+    margin: 10px 0;
 }
-#review-title{
-    width: 75%
+#review-title,
+.review-body{
+    width: 45%;
+    outline: none;
+    border-radius: 10px;
+    padding: 5px;
 }
 .review-section{
+    border-top: 1px solid var(--TEXT-COLOR-LIGHTER);
     display: flex;
     flex-direction: column;
 }

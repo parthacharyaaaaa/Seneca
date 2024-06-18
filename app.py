@@ -959,11 +959,19 @@ def validateDownload():
 @app.route('/get-reviews', methods = ['POST'])
 def getReviews():
     print("Getting reviews")
-    reviews = Review.query.order_by(Review.time.desc()).limit(3).all()
-    if reviews == None:
-        return jsonify({"noReviews" : 1})
+    target = request.get_json().get('id')
+    offset = request.get_json().get('offset')
+    hasMore = 0
+    reviews = Review.query.filter_by(product = target).order_by(Review.time.desc()).offset(offset*3).limit(4).all()
+    if not reviews:
+        return jsonify({"isEmpty" : 1})
+    if len(reviews) > 3:
+        hasMore = 1
+    reviews = reviews[:3]
     reviews = [item.to_dict() for item in reviews]
-    return jsonify({"reviews" : reviews})
+    for item in reviews:
+        item["user"] = User.query.filter_by(id = item["user"]).first().first_name 
+    return jsonify({"reviews" : reviews, 'hasMore' : hasMore})
 
 @app.route('/add-review', methods = ["POST"])
 def addReview():
