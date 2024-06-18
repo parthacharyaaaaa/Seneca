@@ -61,6 +61,12 @@ html body::-webkit-scrollbar {
     --TEXT-COLOR-LIGHT-ALT-2
     */
 }
+.brand-text{
+    font-family: var(--FF-BRAND);
+}
+.fancy-text{
+    font-family: var(--FF-BRAND-2);
+}
 /* UTILITY */
 .utility-readable-text{
     position: absolute;

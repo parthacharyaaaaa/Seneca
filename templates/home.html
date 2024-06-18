@@ -1,6 +1,89 @@
 {% extends 'baseTemplate.html' %}
 {% block title %} Home {% endblock %}
-
+{% block additionalDependencies %}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='homepageStyles.css')}}">
+{% endblock %}
 {% block content %}
-cock
+<section class="banner-container" style="border: 2px solid red">
+    <figure class="banner-figure">
+        <img src="{{url_for('static', filename='assets/Alexandria.jpg')}}" alt="Library of Alexandria" class="banner">
+    </figure>
+    <div class="banner-readable">
+        <h1 class="banner-title">Seneca: Where Every Story Matters</h1>
+        <hr>
+        <span class="banner-promo">
+            At Seneca, we believe that reading is not just a pastime—it's a way of life. Our unwavering dedication to
+            bringing the world's finest books to your fingertips ensures that you experience literature like never
+            before. Whether you're lounging at home, commuting to work, or traveling the globe, Seneca makes it possible
+            to immerse yourself in your favorite stories anytime, anywhere.<br>
+
+            With an unparalleled selection of ebooks, we cater to every reader's taste, offering everything from
+            timeless classics to contemporary bestsellers. Our platform is designed for ease of use, ensuring that every
+            book, every story, and every word is just a click away. Join us at Seneca and embrace the future of
+            reading—where every turn of the page opens a new world of possibilities. Discover the joy of reading with
+            us, and let Seneca be your ultimate literary companion.<br>
+        </span>
+        <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+    </div>
+</section>
+<section class="about">
+    <h2 class="brand-text">About Us</h2>
+    <div class="line-idk-man-why-am-I-even-trying"></div>
+    <span class="fancy-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deleniti rem ipsa quidem ducimus
+        impedit eos debitis
+        facilis dolores necessitatibus excepturi incidunt esse temporibus, nulla veritatis! Eos quidem molestias
+        deserunt praesentium. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis perspiciatis quis ab
+        sint ratione! Tempore optio impedit officiis consequuntur quidem dicta animi, non commodi, ad numquam
+        praesentium quasi ex minima? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magni eveniet ad numquam
+        nostrum animi. Accusantium, sed dolorum minus voluptate explicabo labore eligendi iste odit, nesciunt quis
+        provident voluptatem cumque ipsam?</span>
+    <div class="promises-container">
+        <div class="promise-card">
+            <i class="fas fa-shield-alt"></i>
+            <hr>
+            <h5 class="fancy-text">Trust</h5>
+            <span class="promise-text">At Seneca, we prioritize your security and privacy.
+                Your trust is our top priority, and we are committed to providing a safe and secure online
+                environment for all our users.</span>
+        </div>
+        <div class="promise-card">
+            <i class="fas fa-heart"></i>
+            <hr>
+            <h5 class="fancy-text">Support</h5>
+            <span class="promise-text">At Seneca, support goes beyond just providing help when needed.
+                The support from both our team and our user community is always available to enhance your Seneca
+                experience.</span>
+
+        </div>
+        <div class="promise-card">
+            <i class="fas fa-book"></i>
+            <hr>
+            <h5 class="fancy-text">Diversity</h5>
+            <span class="promise-text">Seneca boasts an unparalleled collection of ebooks, catering to every reader's
+                taste. Whether you're seeking the latest thriller, a heartwarming
+                romance, or non-fiction, we has it all.</span>
+        </div>
+    </div>
+</section>
+<section class="promo">
+    <h5>Why Choose Seneca</h5>
+    <span class="promo-subheader">
+        I like smelly cocks
+    </span>
+    <div class="icons">
+        <div class="icon">
+            <i class="symbol"></i>
+            <span class="number">10+</span>
+            <span class="desc"></span>
+        </div>
+        <div class="icon"></div>
+        <span class="number">300K+</span><span class="desc"></span>
+        <div class="icon"></div>
+        <span class="number">100K+</span><span class="desc"></span>
+        <div class="icon"></div>
+        <span class="number">10K+</span><span class="desc"></span>
+    </div>
+</section>
+<section class="featured"></section>
+<section class="stories"></section>
 {% endblock %}
