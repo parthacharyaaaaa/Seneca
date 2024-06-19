@@ -383,7 +383,10 @@ def template():
 @app.route("/")
 def home():
     print(current_user)
-    return render_template('home.html', signedIn = current_user.is_authenticated)
+    bestSellers = Product.query.order_by(Product.units_sold).limit(5)
+    bestSellers = [item.to_dict() for item in bestSellers]
+    print(bestSellers)
+    return render_template('home.html', signedIn = current_user.is_authenticated, bestSellers = bestSellers)
 
 #---------------------------------------------------------------User Management
 @app.route('/signup', methods=['GET', 'POST'])

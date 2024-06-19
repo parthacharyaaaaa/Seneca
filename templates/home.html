@@ -101,23 +101,45 @@
     <div class="container">
         <div class="featured-card">
                 <!-- <img class="backdrop" src="{{url_for('static', filename='assets/romance-bg.jpg')}}"></img> -->
-            <img class="icon" src="{{url_for('static', filename='assets/heart-angle-svgrepo-com.svg')}}"></img>
+            <img class="icon" src="{{url_for('static', filename='assets/heart-angle-svgrepo-com.svg')}}" height="100" width="100"></img>
             <span class="genre-title">Romance<hr></span>
-            <span class="genre-desc">Romance novels sweep readers off their feet with tales of love, passion, and heartfelt connections. Whether it's a classic love story, a contemporary romance, or a historical romance, this genre captivates the heart and soul, offering a delightful escape into the world of emotion and intimacy.</span>
+            <span class="genre-desc">Embark on a journey of passion and heartache as love blooms in unexpected places in the rich tapestry of romantic novels</span>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+
         </div>
         <div class="featured-card">
 
-            <img class="icon" src="{{url_for('static', filename='assets/dragon-svgrepo-com.svg')}}"></img>
+            <img class="icon" src="{{url_for('static', filename='assets/dragon-svgrepo-com.svg')}}" height="100" width="100"></img>
             <span class="genre-title">Fiction<hr></span>
-            <span class="genre-desc">Fiction opens the door to endless possibilities, transporting readers to imaginative worlds and introducing them to unforgettable characters. This genre encompasses a wide range of stories, from literary masterpieces that delve into the human condition to thrilling adventures that keep readers on the edge of their seats.</span>
+            <span class="genre-desc">Immerse yourself in the boundless realms of fiction, where every page holds the promise of adventure, mystery, and the extraordinary.</span>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
         </div>
         <div class="featured-card">
             <div class="backdrop"></div>
-            <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}"></img>
+            <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}" height="100" width="100"></img>
             <span class="genre-title">Dystopian<hr></span>
-            <span class="genre-desc">Dystopian fiction paints a picture of societies gone awry, where oppressive regimes, environmental catastrophes, or technological domination create a grim reality. These narratives often serve as a cautionary tale, exploring themes of survival, rebellion, and the resilience of the human spirit.</span>
+            <span class="genre-desc">Experience the thrill of dystopian fiction, where societies teeter on the brink of collapse, and heroes emerge from the shadows to challenge the status quo.</span>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
         </div>
     </div>
 </section>
-<section class="stories"></section>
+<section class="bestsellers">
+    <div class="bestsellers-text">
+        <h2 class="brand-text">Bestsellers</h2>
+        <span>Dive into the very best that Seneca has to offer</span>
+        <hr>
+    </div>
+    <div class="bestsellers-ribbon">
+        {% for item in bestSellers %}
+        <div class="container">
+            <img class="backdrop" src="{{item['cover']}}"></img>
+            <img src="{{item['cover']}}" alt="{{item['title']}}">
+            <hr>
+            <span class="text">
+                {{ item['title'] }}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
