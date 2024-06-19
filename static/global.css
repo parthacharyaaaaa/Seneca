@@ -479,6 +479,8 @@ footer a:is(:hover, :focus){
     background-color: #f7f7f7; /* Slightly darker background */
     transform: translateY(-2px);
 }
+
+
 @media screen and (min-width: 480px){
     footer{
         flex-flow: column nowrap;
