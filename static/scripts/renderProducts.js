@@ -9,6 +9,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         .catch(error => console.log("Error: ", error))
 })
 
+document.getElementById('search-field').addEventListener('keydown', function(event){
+    if(event.key === "Enter")
+        alert("penis")
+})
 document.getElementById('filter-form').addEventListener('submit', function (event) {
     event.preventDefault()
     searchQuery = document.getElementById("search-field").value

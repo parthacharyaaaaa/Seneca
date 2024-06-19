@@ -703,12 +703,6 @@ def getFavs():
 @app.route("/catalogue")
 def catalogue():
     return render_template("catalogue.html", signedIn = current_user.is_authenticated)
-
-@app.route("/render-products", methods=['POST', 'GET'])
-def render():
-    products = Product.query.all()
-    products_list = [item.to_dict() for item in products]
-    return jsonify(products_list)
  
 @app.route("/get-catalogue", methods = ["POST", "GET"])
 def getCatalogue():
