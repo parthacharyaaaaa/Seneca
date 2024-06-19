@@ -96,12 +96,101 @@ html body .navbar{
     background-color: var(--BGCOLOR-ICONS-1);
     padding: 1rem;
 
+    h5,
+    #pp{
+        text-align: center;
+        display: block;
+    }
+
     .icons{
         display: flex;
-        justify-content: space-around;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+    .icon{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    .number, .desc{
+        display: block;
+        text-align: center;
+        margin: 0 auto;
+    }
+    .number{
+        font-size: var(--FSIZE-XL);
+        font-weight:600;
+        margin-bottom: 0;
     }
 }
 
+.featured{
+
+    h3{
+        text-align: center;
+        font-size: var(--FSIZE-XL);
+        margin-top: 1.2rem;
+    }
+    .line-idk-man-why-am-I-even-trying{
+        background-color: var(--TEXT-COLOR-LIGHT);
+        height:4px;
+        margin-bottom: 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        width: 10rem
+    }
+    .container{
+        display: grid;
+        grid-template-columns: repeat(3, 30%);
+        column-gap: 2rem;
+        justify-content: center;
+
+        .featured-card{
+            position: relative;
+            height: 25rem;
+            background-color: var(--BGCOLOR-ICONS-1);
+            padding: 1rem;
+            border-radius: 15px;
+
+            transition: 3ms ease-in;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .genre-desc{
+                display: block;
+                text-align: center;
+                font-weight: bold;
+                font-size: 1.05rem;
+            }
+            .genre-desc, 
+            .genre-title,
+            .icon{
+                z-index: 1;
+            }
+        }
+
+        .featured-card:first-child > .backdrop{
+            position: absolute;
+            filter: blur(10px);
+            top:0;
+            left:0;
+            z-index: 0;
+        }
+
+        .featured-card:hover{
+            cursor: pointer;
+        }
+
+        .featured-card:is(:hover, :focus){
+            transform: translateY(-2px);
+            box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+        }
+    }
+}
 html .about > span{
     display: block;
     width: 80%;

@@ -66,24 +66,58 @@
     </div>
 </section>
 <section class="promo">
-    <h5>Why Choose Seneca</h5>
+    <h5 class="brand-text">Why Choose Seneca</h5>
+    <span class="fancy-text" id="pp">Our platform is built on accomplishments, not just promises</span><hr>
     <span class="promo-subheader">
-        I like smelly cocks
     </span>
     <div class="icons">
         <div class="icon">
-            <i class="symbol"></i>
-            <span class="number">10+</span>
-            <span class="desc"></span>
+            <img src="{{url_for('static', filename='assets/map-location-pin-svgrepo-com.svg')}}" alt="genres">
+            <span class="number">20+</span>
+            <span class="desc">Genres to explore</span>
         </div>
-        <div class="icon"></div>
-        <span class="number">300K+</span><span class="desc"></span>
-        <div class="icon"></div>
-        <span class="number">100K+</span><span class="desc"></span>
-        <div class="icon"></div>
-        <span class="number">10K+</span><span class="desc"></span>
+        <div class="icon">
+            <img src="{{url_for('static', filename='assets/download-svgrepo-com.svg')}}" alt="downloads">
+            <span class="number">300K+</span>
+            <span class="desc">Book downloads</span>
+        </div>
+        <div class="icon">
+            <img src="{{url_for('static', filename='assets/books-svgrepo-com.svg')}}" alt="books">
+            
+        <span class="number">90K+</span>
+        <span class="desc">Books Available</span>
+        </div>
+        <div class="icon">
+            <img src="{{url_for('static', filename='assets/user-svgrepo-com.svg')}}" alt="user">
+        <span class="number">10K+</span>
+        <span class="desc">Users on Seneca</span>
+        </div>
     </div>
 </section>
-<section class="featured"></section>
+<section class="featured">
+    <h3 class="brand-text">Featured Genres</h3>
+    <div class="line-idk-man-why-am-I-even-trying"></div>
+
+    <div class="container">
+        <div class="featured-card">
+                <!-- <img class="backdrop" src="{{url_for('static', filename='assets/romance-bg.jpg')}}"></img> -->
+            <img class="icon" src="{{url_for('static', filename='assets/heart-angle-svgrepo-com.svg')}}"></img>
+            <span class="genre-title">Romance<hr></span>
+            <span class="genre-desc">Romance novels sweep readers off their feet with tales of love, passion, and heartfelt connections. Whether it's a classic love story, a contemporary romance, or a historical romance, this genre captivates the heart and soul, offering a delightful escape into the world of emotion and intimacy.</span>
+        </div>
+        <div class="featured-card">
+
+            <img class="icon" src="{{url_for('static', filename='assets/dragon-svgrepo-com.svg')}}"></img>
+            <span class="genre-title">Fiction<hr></span>
+            <span class="genre-desc">Fiction opens the door to endless possibilities, transporting readers to imaginative worlds and introducing them to unforgettable characters. This genre encompasses a wide range of stories, from literary masterpieces that delve into the human condition to thrilling adventures that keep readers on the edge of their seats.</span>
+        </div>
+        <div class="featured-card">
+            <div class="backdrop"></div>
+            <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}"></img>
+            <span class="genre-title">Dystopian<hr></span>
+            <span class="genre-desc">Dystopian fiction paints a picture of societies gone awry, where oppressive regimes, environmental catastrophes, or technological domination create a grim reality. These narratives often serve as a cautionary tale, exploring themes of survival, rebellion, and the resilience of the human spirit.</span>
+        </div>
+    </div>
+</section>
 <section class="stories"></section>
 {% endblock %}
