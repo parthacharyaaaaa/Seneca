@@ -381,7 +381,7 @@ def template():
     return render_template('baseTemplate.html', signedIn = current_user.is_authenticated)
 
 @app.route("/")
-def home():
+def home(): 
     print(current_user)
     bestSellers = Product.query.order_by(Product.units_sold).limit(6)
     bestSellers = [item.to_dict() for item in bestSellers]
@@ -556,24 +556,24 @@ def logout():
             return jsonify({"redirect_url" : url_for('home')})
 
 #------------------------------------------------------------------Cart Management
-@app.route("/products/id=<product_id>", methods=['POST', 'GET'])
-def product(product_id):
+@app.route("/products", methods=['GET'])
+def product():
     #Rendering the page
-    requestedProduct = Product.query.filter_by(id = product_id).first()
+    print(request)
+
+    id = request.args.get('viewkey')
+    print(id)
+    requestedProduct = Product.query.filter_by(id = id).first().loadInfo()
     print(requestedProduct)
     print(current_user.is_authenticated)
 
-    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, id = requestedProduct.id,
-                           title = requestedProduct.title, rating = requestedProduct.rating,
-                           summary = requestedProduct.summary, author = requestedProduct.author,
-                           publisher = requestedProduct.publisher, publication_date = requestedProduct.publication_date,
-                           isbn = requestedProduct.isbn, genre = requestedProduct.genre, pages = requestedProduct.pages, language = requestedProduct.language, file_format = requestedProduct.file_format,
-                           discount = requestedProduct.discount, price = requestedProduct.price,
-                           total_reviews = requestedProduct.total_reviews, url = requestedProduct.url, units_sold = requestedProduct.units_sold)
+    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct)
 
-@app.route("/get-product-details", methods = ['POST'])
+@app.route("/get-product-details", methods = ['GET'])
 def getProductDetails():
-    productID = int(request.get_json().get('id'))
+    print(request)
+    productID = request.args.get('viewkey')
+    print(productID)
     print("Retrieving product details: ", productID)
     requestedProduct = Product.query.filter_by(id = productID).first().loadInfo()   
     print(requestedProduct)
@@ -953,12 +953,14 @@ def validateDownload():
     db.session.commit()
     return send_file(package, as_attachment=True, download_name=f"Seneca: Order-{order_id}.zip")
 
-@app.route('/get-reviews', methods = ['POST'])
+@app.route('/get-reviews', methods = ['GET'])
 def getReviews():
     print("Getting reviews")
-    target = request.get_json().get('id')
-    offset = request.get_json().get('offset')
+    target = int(request.args.get('id'))
+    offset = int(request.args.get('offset'))
+
     hasMore = 0
+    print(target, offset)
     reviews = Review.query.filter_by(product = target).order_by(Review.time.desc()).offset(offset*3).limit(4).all()
     if not reviews:
         return jsonify({"isEmpty" : 1})

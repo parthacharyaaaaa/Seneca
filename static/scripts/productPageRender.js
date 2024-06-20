@@ -1,14 +1,16 @@
 document.addEventListener('DOMContentLoaded', function (event) {
     console.log("Loading product")
-    const path = window.location.pathname;
 
-    const id = ((path.split('/'))[2].split("="))[1]
+    const url = new URL(window.location.href)
+    const searchParams = new URLSearchParams(url.search)
+    const viewkeyValue = searchParams.get('viewkey')
+    console.log(viewkeyValue)
+
     fetch("/get-product-details", {
-        method: "POST",
+        method: "GET",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ id: id })
     })
         .then(response => response.json())
         .then(data => renderPage(data.product))

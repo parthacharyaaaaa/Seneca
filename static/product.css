@@ -11,13 +11,15 @@
 }
 .product-image > .backdrop{
     position: absolute;
-    top: 0;
+    top: 1.5rem;
     bottom: 0;
-    height: 100%;
-    width: 100%;
+    height: 120%;
+    width: 110%;
 
     object-fit: contain;
     z-index: -100;
+    background-size: cover;
+    filter: blur(40px);
 }
 
 .product-image > img{
@@ -142,6 +144,7 @@
 @media screen and (min-width: 320px) {
     .product-container{
         grid-template-columns: 1fr;
+        row-gap: 1rem;
     }
 
     .icons{

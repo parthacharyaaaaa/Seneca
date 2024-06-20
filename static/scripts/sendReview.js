@@ -1,13 +1,15 @@
 document.addEventListener("DOMContentLoaded", function(event){
     var offset = 0
-    const path = window.location.pathname;
-    const id = ((path.split('/'))[2].split("="))[1]
+    const url = new URL(window.location.href)
+    const searchParams = new URLSearchParams(url.search)
+    const viewkeyValue = searchParams.get('viewkey')
+    console.log(viewkeyValue)
     try {
         document.getElementById("review-form").addEventListener('submit', function(event){
             event.preventDefault()
             console.log("Send pp")
             var formData = new FormData(this)
-            formData.append("id", id)
+            formData.append("id", viewkeyValue)
     
             fetch("/add-review", {
                 method : "POST",
@@ -26,12 +28,11 @@ document.addEventListener("DOMContentLoaded", function(event){
     const reviewContainer = document.querySelector(".review-section")
     reviewContainer.innerHTML = ''
     console.log("Reviews called")
-    fetch("/get-reviews", {
-        method : "POST",
+    fetch(`/get-reviews?id=${viewkeyValue}&offset=${offset}`, {
+        method : "GET",
         headers : {
             "Content-Type" : "application/json"
-        },
-        body : JSON.stringify({ id : id , offset : offset})
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -69,13 +70,12 @@ document.addEventListener("DOMContentLoaded", function(event){
             document.querySelector('.load-button').addEventListener('click', function(event){
                 offset += 1
                 this.remove();
-                fetch("/get-reviews", {
-                    method : "POST",
+                fetch(`/get-reviews?id=${viewkeyValue}&offset=${offset}`, {
+                    method : "GET",
                     headers : {
                         "Content-Type" : "application/json"
-                    },
-                    body : JSON.stringify({ id : id , offset : offset})
-                })
+                    }
+                 })
                 .then(response => response.json())
                 .then(data => {
                     loadReviews(data)

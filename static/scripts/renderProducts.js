@@ -39,7 +39,7 @@ document.getElementById('filter-form').addEventListener('submit', function (even
         .catch(error => console.log("Error: ", error))
 })
 
-//Function to display the books
+
 function displayContent(products) {
     const container = document.querySelector('.product-container');
     container.innerHTML = '';
@@ -70,7 +70,7 @@ function displayContent(products) {
                 </div>
                 <div class='card-buttons'>
                 <div>
-                        <button class='view-button card-button' type='button' onclick='location.href = "/products/id=${product.id}"'>View</button>
+                        <button class='view-button card-button' type='button' onclick='location.href = "/products?viewkey=${product.id}"'>View</button>
                         <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
                     </div
                     <div>
