@@ -8,38 +8,31 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
         .catch(error => console.log("Error: ", error))
 })
-
-document.getElementById('search-field').addEventListener('keydown', function(event){
-    if(event.key === "Enter")
-        alert("penis")
-})
-document.getElementById('filter-form').addEventListener('submit', function (event) {
-    event.preventDefault()
-    searchQuery = document.getElementById("search-field").value
-
-    console.log("Filter called")
-    var filterOptions = new FormData(this)
-    filterOptions.append("search", searchQuery)
-    console.log(filterOptions)
-    fetch("/get-catalogue", {
-        method: "POST",
-        body: filterOptions
-    })
+searchField = document.getElementById('search-field')
+searchField.addEventListener('keydown', function(event){
+    if(event.key === "Enter"){
+        console.log("Searching")
+        fetch(`/get-catalogue?search=${searchField.value.trim()}`, {
+            method : "GET",
+            headers : {
+                "Content-Type" : "application/json"
+            }
+        })
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert(data.error);
-                return false;
+            if((data.books).length === 0){
+                alert("empty")
             }
-            else {
-                console.log(data)
+            else{
+                console.log(data.books)
                 displayContent(data.books)
             }
         })
-        .catch(error => console.log("Error: ", error))
+    }
+        
 })
 
-
+//Function to display the books
 function displayContent(products) {
     const container = document.querySelector('.product-container');
     container.innerHTML = '';
@@ -70,9 +63,9 @@ function displayContent(products) {
                 </div>
                 <div class='card-buttons'>
                 <div>
-                        <button class='view-button card-button' type='button' onclick='location.href = "/products?viewkey=${product.id}"'>View</button>
+                        <button class='view-button card-button' type='button' onclick='location.href = "/products/id=${product.id}"'>View</button>
                         <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
-                    </div
+                    </div>
                     <div>
                         <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
                     </div>
