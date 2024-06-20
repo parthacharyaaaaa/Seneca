@@ -716,7 +716,7 @@ def getCatalogue():
         search = request.args.get('search')
         try:
             sort = int(request.args.get('sort_by'))
-        except TypeError:
+        except (TypeError, ValueError):
             sort = None
         minPrice = request.args.get('min-price')
         maxPrice = request.args.get('max-price')
@@ -732,7 +732,7 @@ def getCatalogue():
                 )
             )
         if minPrice:
-            query = query.filter(Product.price >= minPrice)
+            query = query.filter(Product.price >= (minPrice))
         if maxPrice:
             query = query.filter(Product.price <= maxPrice)
         if minPages:

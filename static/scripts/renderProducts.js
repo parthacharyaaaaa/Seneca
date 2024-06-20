@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function (event) {
+    var search = document.getElementById('search-field').value
+    var sortOption = null
     fetch("/get-catalogue", {
         method: "GET"
     })
@@ -7,13 +9,70 @@ document.addEventListener("DOMContentLoaded", function (event) {
             displayContent(data.books)
         })
         .catch(error => console.log("Error: ", error))
-})
-searchField = document.getElementById('search-field')
-searchField.addEventListener('keydown', function(event){
-    if(event.key === "Enter"){
-        console.log("Searching")
-        fetch(`/get-catalogue?search=${searchField.value.trim()}`, {
-            method : "GET",
+
+
+    var searchField = document.getElementById('search-field')
+    searchField.addEventListener('keydown', function(event){
+        if(event.key === "Enter"){
+            console.log("Searching")
+            document.getElementById("filter-form").reset()
+            search = searchField.value.trim()
+            fetch(`/get-catalogue?search=${search}`, {
+                method : "GET",
+                headers : {
+                    "Content-Type" : "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if((data.books).length === 0){
+                    alert("empty")
+                }
+                else{
+                    console.log(data.books)
+                    displayContent(data.books)
+                }
+            })
+        }
+            
+    })
+    
+    var sortButtons = document.querySelectorAll('[name="sort-option"]')
+    sortButtons.forEach(sortButton =>
+        sortButton.addEventListener('click', function(event){
+            sortOption = sortButton.value
+            fetch(`/get-catalogue?search=${search}&sort_by=${sortOption}`, {
+                method : "GET",
+                headers : {
+                    "Content-Type" : "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if((data.books).length === 0){
+                    alert("empty")
+                }
+                else{
+                    console.log(data.books)
+                    displayContent(data.books)
+                }
+            })
+        })
+    )
+
+    document.getElementById("filter-form").addEventListener('submit', function(event){
+        event.preventDefault()
+        const maxPrice = document.getElementById('max-price').value
+        const minPrice = document.getElementById('min-price').value
+        const maxPages = document.getElementById('max-pages').value
+        const minPages = document.getElementById('min-pages').value
+
+        if(isNaN(maxPages) || isNaN(minPages) || isNaN(maxPrice) || isNaN(minPrice)){
+            alert("Improper Filter Option Entered (Non-Number)")
+            this.reset()
+        }
+        fetch(`/get-catalogue?search=${search}&sort_by=${sortOption}&max-price=${maxPrice}&min-price=${minPrice}&max-pages=${maxPages}&min-pages=${minPages}`, {
+            method : 'GET',
             headers : {
                 "Content-Type" : "application/json"
             }
@@ -28,8 +87,7 @@ searchField.addEventListener('keydown', function(event){
                 displayContent(data.books)
             }
         })
-    }
-        
+    })
 })
 
 //Function to display the books
@@ -63,7 +121,7 @@ function displayContent(products) {
                 </div>
                 <div class='card-buttons'>
                 <div>
-                        <button class='view-button card-button' type='button' onclick='location.href = "/products/id=${product.id}"'>View</button>
+                        <button class='view-button card-button' type='button' onclick='location.href = "/products?viewkey=${product.id}"'>View</button>
                         <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
                     </div>
                     <div>
