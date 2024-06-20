@@ -4,26 +4,21 @@
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='homepageStyles.css')}}">
 {% endblock %}
 {% block content %}
-<section class="banner-container" style="border: 2px solid red">
-    <figure class="banner-figure">
-        <img src="{{url_for('static', filename='assets/Alexandria.jpg')}}" alt="Library of Alexandria" class="banner">
-    </figure>
+<section class="banner-container">
     <div class="banner-readable">
-        <h1 class="banner-title">Seneca: Where Every Story Matters</h1>
+        <h1 class="banner-title brand-text">Seneca: Where Every Story Matters</h1>
         <hr>
-        <span class="banner-promo">
+        <span class="banner-promo fancy-text">
             At Seneca, we believe that reading is not just a pastime—it's a way of life. Our unwavering dedication to
             bringing the world's finest books to your fingertips ensures that you experience literature like never
             before. Whether you're lounging at home, commuting to work, or traveling the globe, Seneca makes it possible
             to immerse yourself in your favorite stories anytime, anywhere.<br>
 
-            With an unparalleled selection of ebooks, we cater to every reader's taste, offering everything from
-            timeless classics to contemporary bestsellers. Our platform is designed for ease of use, ensuring that every
-            book, every story, and every word is just a click away. Join us at Seneca and embrace the future of
-            reading—where every turn of the page opens a new world of possibilities. Discover the joy of reading with
-            us, and let Seneca be your ultimate literary companion.<br>
+            Discover the joy of reading with us, and let Seneca be your ultimate literary companion.<br>
         </span>
-        <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+        <div class="container">
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+        </div>
     </div>
 </section>
 <section class="about">
@@ -100,26 +95,23 @@
 
     <div class="container">
         <div class="featured-card">
-                <!-- <img class="backdrop" src="{{url_for('static', filename='assets/romance-bg.jpg')}}"></img> -->
             <img class="icon" src="{{url_for('static', filename='assets/heart-angle-svgrepo-com.svg')}}" height="100" width="100"></img>
             <span class="genre-title">Romance<hr></span>
             <span class="genre-desc">Embark on a journey of passion and heartache as love blooms in unexpected places in the rich tapestry of romantic novels</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location.href = '/catalogue'">Explore</button>
 
         </div>
         <div class="featured-card">
-
             <img class="icon" src="{{url_for('static', filename='assets/dragon-svgrepo-com.svg')}}" height="100" width="100"></img>
             <span class="genre-title">Fiction<hr></span>
             <span class="genre-desc">Immerse yourself in the boundless realms of fiction, where every page holds the promise of adventure, mystery, and the extraordinary.</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location.href = '/catalogue'">Explore</button>
         </div>
         <div class="featured-card">
-            <div class="backdrop"></div>
             <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}" height="100" width="100"></img>
             <span class="genre-title">Dystopian<hr></span>
             <span class="genre-desc">Experience the thrill of dystopian fiction, where societies teeter on the brink of collapse, and heroes emerge from the shadows to challenge the status quo.</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location.href = '/catalogue'">Explore</button>
         </div>
     </div>
 </section>
@@ -131,6 +123,7 @@
     </div>
     <div class="bestsellers-ribbon">
         {% for item in bestSellers %}
+        <a href="products/id={{item['id']}}">
         <div class="container">
             <img class="backdrop" src="{{item['cover']}}"></img>
             <img src="{{item['cover']}}" alt="{{item['title']}}">
@@ -138,8 +131,31 @@
             <span class="text">
                 {{ item['title'] }}
             </span>
-        </div>
+        </div></a>
         {% endfor %}
+    </div>
+</section>
+<section class="team">
+    <h3 class="fancy-text">Meet the team</h3>
+    <div class="line-idk-man-why-am-I-even-trying"></div>
+    <div class="container">
+        <div class="card">
+            <span class="header-text">Design: Parth</span><hr>
+            <span-description>If you've scrolled this far, you must have wondered why the design of this website is so sub-par,
+                well, that is all thanks to our one and only designer, Parth. He is responsible for the entire design of Seneca, which is
+                why the interface is almost unbearably ugly :D
+            </span-description>
+        </div>
+        <div class="card">
+            <span class="header-text">Development: Parth</span><hr>
+            <span-description>Again, it's your boy, Parth. He is responsible for the entire backend as well, developing robust APIs and queries, handling
+                input validation, edge cases (pause), implementing logic for handling orders and managing carts, and any other feature you come across.
+            </span-description>
+        </div>
+        <div class="card">
+            <span class="header-text">Vision: Parth</span><hr>
+            <span-description>The vision of Seneca was to provide a platform for me to practice using Flask to build something that I personally could use. The inspiration for this website is Kindle, of course. By making this site, I may not have perfected APIs or web design or Flask or SQLAlchemy, but this project has allowed me to practice all of these skills.</span-description>
+        </div>
     </div>
 </section>
 {% endblock %}
