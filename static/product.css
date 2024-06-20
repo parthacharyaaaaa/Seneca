@@ -23,7 +23,6 @@
 .product-image > img{
     object-fit: contain;
 }
-
 .product-info{
     background-color: black;
     padding: 1rem;
@@ -71,10 +70,20 @@
 .icons .fas{
     color: var(--TEXT-COLOR-LIGHTER);
 }
-
+.reviews-top{
+    padding: 1rem;
+    text-align: center;
+}
+.form-top{
+    text-align: center;
+    background-color: var(--BGCOLOR-ICONS-1);
+    margin-top: 1rem;
+    padding: 1rem;
+    border-top: 1px solid var(--TEXT-COLOR-LIGHTER)
+}
 #review-form{
     background-color: var(--BGCOLOR-ICONS-1);
-    margin-top: 3rem;
+    /* margin-top: 3rem; */
     padding: 1rem;
 }
 
@@ -95,26 +104,40 @@
     width: 45%;
     outline: none;
     border-radius: 10px;
-    padding: 5px;
 }
 .review-section{
     border-top: 1px solid var(--TEXT-COLOR-LIGHTER);
     display: flex;
     flex-direction: column;
 }
+.review-section .empty-msg{
+    text-align: center;
+    padding: 1rem;
+    font-size: var(--FSIZE-XL);
+    background-color: var(--BGCOLOR-ICONS-1);
+}
 .review-item{
     background-color: var(--BGCOLOR-ICONS-1);
     padding: 1rem;
     height: fit-content;
+    width: 95%;
+    margin: 0.5rem auto;
+    border-radius: 15px;
 
     .review-title{
         display: block;
-        font-size: var(--FSIZE-SLIGHTLY-LARGER);
+        font-size: var(--FSIZE-XL);
+        font-weight: bold;
     }
     .review-credentials{
         display: block;
         font-size: var(--FSIZE-SLIGHTLY-SMALLER);
     }
+}
+
+.review-item:nth-child(even){
+    background-color: gray;
+    color: var(--BGCOLOR-ICONS-1)
 }
 @media screen and (min-width: 320px) {
     .product-container{

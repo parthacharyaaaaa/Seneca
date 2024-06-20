@@ -2,23 +2,26 @@ document.addEventListener("DOMContentLoaded", function(event){
     var offset = 0
     const path = window.location.pathname;
     const id = ((path.split('/'))[2].split("="))[1]
-
-    document.getElementById("review-form").addEventListener('submit', function(event){
-        event.preventDefault()
-        console.log("Send pp")
-        var formData = new FormData(this)
-        formData.append("id", id)
-
-        fetch("/add-review", {
-            method : "POST",
-            body : formData
+    try {
+        document.getElementById("review-form").addEventListener('submit', function(event){
+            event.preventDefault()
+            console.log("Send pp")
+            var formData = new FormData(this)
+            formData.append("id", id)
+    
+            fetch("/add-review", {
+                method : "POST",
+                body : formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.alert)
+                document.getElementById("review-form").reset()
+            })
         })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.alert)
-            document.getElementById("review-form").reset()
-        })
-    })
+    } catch (error) {
+        console.log("Not signed in")
+    }
 
     const reviewContainer = document.querySelector(".review-section")
     reviewContainer.innerHTML = ''
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function(event){
     .then(response => response.json())
     .then(data => {
         if(data.isEmpty === 1){
-            reviewContainer.innerHTML = "Woah, sure is empty around here"
+            reviewContainer.innerHTML = `<div class='empty-msg'>Woah, sure is empty around here </div>`
             return false
         }
         else{
@@ -49,8 +52,8 @@ document.addEventListener("DOMContentLoaded", function(event){
             reviewObj.classList.add('review-item');
             
             reviewObj.innerHTML = `
-            <div class = "review-item">
-                <span class = "review-title"> ${review.title} </span>
+            <div>
+                <span class = "review-title"> ${review.title} <hr></span>
                 <span class = "review-credentials">${review.user} at ${review.time}</span> 
                 <div class = "review-body"> ${review.body} </div>
             </div>
