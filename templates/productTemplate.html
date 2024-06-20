@@ -5,6 +5,44 @@
     {% block additionalDependencies %}
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='product.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='stars.css')}}">
+
+        <!-- Meta Tags for SEO -->
+        <meta name="keywords" content="product, {{product['title']}}, buy {{product['title']}}, by {{product['author']}}">
+    
+        <!-- Open Graph Meta Tags for Social Media -->
+        <meta property="og:title" content="{{ product['title'] }}" />
+        <meta property="og:description" content="{{ product['summary'] }}" />
+        <meta property="og:image" content="{{product['cover']}}" />
+        <meta property="og:url" content="{{ request.url }}" />
+    
+        <!-- Twitter Card Meta Tags -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ product['title'] }}">
+        <meta name="twitter:description" content="{{ product['summary'] }}">
+        <meta name="twitter:image" content="{{product['cover']}}">
+    
+        <!-- Schema.org Markup -->
+        <script type="application/ld+json">
+        {
+          "@context": "http://schema.org",
+          "@type": "Product",
+          "name": "{{ product['title'] }}",
+          "image": "{{product['cover']}}",
+          "description": "{{ product['summary'] }}",
+          "brand": {
+            "@type": "Thing",
+            "name": "Seneca"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": "{{ request.url }}",
+            "priceCurrency": "USD",
+            "price": "{{ product['price'] }}",
+            "itemCondition": "http://schema.org/NewCondition",
+            "availability": "http://schema.org/InStock"
+          }
+        }
+    </script>
     {% endblock %}
 </head>
 {% block content %}
