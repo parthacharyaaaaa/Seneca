@@ -160,7 +160,7 @@ class Product(db.Model):
             'publication_date' : self.publication_date,
             'price' : self.price,
             'file_format' : self.file_format,
-            'rating': self.rating,
+            'rating': round(self.rating,2),
             'cover': url_for('static', filename=f"{os.environ.get('library')}{self.cover}"),
             'genre' : self.genre,
             'discount' : self.discount,
@@ -569,18 +569,18 @@ def product():
 
     return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct)
 
-@app.route("/get-product-details", methods = ['GET'])
-def getProductDetails():
-    print(request)
-    productID = request.args.get('viewkey')
-    print(productID)
-    print("Retrieving product details: ", productID)
-    requestedProduct = Product.query.filter_by(id = productID).first().loadInfo()   
-    print(requestedProduct)
-    if not requestedProduct:
-        raise AssertionError('Item not found')
+# @app.route("/get-product-details", methods = ['GET'])
+# def getProductDetails():
+#     print(request)
+#     productID = request.args.get('viewkey')
+#     print(productID)
+#     print("Retrieving product details: ", productID)
+#     requestedProduct = Product.query.filter_by(id = productID).first().loadInfo()   
+#     print(requestedProduct)
+#     if not requestedProduct:
+#         raise AssertionError('Item not found')
     
-    return({'product' : requestedProduct})
+#     return({'product' : requestedProduct})
 
 @app.route('/cart')
 def cart():

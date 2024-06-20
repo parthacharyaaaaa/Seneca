@@ -1,7 +1,7 @@
-document.addEventListener('contentLoaded', function (event) {
-    const path = window.location.pathname;
-    const id = ((path.split('/'))[2].split("="))[1]
-
+document.addEventListener('DOMContentLoaded', function (event) {
+    const url = new URL(window.location.href)
+    const searchParams = new URLSearchParams(url.search)
+    const id = searchParams.get('viewkey')
 
     document.getElementById('add-to-cart').addEventListener('click', function (event) {
         console.log("Caught request for: ", id);

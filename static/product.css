@@ -19,12 +19,15 @@
     object-fit: contain;
     z-index: -100;
     background-size: cover;
-    filter: blur(40px);
+    filter: blur(50px);
 }
 
-.product-image > img{
+.product-image > #book-cover{
     object-fit: contain;
+    border-radius: 15px;
+
 }
+
 .product-info{
     background-color: black;
     padding: 1rem;
@@ -79,9 +82,13 @@
 .form-top{
     text-align: center;
     background-color: var(--BGCOLOR-ICONS-1);
-    margin-top: 1rem;
+    /* margin-top: 1rem; */
     padding: 1rem;
     border-top: 1px solid var(--TEXT-COLOR-LIGHTER)
+}
+
+.form-top hr{
+    margin-bottom: 0;
 }
 #review-form{
     background-color: var(--BGCOLOR-ICONS-1);
@@ -106,6 +113,13 @@
     width: 45%;
     outline: none;
     border-radius: 10px;
+    padding: 5px;
+}
+#review-title{
+    height: 3rem;
+}
+.review-body{
+    height: 6rem
 }
 .review-section{
     border-top: 1px solid var(--TEXT-COLOR-LIGHTER);
