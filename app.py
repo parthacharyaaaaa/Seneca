@@ -383,7 +383,7 @@ def template():
 @app.route("/")
 def home(): 
     print(current_user)
-    bestSellers = Product.query.order_by(Product.units_sold).limit(6)
+    bestSellers = Product.query.order_by(Product.units_sold.desc()).limit(6)
     bestSellers = [item.to_dict() for item in bestSellers]
     print(bestSellers)
     return render_template('home.html', signedIn = current_user.is_authenticated, bestSellers = bestSellers)
@@ -569,19 +569,6 @@ def product():
     print(current_user.is_authenticated)
 
     return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct)
-
-# @app.route("/get-product-details", methods = ['GET'])
-# def getProductDetails():
-#     print(request)
-#     productID = request.args.get('viewkey')
-#     print(productID)
-#     print("Retrieving product details: ", productID)
-#     requestedProduct = Product.query.filter_by(id = productID).first().loadInfo()   
-#     print(requestedProduct)
-#     if not requestedProduct:
-#         raise AssertionError('Item not found')
-    
-#     return({'product' : requestedProduct})
 
 @app.route('/cart')
 def cart():

@@ -24,14 +24,11 @@
 <section class="about">
     <h2 class="brand-text">About Us</h2>
     <div class="line-idk-man-why-am-I-even-trying"></div>
-    <span class="fancy-text">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deleniti rem ipsa quidem ducimus
-        impedit eos debitis
-        facilis dolores necessitatibus excepturi incidunt esse temporibus, nulla veritatis! Eos quidem molestias
-        deserunt praesentium. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis perspiciatis quis ab
-        sint ratione! Tempore optio impedit officiis consequuntur quidem dicta animi, non commodi, ad numquam
-        praesentium quasi ex minima? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magni eveniet ad numquam
-        nostrum animi. Accusantium, sed dolorum minus voluptate explicabo labore eligendi iste odit, nesciunt quis
-        provident voluptatem cumque ipsam?</span>
+    <span class="fancy-text">Welcome to Seneca, your premier online destination for eBooks that enlighten, entertain,
+        and educate. At Seneca, we believe that books have the power to transform lives and open doors to new worlds.
+        Whether you are a passionate reader, a lifelong learner, or someone looking to escape into a good story, our
+        extensive collection has something for everyone.
+    </span>
     <div class="promises-container">
         <div class="promise-card">
             <i class="fas fa-shield-alt"></i>
@@ -62,7 +59,8 @@
 </section>
 <section class="promo">
     <h5 class="brand-text">Why Choose Seneca</h5>
-    <span class="fancy-text" id="pp">Our platform is built on accomplishments, not just promises</span><hr>
+    <span class="fancy-text" id="pp">Our platform is built on accomplishments, not just promises</span>
+    <hr>
     <span class="promo-subheader">
     </span>
     <div class="icons">
@@ -78,14 +76,14 @@
         </div>
         <div class="icon">
             <img src="{{url_for('static', filename='assets/books-svgrepo-com.svg')}}" alt="books">
-            
-        <span class="number">90K+</span>
-        <span class="desc">Books Available</span>
+
+            <span class="number">90K+</span>
+            <span class="desc">Books Available</span>
         </div>
         <div class="icon">
             <img src="{{url_for('static', filename='assets/user-svgrepo-com.svg')}}" alt="user">
-        <span class="number">10K+</span>
-        <span class="desc">Users on Seneca</span>
+            <span class="number">10K+</span>
+            <span class="desc">Users on Seneca</span>
         </div>
     </div>
 </section>
@@ -95,23 +93,38 @@
 
     <div class="container">
         <div class="featured-card">
-            <img class="icon" src="{{url_for('static', filename='assets/heart-angle-svgrepo-com.svg')}}" height="100" width="100"></img>
-            <span class="genre-title">Romance<hr></span>
-            <span class="genre-desc">Embark on a journey of passion and heartache as love blooms in unexpected places in the rich tapestry of romantic novels</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location.href = '/catalogue'">Explore</button>
+            <img class="icon" src="{{url_for('static', filename='assets/heart-angle-svgrepo-com.svg')}}" height="100"
+                width="100"></img>
+            <span class="genre-title">Romance
+                <hr>
+            </span>
+            <span class="genre-desc">Embark on a journey of passion and heartache as love blooms in unexpected places in
+                the rich tapestry of romantic novels</span>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button"
+                onclick="window.location.href = '/catalogue'">Explore</button>
 
         </div>
         <div class="featured-card">
-            <img class="icon" src="{{url_for('static', filename='assets/dragon-svgrepo-com.svg')}}" height="100" width="100"></img>
-            <span class="genre-title">Fiction<hr></span>
-            <span class="genre-desc">Immerse yourself in the boundless realms of fiction, where every page holds the promise of adventure, mystery, and the extraordinary.</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location.href = '/catalogue'">Explore</button>
+            <img class="icon" src="{{url_for('static', filename='assets/dragon-svgrepo-com.svg')}}" height="100"
+                width="100"></img>
+            <span class="genre-title">Fiction
+                <hr>
+            </span>
+            <span class="genre-desc">Immerse yourself in the boundless realms of fiction, where every page holds the
+                promise of adventure, mystery, and the extraordinary.</span>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button"
+                onclick="window.location.href = '/catalogue'">Explore</button>
         </div>
         <div class="featured-card">
-            <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}" height="100" width="100"></img>
-            <span class="genre-title">Dystopian<hr></span>
-            <span class="genre-desc">Experience the thrill of dystopian fiction, where societies teeter on the brink of collapse, and heroes emerge from the shadows to challenge the status quo.</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location.href = '/catalogue'">Explore</button>
+            <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}" height="100"
+                width="100"></img>
+            <span class="genre-title">Dystopian
+                <hr>
+            </span>
+            <span class="genre-desc">Experience the thrill of dystopian fiction, where societies teeter on the brink of
+                collapse, and heroes emerge from the shadows to challenge the status quo.</span>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button"
+                onclick="window.location.href = '/catalogue'">Explore</button>
         </div>
     </div>
 </section>
@@ -124,14 +137,15 @@
     <div class="bestsellers-ribbon">
         {% for item in bestSellers %}
         <a href="products/id={{item['id']}}">
-        <div class="container">
-            <img class="backdrop" src="{{item['cover']}}"></img>
-            <img src="{{item['cover']}}" alt="{{item['title']}}">
-            <hr>
-            <span class="text">
-                {{ item['title'] }}
-            </span>
-        </div></a>
+            <div class="container">
+                <img class="backdrop" src="{{item['cover']}}"></img>
+                <img src="{{item['cover']}}" alt="{{item['title']}}">
+                <hr>
+                <span class="text">
+                    {{ item['title'] }}
+                </span>
+            </div>
+        </a>
         {% endfor %}
     </div>
 </section>
@@ -140,21 +154,31 @@
     <div class="line-idk-man-why-am-I-even-trying"></div>
     <div class="container">
         <div class="card">
-            <span class="header-text">Design: Parth</span><hr>
-            <span-description>If you've scrolled this far, you must have wondered why the design of this website is so sub-par,
-                well, that is all thanks to our one and only designer, Parth. He is responsible for the entire design of Seneca, which is
+            <span class="header-text">Design: Parth</span>
+            <hr>
+            <span-description>If you've scrolled this far, you must have wondered why the design of this website is so
+                sub-par,
+                well, that is all thanks to our one and only designer, Parth. He is responsible for the entire design of
+                Seneca, which is
                 why the interface is almost unbearably ugly :D
             </span-description>
         </div>
         <div class="card">
-            <span class="header-text">Development: Parth</span><hr>
-            <span-description>Again, it's your boy, Parth. He is responsible for the entire backend as well, developing robust APIs and queries, handling
-                input validation, edge cases (pause), implementing logic for handling orders and managing carts, and any other feature you come across.
+            <span class="header-text">Development: Parth</span>
+            <hr>
+            <span-description>Again, it's your boy, Parth. He is responsible for the entire backend as well, developing
+                robust APIs and queries, handling
+                input validation, edge cases (pause), implementing logic for handling orders and managing carts, and any
+                other feature you come across.
             </span-description>
         </div>
         <div class="card">
-            <span class="header-text">Vision: Parth</span><hr>
-            <span-description>The vision of Seneca was to provide a platform for me to practice using Flask to build something that I personally could use. The inspiration for this website is Kindle, of course. By making this site, I may not have perfected APIs or web design or Flask or SQLAlchemy, but this project has allowed me to practice all of these skills.</span-description>
+            <span class="header-text">Vision: Parth</span>
+            <hr>
+            <span-description>The vision of Seneca was to provide a platform for me to practice using Flask to build
+                something that I personally could use. The inspiration for this website is Kindle, of course. By making
+                this site, I may not have perfected APIs or web design or Flask or SQLAlchemy, but this project has
+                allowed me to practice all of these skills.</span-description>
         </div>
     </div>
 </section>

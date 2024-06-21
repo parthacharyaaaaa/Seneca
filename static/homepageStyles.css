@@ -442,7 +442,9 @@ html .about>span {
     .promises-container{
             grid-template-columns: repeat(3, 33%);
         }
-
+    html .about > span{
+        width: 80%;
+    }
     .promo
     .icons{
         display: flex;
@@ -471,6 +473,9 @@ html .about>span {
     .container{
         grid-template-columns: repeat(3, 33%);
         column-gap: 1rem;
+    }
+    .banner-container .banner-readable .banner-promo{
+        width: 70%;
     }
 }
 
