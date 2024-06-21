@@ -2,7 +2,7 @@ import os
 import ssl
 import smtplib
 
-from utils import format_receipt
+from Seneca.utils import format_receipt
 
 from email import encoders
 from email.mime.multipart import MIMEMultipart
