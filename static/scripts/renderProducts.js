@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if (minPrice) url += `&min-price=${minPrice}`;
         if (maxPages) url += `&max-pages=${maxPages}`;
         if (minPages) url += `&min-pages=${minPages}`;
+        console.log(maxPrice, minPrice, maxPages, minPages)
         
         fetch(url, {
             method: "GET",
@@ -66,6 +67,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if(event.key === "Enter"){
             console.log("Searching");
             document.getElementById("filter-form").reset();
+            minPrice = null, maxPrice = null, minPages = null, maxPages = null
             search = searchField.value.trim();
             page = 1;
             fetchCatalogue();
