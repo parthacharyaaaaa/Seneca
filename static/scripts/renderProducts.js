@@ -137,9 +137,7 @@ function displayContent(products) {
                         <button class='view-button card-button' type='button' onclick='location.href = "/products?viewkey=${product.id}"'>View</button>
                         <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
                     </div>
-                    <div>
                         <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
-                    </div>
                 </div>
                 </div>
         `;
