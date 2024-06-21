@@ -1,5 +1,6 @@
 from zipfile import ZipFile as zipf
 import os
+import re
 
 def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
     receipt_lines = []
@@ -45,3 +46,15 @@ def createZip(filename, contents):
             arcname = os.path.basename(full_path)
             zipPackage.write(filename=full_path, arcname=arcname)
     return zip_path
+
+def validateSignup(form) -> bool:
+    print("called: ", form)
+    return (
+        form['first_name'].isalpha() and
+        form['last_name'].isalpha() and
+        re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', form['email_id']) is not None and
+        form['phone_number'].isdigit() and
+        form['age'].isdigit() and
+        len(form['password']) >= 8 and
+        form['password'] == form['confirm_password']
+    )

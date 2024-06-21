@@ -9,7 +9,7 @@ document.getElementById('signupForm').addEventListener('submit', function(event)
 
     var formData = new FormData(this);
     
-    if(checkForm('signUp', formData)){
+    if(checkForm('signup', formData)){
         formData.append("formattedDateTime", formattedDateTime)
         fetch('/signup', {
             method: 'POST',

@@ -1,4 +1,5 @@
 export function checkForm(flag, formDetails) {
+    console.log("Called")
     //Checking for empty inputs
     for (let [field, value] in formDetails.entries()) {
         if (!value || value === undefined || value === '') {
@@ -7,6 +8,7 @@ export function checkForm(flag, formDetails) {
         }
     }
     if (flag === 'signup') {
+        console.log("signup")
         const firstName = formDetails.get('first_name'), lastName = formDetails.get('last_name'), age = formDetails.get('age'), emailID = formDetails.get('email_id'), phoneNumber = formDetails.get('phone_number'), password = formDetails.get('password'), cPassword = formDetails.get('confirm_password');
 
         //Check name
@@ -18,7 +20,7 @@ export function checkForm(flag, formDetails) {
 
         //Check Age
         if (isNaN(age)) {
-            alert("Invalud Age");
+            alert("Invalid Age");
             return false;
         }
         else if (age > 100) {
@@ -47,6 +49,8 @@ export function checkForm(flag, formDetails) {
             return false;
         }
         //All checks out, send to endpoint
+        console.log("All good")
+
         return true;
     }
 

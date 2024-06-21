@@ -15,7 +15,7 @@ import secrets
 import concurrent.futures
 
 from mail_sender import sendReceipt, sendSalutation, sendOrder
-from utils import createZip
+from utils import createZip, validateSignup
     
 #App configuration
 app = Flask(__name__)
@@ -392,57 +392,56 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        email = request.form['email_id']
-        phone = str(request.form['phone_number'])
-        time = request.form['formattedDateTime']
-
-        #Handle existing user trying to sign up
-        if User.query.filter_by(email_id = email).first() != None:
-            print("User already exists (email)")
-            flash("This email and/or phone number already exists")
-
-            return jsonify({'exists' : True,
-                            'alert' : 'A Haki account with this email already exists'})
-        elif User.query.filter_by(phone_number = phone).first() != None:
-            print("User already exists (phone number)")
-
-            return jsonify({'exists' : True,
-                            'alert' : 'A Haki account with this phone number already exists'})
+        print("Endpoint signup")
+        if not validateSignup(request.form):
+            print('error validating form')
+            return jsonify({"alert" : "Invalid details submitted"})
         
-        #Register user into database
-        fname = request.form['first_name']
-        lname = request.form['last_name']
-        age = request.form['age']
-        password = request.form['password']
-        confirmPassword = request.form['confirm_password']
-
-        hashedPassword = bcrypt.generate_password_hash(password)
-        newUser = User(fname, lname, age, phone, email, hashedPassword)
-
-        db.session.add(newUser)
-        db.session.commit()
-        print('User added')
-
-        login_user(newUser, remember=False, duration=timedelta(days=1))
-        setLastSeen(time)
-        
-        #Sending Salutations
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(sendSalutation(current_user))
-        #Guest user had a cart before creating an account
-        if 'cart' in session:
-            if not validateCart():
-                print("Session cart data has been tampered with (Signup)")
-                return({'alert' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
-            else:
-                persistNewCart()
-                print("Cart updated: New user <- Guest Cart")
-                session.pop('cart')
-                print(session)
-                return jsonify({'alert' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
         else:
-            print("Account made")
-            return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
+            email = request.form['email_id']
+            phone = str(request.form['phone_number'])
+            time = request.form['formattedDateTime']
+
+            #Handle existing user trying to sign up
+            if User.query.filter_by(email_id = email).first() != None:
+                return jsonify({'exists' : True,'alert' : 'A Seneca account with this email already exists'})
+
+            elif User.query.filter_by(phone_number = phone).first() != None:
+                return jsonify({'exists' : True,'alert' : 'A Seneca account with this phone number already exists'})
+            
+            #Register user into database
+            fname = request.form['first_name']
+            lname = request.form['last_name']
+            age = request.form['age']
+            password = request.form['password']
+
+            hashedPassword = bcrypt.generate_password_hash(password)
+            newUser = User(fname, lname, age, phone, email, hashedPassword)
+
+            db.session.add(newUser)
+            db.session.commit()
+
+            login_user(newUser, remember=False, duration=timedelta(days=1))
+            setLastSeen(time)
+            
+            #Sending Salutations
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(sendSalutation(current_user))
+
+            #Guest user had a cart before creating an account
+            if 'cart' in session:
+                if not validateCart():
+                    print("Session cart data has been tampered with (Signup)")
+                    return({'alert' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
+                else:
+                    persistNewCart()
+                    print("Cart updated: New user <- Guest Cart")
+                    session.pop('cart')
+                    print(session)
+                    return jsonify({'alert' : 'Welcome to Seneca! Your temporary cart has been stored in our database. Happy reading :)', 'redirect_url' : url_for('home')})
+            else:
+                print("Account made")
+                return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
     return render_template('signup.html')
 
 @app.route("/login", methods = ['POST', 'GET'])
@@ -463,8 +462,7 @@ def login():
             registeredUser = User.query.filter_by(phone_number = identity).first()
         else:
             print("Invalid identity data sent from client\nTERMINATING----------------------------")
-            return jsonify({'authenticated' : False,
-                            'alert' : 'Error: Invalid identity syntax'})      #Ideally, this message should never pop up since input validation is performed at clinet-side itself
+            return jsonify({'authenticated' : False,'alert' : 'Error: Invalid identity syntax'})      #Ideally, this message should never pop up since input validation is performed at clinet-side itself
         
         if registeredUser:
             print("User found")
@@ -520,14 +518,12 @@ def getUserInfo():
         for item in target.favourites:
             product = Product.query.filter_by(id = int(item)).first()
             favourites.update({int(item):product.to_dict()})
-        # print(favourites)
 
         orderHolder = {}
         orderHistory = Order_History.query.filter_by(user = target.id).all()
         for orders in orderHistory:
             orderHistoryItems = Order_Item.query.filter_by(order_id = orders.id).all()
             orderItemHolder = [item.to_dict() for item in orderHistoryItems]
-            print(orderItemHolder)
             for item in orderItemHolder:
                 x = Product.query.filter_by(id = item['product_id']).first()
                 item.update({"title" : x.title,"author": x.author, "isbn" : x.isbn})
@@ -539,7 +535,6 @@ def getUserInfo():
                 'total_amount': orders.total_price,
                 'items': orderItemHolder
             }
-        # print(orderHolder)
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
 
 @app.route("/logout", methods = ['POST'])
@@ -559,9 +554,6 @@ def logout():
 #------------------------------------------------------------------Cart Management
 @app.route("/products", methods=['GET'])
 def product():
-    #Rendering the page
-    print(request)
-
     id = request.args.get('viewkey')
     print(id)
     requestedProduct = Product.query.filter_by(id = id).first().loadInfo()
@@ -577,7 +569,6 @@ def cart():
     for items in fallback.values():
         backup_price += items['price'] - items['discount']
     backup_quantity = len(fallback)
-    print(session)
     if current_user.is_authenticated:
         if current_user.cart == []:
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = True, backup_price = backup_price, backup_quantity = backup_quantity)
@@ -596,14 +587,12 @@ def removeFromCart():
         print(productID)
         # Logged in user
         if current_user.is_authenticated:
-            print("Before removing: ",current_user.cart)
             current_user.cart.remove(productID)
 
             flag_modified(current_user, 'cart')
             db.session.commit()
 
         else:
-            print(session['cart'])
             session['cart'].remove(productID)
             session.modified = True
         product = Product.query.filter_by(id = productID).first()
@@ -613,14 +602,12 @@ def removeFromCart():
 def addToCart():
     if request.method == 'POST':
         product_id = str(request.form['id'])
-        print("Incoming product (API): ", product_id)
 
         product = Product.query.filter_by(id = product_id).first()
         if not product:
             return jsonify({"message" : "Error in validating product authenticity :/"})
         #Guest user:
         if not(current_user.is_authenticated):
-            print("Error: Not logged in")
             if 'cart' not in session:
                 session.permanent = True
                 session['cart'] = []
@@ -629,7 +616,6 @@ def addToCart():
                 return jsonify({'message' : "It appears you are using Seneca as a guest. While we do allow guest purchases, please note that your session data, including your cart, is only stored temporarily and will be deleted after inactivity :)"})
 
             elif product_id in session['cart']:
-                print("Guest's cart already has all this shit")
                 return jsonify({"message" : "Item exists in cart (temp)"})
 
             session['cart'].append(product_id)
@@ -641,10 +627,8 @@ def addToCart():
         #Logged in user:
         targetUser = User.query.filter_by(id = current_user.id).first()
         print(targetUser.cart)
-        print("/addToCart: Current Cart")
 
         if product_id in targetUser.cart:
-            print("This item already exists in your cart")
             return jsonify({'message' : 'Product already in cart'})
         else:
             targetUser.cart.append(product_id)
@@ -656,7 +640,7 @@ def addToCart():
 
         return jsonify({'message' : 'Product added to cart'})
 
-@app.route("/get-cart", methods = ['POST', 'GET'])
+@app.route("/get-cart", methods = ['GET'])
 def getCart():
     billItems = loadCart()
     print("Final bill: ", billItems)
@@ -669,7 +653,6 @@ def toggleFav():
         return jsonify({'alert' : 'You must have an account to keep favourites'})
     
     item = request.get_json().get('id')
-    print(item, current_user.favourites)
     if item in current_user.favourites:
         (current_user.favourites).remove(item)
         print(current_user.favourites)
@@ -686,7 +669,6 @@ def toggleFav():
 @app.route("/get-favourites", methods = ['GET'])
 def getFavs():
     if not current_user.is_authenticated:
-        print("Guest User, No favourites")
         return jsonify({"isGuest" : 1})
     else:
         return jsonify({'favs' : current_user.favourites})
@@ -718,7 +700,7 @@ def getCatalogue():
                     Product.genre.ilike(f"%{search}%")
                 )
             )
-            print("Search result: ",type(query))
+
         if minPrice:
             query = query.filter(Product.price >= (minPrice))
         if maxPrice:
@@ -728,9 +710,6 @@ def getCatalogue():
         if maxPages:
             query = query.filter(Product.pages <= maxPages)
         
-        print("Filter result: ",type(query))
-
-
         if sort == 1:
             query = query.order_by(Product.title.asc())
         elif sort == 2:
@@ -752,9 +731,6 @@ def getCatalogue():
         elif sort == 10:
             query = query.order_by(Product.pages.desc())
         
-        print("Sort result: ",type(query))
-
-    print(type(query))
     paginatedQuery = query.paginate(page=page, per_page=8)
     books = [item.loadInfo() for item in paginatedQuery]
     print(paginatedQuery.pages, paginatedQuery.items)
