@@ -5,7 +5,7 @@ from flask_login import UserMixin, login_required, login_user, current_user, Log
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy import ForeignKey, CheckConstraint, Index
+from sqlalchemy import ForeignKey, CheckConstraint, Index, or_
 from sqlalchemy.orm.attributes import flag_modified
 
 from datetime import timedelta, datetime
@@ -621,7 +621,7 @@ def removeFromCart():
         product = Product.query.filter_by(id = productID).first()
         return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
-@app.route('/addToCart', methods=['POST', 'GET'])
+@app.route('/addToCart', methods=['POST'])
 def addToCart():
     if request.method == 'POST':
         product_id = str(request.form['id'])
@@ -703,86 +703,81 @@ def getFavs():
     else:
         return jsonify({'favs' : current_user.favourites})
 #--------------------------------------------------------------------Product Management
-@app.route("/catalogue")
+@app.route("/catalogue", methods=['GET'])
 def catalogue():
-    return render_template("catalogue.html", signedIn = current_user.is_authenticated)
- 
-@app.route("/get-catalogue", methods = ["POST", "GET"])
+    return render_template('catalogue.html', signedIn=current_user.is_authenticated)
+     
+@app.route("/get-catalogue", methods = ["GET"])
 def getCatalogue():
-    books = Product.query.all()
-    if request.method == "GET":
-        print("Normal catalogue, page just loaded")
-
-    elif request.method == "POST":
-        print(request.form)
-
-        price_range_lower = request.form.get('price-range-lower')
-        price_range_upper = request.form.get('price-range-upper')
-        page_range_lower = request.form.get('page-range-lower')
-        page_range_upper = request.form.get('page-range-upper')
-        author = request.form.get('authors')
-        sort_option = request.form.get('sort-option')
-        search = request.form.get("search")
-        print(sort_option, author)
-
-        #Managing filtering
-        #Price filters
-        if price_range_lower:
-            books = [item for item in books if int(price_range_lower) <= item.price]
-        if price_range_upper:
-            books = [item for item in books if int(price_range_upper) >= item.price]
-
-        #Page filters
-        if page_range_lower:
-            books = [item for item in books if int(price_range_lower) <= item.pages]
-        if page_range_upper:
-            books = [item for item in books if int(price_range_upper) >= item.pages]
-
-        #Author filter
-        if author:
-            books = [item for item in books if author == item.author]
-        
-        print("Post filter: ", books)
-
-        #Search criteria
+    page=request.args.get('page', 1, type=int)
+    query = Product.query
+    if len(request.args) != 0:
+        print(request.args)
+        search = request.args.get('search')
+        try:
+            sort = int(request.args.get('sort_by'))
+        except (TypeError, ValueError):
+            sort = None
+        minPrice = request.args.get('min-price')
+        maxPrice = request.args.get('max-price')
+        minPages = request.args.get('min-pages')
+        maxPages = request.args.get('max-pages')
         if search:
-            search = search.lower()
-            books = [item for item in books 
-                if search in item.author.lower().split() or
-                search in item.title.lower().split() or
-                search in item.language.lower()]
-
-        if sort_option == '1':
-            books.sort(key=lambda x: x.title.lower())
-        elif sort_option == '2':
-            books.sort(key=lambda x: x.title.lower(), reverse=True)
-        elif sort_option == '3':
-            books.sort(key= lambda x: x.price)
-        elif sort_option == '4':
-            books.sort(key=lambda x:x.price, reverse=True)
-        elif sort_option == '5':
-            books.sort(key= lambda x: x.publication_date, reverse=True)
-        elif sort_option == '6':
-            books.sort(key=lambda x:x.publication_date)
-        elif sort_option == '7':
-            books.sort(key= lambda x: x.author)
-        elif sort_option == '8':
-            books.sort(key=lambda x:x.author, reverse=True)
-        elif sort_option == '9':
-            books.sort(key= lambda x: x.pages, reverse=True)
-        elif sort_option == '10':
-            books.sort(key=lambda x:x.pages, reverse=False)
-        else:
-            pass
+            query = query.filter(
+                or_(
+                    Product.title.ilike(f"%{search}%"),
+                    Product.author.ilike(f"%{search}%"),
+                    Product.genre.ilike(f"%{search}%")
+                )
+            )
+            print("Search result: ",type(query))
+        if minPrice:
+            query = query.filter(Product.price >= (minPrice))
+        if maxPrice:
+            query = query.filter(Product.price <= maxPrice)
+        if minPages:
+            query = query.filter(Product.pages >= minPages)
+        if maxPages:
+            query = query.filter(Product.pages <= maxPages)
         
-        print("Sorted List: ", books)
+        print("Filter result: ",type(query))
 
 
-    books = [item.to_dict() for item in books]
-    if current_user.is_authenticated:
-        return jsonify({"books": books, "favourites" : current_user.favourites})
-    else:
-        return jsonify({"books" : books})
+        if sort == 1:
+            query = query.order_by(Product.title.asc())
+        elif sort == 2:
+            query = query.order_by(Product.title.desc())
+        elif sort == 3:
+            query = query.order_by(Product.price.asc())
+        elif sort == 4:
+            query = query.order_by(Product.price.desc())
+        elif sort == 5:
+            query = query.order_by(Product.publication_date.asc())
+        elif sort == 6:
+            query = query.order_by(Product.publication_date.desc())
+        elif sort == 7:
+            query = query.order_by(Product.author.asc())
+        elif sort == 8:
+            query = query.order_by(Product.author.desc())
+        elif sort == 9:
+            query = query.order_by(Product.pages.asc())
+        elif sort == 10:
+            query = query.order_by(Product.pages.desc())
+        
+        print("Sort result: ",type(query))
+
+    print(type(query))
+    paginatedQuery = query.paginate(page=page, per_page=8)
+    books = [item.loadInfo() for item in paginatedQuery]
+    print(paginatedQuery.pages, paginatedQuery.items)
+    return jsonify({"books" : books,
+                    "total_pages" : paginatedQuery.pages,
+                    "current_page" : page,
+                    "has_next" : paginatedQuery.has_next,
+                    "has_prev" : paginatedQuery.has_prev,
+                    "next_page" : paginatedQuery.next_num if paginatedQuery.has_next else None,
+                    "prev_page" : paginatedQuery.prev_num if paginatedQuery.has_prev else None
+                    })
 
 #Order Management
 @app.route("/process-order", methods = ['POST', 'GET'])
