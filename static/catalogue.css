@@ -113,7 +113,12 @@ option{
     margin: 1rem 0;
 }
 
-
+.pagination{
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+    gap: 10%
+}
 @media screen and (min-width: 320px) {
     .wrapper{
         display: grid;

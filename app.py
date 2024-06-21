@@ -621,7 +621,7 @@ def removeFromCart():
         product = Product.query.filter_by(id = productID).first()
         return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
-@app.route('/addToCart', methods=['POST', 'GET'])
+@app.route('/addToCart', methods=['POST'])
 def addToCart():
     if request.method == 'POST':
         product_id = str(request.form['id'])
@@ -709,9 +709,9 @@ def catalogue():
      
 @app.route("/get-catalogue", methods = ["GET"])
 def getCatalogue():
-    if len(request.args) == 0:
-        query = Product.query.all()
-    else:
+    page=request.args.get('page', 1, type=int)
+    query = Product.query
+    if len(request.args) != 0:
         print(request.args)
         search = request.args.get('search')
         try:
@@ -722,15 +722,15 @@ def getCatalogue():
         maxPrice = request.args.get('max-price')
         minPages = request.args.get('min-pages')
         maxPages = request.args.get('max-pages')
-        query = Product.query
         if search:
             query = query.filter(
                 or_(
-                    Product.title.ilike(f"%{search}%"),  # Case-insensitive match for title
-                    Product.author.ilike(f"%{search}%"),  # Case-insensitive match for author
-                    Product.genre.ilike(f"%{search}%")  # Case-insensitive match for genre
+                    Product.title.ilike(f"%{search}%"),
+                    Product.author.ilike(f"%{search}%"),
+                    Product.genre.ilike(f"%{search}%")
                 )
             )
+            print("Search result: ",type(query))
         if minPrice:
             query = query.filter(Product.price >= (minPrice))
         if maxPrice:
@@ -739,13 +739,14 @@ def getCatalogue():
             query = query.filter(Product.pages >= minPages)
         if maxPages:
             query = query.filter(Product.pages <= maxPages)
+        
+        print("Filter result: ",type(query))
+
 
         if sort == 1:
             query = query.order_by(Product.title.asc())
-            print(query)
         elif sort == 2:
             query = query.order_by(Product.title.desc())
-            print(query)
         elif sort == 3:
             query = query.order_by(Product.price.asc())
         elif sort == 4:
@@ -762,9 +763,21 @@ def getCatalogue():
             query = query.order_by(Product.pages.asc())
         elif sort == 10:
             query = query.order_by(Product.pages.desc())
-        print(query)
-    query = [item.loadInfo() for item in query]
-    return jsonify({"books" : query})
+        
+        print("Sort result: ",type(query))
+
+    print(type(query))
+    paginatedQuery = query.paginate(page=page, per_page=8)
+    books = [item.loadInfo() for item in paginatedQuery]
+    print(paginatedQuery.pages, paginatedQuery.items)
+    return jsonify({"books" : books,
+                    "total_pages" : paginatedQuery.pages,
+                    "current_page" : page,
+                    "has_next" : paginatedQuery.has_next,
+                    "has_prev" : paginatedQuery.has_prev,
+                    "next_page" : paginatedQuery.next_num if paginatedQuery.has_next else None,
+                    "prev_page" : paginatedQuery.prev_num if paginatedQuery.has_prev else None
+                    })
 
 #Order Management
 @app.route("/process-order", methods = ['POST', 'GET'])
