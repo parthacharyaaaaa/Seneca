@@ -15,8 +15,9 @@ document.getElementById('confirm-purchase').addEventListener('click', function (
     })
         .then(response => response.json())
         .then(data => {
+            console.log(data)
             if (data.alert) {
-                alert("Alert: ", data.alert)
+                alert(data.alert)
             }
             if (data.flag === "valid") {
                 window.location.href = data.redirect_url

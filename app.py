@@ -744,7 +744,7 @@ def getCatalogue():
                     })
 
 #Order Management
-@app.route("/process-order", methods = ['POST', 'GET'])
+@app.route("/process-order", methods = ['POST'])
 def processOrder():
     data = request.get_json()
     print(data)
@@ -791,8 +791,8 @@ def processOrder():
         #Guest Transaction
         else:
             billingEmail = data.get('billing_email')
-            if billingEmail == "" or not regex.match(email_regex, billingEmail):
-                return jsonify({"alert" : "Invalid billing email provided"})
+            if billingEmail == "" or not regex.match(email_regex, billingEmail) or billingEmail == None:
+                return jsonify({"alert" : "Error: Invalid billing email provided"})
             if validateCart():
                 print("Processing order: guest")
 
