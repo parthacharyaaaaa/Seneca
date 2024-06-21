@@ -1,3 +1,5 @@
+import { checkForm } from "./formFunctions.js"
+
 document.addEventListener("DOMContentLoaded", function(event){
     var offset = 0
     const url = new URL(window.location.href)
@@ -9,17 +11,18 @@ document.addEventListener("DOMContentLoaded", function(event){
             event.preventDefault()
             console.log("Send pp")
             var formData = new FormData(this)
-            formData.append("id", viewkeyValue)
-    
-            fetch("/add-review", {
-                method : "POST",
-                body : formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.alert)
-                document.getElementById("review-form").reset()
-            })
+            if(checkForm('review', formData)){
+                formData.append("id", viewkeyValue)
+                fetch("/add-review", {
+                    method : "POST",
+                    body : formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.alert)
+                    document.getElementById("review-form").reset()
+                })
+            }
         })
     } catch (error) {
         console.log("Not signed in")

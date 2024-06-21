@@ -5,7 +5,7 @@
 {%endblock%}
 {% block content %}
 <section class="letter">
-    <h2>Speak, so that I may see you.</h2><hr>
+    <h2>"Speak, so that I may see you."</h2><hr>
     At Seneca, we are dedicated to providing the best reading experience possible. We believe in constant
     improvement and innovation, and your feedback is a crucial part of that journey. Whether you have suggestions,
     compliments, or concerns, we are eager to hear from you. Please fill out the form below, and rest assured, your
@@ -29,5 +29,5 @@
     <button type="submit" class="feedback-button">Submit</button>
 </form>
 
-<script type="text/javascript" src="{{url_for('static', filename = 'scripts/manageFeedback.js')}}"></script>
+<script type="module" src="{{url_for('static', filename = 'scripts/manageFeedback.js')}}"></script>
 {% endblock %}

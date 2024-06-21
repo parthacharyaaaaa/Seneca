@@ -448,6 +448,7 @@ def signup():
 @app.route("/login", methods = ['POST', 'GET'])
 def login():
     if request.method == 'POST':
+        print(request.form)
         identity = request.form['emailPhone']
         password = request.form['password']
         time = request.form['formattedDateTime']
