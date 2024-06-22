@@ -19,6 +19,9 @@ function renderDashboard(data) {
     renderUserInfo(data.user_info);
     renderFavourites(data.fav_info);
     renderOrders(data.order_info);
+
+    const event = new Event('contentLoaded');
+    document.dispatchEvent(event)
 }
 
 function renderUserInfo(userInfo) {
@@ -90,8 +93,8 @@ function renderFavourites(favInfo) {
                         </div>
                         <div class="card-buttons">
                             <div>
-                                <button class="view-button card-button" type="button" onclick='location.href="/products/view/id=${favInfo[productId].id}"'>View</button>
-                                <button class="cart-button card-button" type="button" onclick='addToCart(${favInfo[productId].id})'>Add to cart</button>
+                                <button class="view-button card-button" type="button" onclick='location.href="/products?viewkey=${favInfo[productId].id}"'>View</button>
+                                <button class="cart-button card-button" type="button" name=${favInfo[productId].id}>Add to cart</button>
                             </div>
                             <div>
                                 <button class="fav-button card-button" type="button" id="${favInfo[productId].id}">x</button>
@@ -99,7 +102,7 @@ function renderFavourites(favInfo) {
                         </div>
                     </div>
                 `;
-                favsContainer.appendChild(favItem); // Append each product card to the body or another container element
+                favsContainer.appendChild(favItem);
                 favButton = favItem.querySelector('.fav-button')
                 favButton.addEventListener('click', function(event){
                     fetch('/toggle-favourites', {
@@ -157,19 +160,19 @@ function renderOrders(orderInfo) {
     }
 }
 
-function addToCart(id) {
-    var formData = new FormData()
-    formData.append('id', id);
+// function addToCart(id) {
+//     var formData = new FormData()
+//     formData.append('id', id);
 
-    fetch("/addToCart", {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message)
-            }
-        })
-        .catch(error => alert("Error: ", error))
-}
+//     fetch("/addToCart", {
+//         method: 'POST',
+//         body: formData
+//     })
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.message) {
+//                 alert(data.message)
+//             }
+//         })
+//         .catch(error => alert("Error: ", error))
+// }

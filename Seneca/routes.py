@@ -255,7 +255,9 @@ def removeFromCart():
 @app.route('/addToCart', methods=['POST'])
 def addToCart():
     if request.method == 'POST':
-        product_id = str(request.form['id'])
+        print("ID: ", str(request.form['id']))
+        product_id = request.form['id']
+        print("Session: ", session)
 
         product = Product.query.filter_by(id = product_id).first()
         if not product:
@@ -270,13 +272,12 @@ def addToCart():
                 return jsonify({'message' : "It appears you are using Seneca as a guest. While we do allow guest purchases, please note that your session data, including your cart, is only stored temporarily and will be deleted after inactivity :)"})
 
             elif product_id in session['cart']:
-                return jsonify({"message" : "Item exists in cart (temp)"})
+                return jsonify({"message" : "Item exists in cart"})
 
             session['cart'].append(product_id)
-            print(session)
             session.modified = True
 
-            return jsonify({"message" : 'Ye le bc guest saala mkc teri'})
+            return jsonify({'added' : 1})
         
         #Logged in user:
         targetUser = User.query.filter_by(id = current_user.id).first()
@@ -292,13 +293,22 @@ def addToCart():
             db.session.commit()
             print(User.query.get(current_user.id).cart)
 
-        return jsonify({'message' : 'Product added to cart'})
+        return jsonify({'added' : 1})
 
 @app.route("/get-cart", methods = ['GET'])
 def getCart():
-    billItems = loadCart()
-    print("Final bill: ", billItems)
-    return jsonify(billItems)
+    if request.args.get('flag') == "id":
+        if current_user.is_authenticated:
+            return jsonify(current_user.cart)
+        else:
+            try:
+                return jsonify(session['cart'])
+            except:
+                return jsonify([])
+    else:
+        billItems = loadCart()
+        print("Final bill: ", billItems)
+        return jsonify(billItems)
 
 #-------------------------------------------------------------------Favourites Management
 @app.route("/toggle-favourites", methods = ['POST'])
