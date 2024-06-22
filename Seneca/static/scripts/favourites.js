@@ -1,7 +1,7 @@
 document.addEventListener('contentLoaded', function (event) {
     const hearts = document.querySelectorAll('.fav-button')
     var favourites
-    console.log(hearts.length)
+    console.log("Buttons: " + hearts.length)
     fetch('/get-favourites', {
         method : 'GET'
     })
@@ -18,6 +18,7 @@ document.addEventListener('contentLoaded', function (event) {
             favourites = data.favs
             console.log(favourites)
             hearts.forEach(icon => {
+                console.log(icon)
                 if(favourites.includes(icon.id)){
                     icon.style.backgroundColor = 'red'
                 }

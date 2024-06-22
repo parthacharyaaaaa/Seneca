@@ -154,19 +154,3 @@ function displayContent(products) {
     const event = new Event('contentLoaded');
     document.dispatchEvent(event)
 }
-// function addToCart(id) {
-//     var formData = new FormData()
-//     formData.append('id', id);
-
-//     fetch("/addToCart", {
-//         method: 'POST',
-//         body: formData
-//     })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.message) {
-//                 alert(data.message)
-//             }
-//         })
-//         .catch(error => alert("Error: ", error))
-// }
