@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
 
     __table_args__ = (
         Index('users_email_id', 'email_id'),
+        CheckConstraint('age > 8 AND age < 100', name = 'check_age_range'),
     )
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:

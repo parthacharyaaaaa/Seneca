@@ -10,8 +10,9 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 
 env_path = os.path.join(os.path.dirname(__file__)[:-7], "instance", ".env")
-print(os.path.dirname(__file__)[:-7])
-print(load_dotenv(env_path))
+load_dotenv(env_path)
+# print(os.path.dirname(__file__)[:-7])
+# print(load_dotenv(env_path))
 
 #Configs
 app.secret_key = os.environ.get('SENECA_KEY')
