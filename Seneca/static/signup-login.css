@@ -1,9 +1,9 @@
+.form-wrapper{
+    display: grid;
+}
+
 .form-container{
-    /* background-color: var(--BGCOLOR-ICONS-1); */
-    width: 50%;
-    margin: 0 auto;
     padding:1rem;
-    border-radius: 10px;
 }
 
 .bg-field{
@@ -13,8 +13,6 @@
 #signupForm{
     display: flex;
     flex-flow: column nowrap;
-    /* justify-content: space-around; */
-    /* align-items: center; */
     gap:1rem;
 
     .input-wrapper{
@@ -24,7 +22,6 @@
     }
 
     .form-field{
-        /* background-color: transparent; */
         border-top: none;
         border-left: none;
         border-right: none;
@@ -47,12 +44,7 @@ footer{
     bottom: 0;
 }
 
-.form-wrapper{
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    flex: 1;
-}
+
 body{
     display: block;
 }
@@ -67,4 +59,29 @@ body{
 }
 .promo{
     font-size: var(--FSIZE-SLIGHTLY-LARGER);
+}
+
+@media screen and (min-width: 480px){
+    .form-wrapper{
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+    }
+    .form-container{
+        justify-self: center;
+    }
+}
+
+@media screen and (min-width: 992px){
+    .form-wrapper{
+        grid-template-columns: 50% 50%;
+        justify-content: space-between;
+    }
+    .form-container{
+        align-self: center;
+    }
+}
+@media screen and (min-width: 1200px){
+    .form-wrapper{
+        grid-template-columns: 45% 50%;
+    }
 }
