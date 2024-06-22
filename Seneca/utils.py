@@ -54,8 +54,8 @@ def createZip(filename, contents):
             zipPackage.write(filename=full_path, arcname=arcname)
     return zip_path
 
+#Input validation
 def validateSignup(form) -> bool:
-    print("called: ", form)
     return (
         form['first_name'].isalpha() and
         form['last_name'].isalpha() and
@@ -66,6 +66,13 @@ def validateSignup(form) -> bool:
         form['password'] == form['confirm_password']
     )
 
+def valdiateLogin(form) -> bool:
+    return (
+        (re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', form['emailPhone']) or 
+        form['phone_number'].isdigit()) and
+        len(form['password']) >= 8 
+    )
+#Download tokens
 def generateDownloadToken(orderID, userID = 'guest'):
     download_url = secrets.token_urlsafe(16)
     expiration_time = datetime.now() + timedelta(minutes=30)
@@ -77,6 +84,7 @@ def generateDownloadToken(orderID, userID = 'guest'):
         "used" : 0
     }
 
+#Logout function
 def setLastSeen(time) -> None:
     print(time, datetime.now())
     date_format = "%m/%d/%Y, %I:%M:%S %p"
@@ -84,6 +92,7 @@ def setLastSeen(time) -> None:
     current_user.last_seen = time
     db.session.commit()
 
+#Cart Management
 def loadCart() -> dict:
     if current_user.is_authenticated:
         itemKeys = current_user.cart

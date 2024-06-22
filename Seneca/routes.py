@@ -98,6 +98,10 @@ def signup():
 def login():
     if request.method == 'POST':
         print(request.form)
+        if not valdiateLogin(request.form):
+            print("Login validation failed: Backend")
+            return jsonify({'alert' : 'Invalid details submitted'})
+        
         identity = request.form['emailPhone']
         password = request.form['password']
         time = request.form['formattedDateTime']
