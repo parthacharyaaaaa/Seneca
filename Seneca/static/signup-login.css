@@ -1,3 +1,14 @@
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.login-wrapper{
+    margin: 0 auto;
+    padding: 1rem;
+    background-color: var(--BGCOLOR-ICONS-1);
+    border-radius: 15px;
+}
 .form-wrapper{
     display: grid;
 }
