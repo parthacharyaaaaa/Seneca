@@ -1,6 +1,13 @@
 from zipfile import ZipFile as zipf
 import os
 import re
+from datetime import datetime, timedelta
+import secrets
+from Seneca import db
+from Seneca.models import Product, User
+from flask_login import current_user
+from flask import session
+from sqlalchemy.orm.attributes import flag_modified
 
 def format_receipt(book_dict, orderID, orderQuantity, orderTime, orderPrice):
     receipt_lines = []
@@ -58,3 +65,73 @@ def validateSignup(form) -> bool:
         len(form['password']) >= 8 and
         form['password'] == form['confirm_password']
     )
+
+def generateDownloadToken(orderID, userID = 'guest'):
+    download_url = secrets.token_urlsafe(16)
+    expiration_time = datetime.now() + timedelta(minutes=30)
+    return{
+        "order_id" : orderID,
+        "user_id" : userID,
+        "download_url" : download_url,
+        "expiration_time" : expiration_time.isoformat(),
+        "used" : 0
+    }
+
+def setLastSeen(time) -> None:
+    print(time, datetime.now())
+    date_format = "%m/%d/%Y, %I:%M:%S %p"
+    time = datetime.strptime(time, date_format)
+    current_user.last_seen = time
+    db.session.commit()
+
+def loadCart() -> dict:
+    if current_user.is_authenticated:
+        itemKeys = current_user.cart
+    else:
+        try:
+            itemKeys = session['cart']
+        #Handle uninitialized session
+        except KeyError as k:
+            itemKeys = []
+
+    cart = {}
+    for itemKey in itemKeys:
+        item = Product.query.filter_by(id = int(itemKey)).first()
+        cart.update({str(item.id) : item.to_dict()})
+    print(cart)
+    return cart
+
+def validateCart() -> bool:
+    print("ValidateCart called")
+    if 'cart' not in session:
+        return True
+    
+    for productID in session['cart']:
+        print(productID)
+        cleanProduct = Product.query.filter_by(id = int(productID)).first()
+        
+        if cleanProduct:
+            print(f"Product {productID} exists")
+        else:
+            print(f"Product not found in database. Outdated/Tampered data detected")
+            session['cart'].pop(productID)
+            return False
+    print("ValidateCart ended")
+    return True
+
+def mergeCarts() -> None:
+    ("-----------MERGING DATABASE CART WITH TEMPORARY (GUEST) CART OF EXISTING USER------------")
+    targetUser = User.query.get(current_user.id)
+    targetUser.cart = list(set(targetUser.cart + session['cart']))
+
+    flag_modified(targetUser, 'cart')
+    db.session.commit()
+
+def persistNewCart() -> None:
+    print("--------------OVERWRITING DATABASE CART WITH GUEST CART (NEW USER)------------------")
+    updateUser = User.query.filter_by(id = current_user.id).first()
+    cart_data = session['cart']
+    updateUser.cart = cart_data
+
+    flag_modified(updateUser, 'cart')
+    db.session.commit()
