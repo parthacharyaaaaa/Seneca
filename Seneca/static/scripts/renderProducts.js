@@ -137,7 +137,7 @@ function displayContent(products) {
                 <div class='card-buttons'>
                 <div>
                         <button class='view-button card-button' type='button' onclick='location.href = "/products?viewkey=${product.id}"'>View</button>
-                        <button class='cart-button card-button' type='button' onclick='addToCart(${product.id})'>Add to cart</button>
+                        <button class='cart-button card-button' type='button' name='${product.id}'>Add to cart</button>
                     </div>
                         <button class='fav-button card-button' type='button' id='${product.id}'><3</button>
                 </div>
@@ -154,19 +154,19 @@ function displayContent(products) {
     const event = new Event('contentLoaded');
     document.dispatchEvent(event)
 }
-function addToCart(id) {
-    var formData = new FormData()
-    formData.append('id', id);
+// function addToCart(id) {
+//     var formData = new FormData()
+//     formData.append('id', id);
 
-    fetch("/addToCart", {
-        method: 'POST',
-        body: formData
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert(data.message)
-            }
-        })
-        .catch(error => alert("Error: ", error))
-}
+//     fetch("/addToCart", {
+//         method: 'POST',
+//         body: formData
+//     })
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.message) {
+//                 alert(data.message)
+//             }
+//         })
+//         .catch(error => alert("Error: ", error))
+// }

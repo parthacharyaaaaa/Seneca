@@ -46,4 +46,42 @@ document.addEventListener('contentLoaded', function (event) {
         }
     })
     .catch(error => alert("Error: ", error))
+
+    const addButtons = document.querySelectorAll('.cart-button')
+    fetch('/get-cart?flag=id', {
+        method : "GET",
+        headers : {
+            "Content-Type" : "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        addButtons.forEach(addButton => {
+            var id = addButton.getAttribute('name')
+            if(data.includes(id)){
+                addButton.innerHTML = "In Cart";
+            }
+            addButton.addEventListener('click', function(event){
+                var formData = new FormData()
+                formData.append('id', id);
+                fetch("/addToCart", {
+                    method : "POST",
+                    body : formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    if(data.added === 1){
+                        addButton.innerHTML = "In Cart"
+                    }
+                    if (data.message) {
+                        alert(data.message)
+                    }
+                })
+                .catch(error => alert("Error: ", error))
+            })
+        })
+        
+    })
 })
