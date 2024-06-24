@@ -255,10 +255,12 @@ def removeFromCart():
 @app.route('/addToCart', methods=['POST'])
 def addToCart():
     if request.method == 'POST':
-        print("ID: ", str(request.form['id']))
+        # print("ID: ", type(request.form['id']))
         product_id = request.form['id']
-        print("Session: ", session)
-
+        try:
+            int(product_id)
+        except:
+            return jsonify({"message" : "Invalid product ID"})
         product = Product.query.filter_by(id = product_id).first()
         if not product:
             return jsonify({"message" : "Error in validating product authenticity :/"})
@@ -317,6 +319,10 @@ def toggleFav():
         return jsonify({'alert' : 'You must have an account to keep favourites'})
     
     item = request.get_json().get('id')
+    try:
+        int(item)
+    except:
+        return jsonify({"message" : "Invalid product ID"})
     if item in current_user.favourites:
         (current_user.favourites).remove(item)
         print(current_user.favourites)
