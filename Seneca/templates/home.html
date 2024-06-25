@@ -100,8 +100,7 @@
             </span>
             <span class="genre-desc">Embark on a journey of passion and heartache as love blooms in unexpected places in
                 the rich tapestry of romantic novels</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button"
-                onclick="window.location.href = '/catalogue'">Explore</button>
+            <button id="romance" class="sideswipe-btn redirect-catalogue" type="button">Explore</button>
 
         </div>
         <div class="featured-card">
@@ -112,8 +111,7 @@
             </span>
             <span class="genre-desc">Immerse yourself in the boundless realms of fiction, where every page holds the
                 promise of adventure, mystery, and the extraordinary.</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button"
-                onclick="window.location.href = '/catalogue'">Explore</button>
+            <button id="fiction" class="sideswipe-btn redirect-catalogue" type="button">Explore</button>
         </div>
         <div class="featured-card">
             <img class="icon" src="{{url_for('static', filename='assets/eye-svgrepo-com.svg')}}" height="100"
@@ -123,8 +121,7 @@
             </span>
             <span class="genre-desc">Experience the thrill of dystopian fiction, where societies teeter on the brink of
                 collapse, and heroes emerge from the shadows to challenge the status quo.</span>
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button"
-                onclick="window.location.href = '/catalogue'">Explore</button>
+            <button id="dystopian" class="sideswipe-btn redirect-catalogue" type="button">Explore</button>
         </div>
     </div>
 </section>
@@ -182,4 +179,5 @@
         </div>
     </div>
 </section>
+<script type="text/javascript" src="{{url_for('static', filename='scripts/homepage.js')}}"></script>
 {% endblock %}

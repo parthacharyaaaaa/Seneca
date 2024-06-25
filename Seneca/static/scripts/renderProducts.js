@@ -1,8 +1,21 @@
 document.addEventListener("DOMContentLoaded", function (event) {
     let page = 1;
-    var search
     var sortOption
     var maxPrice, minPrice, maxPages, minPages
+
+    const url = new URL(window.location.href)
+    const searchParams = new URLSearchParams(url.search)
+    let x = searchParams.get('search')
+    if(x != "" || x != null){
+        searchParams.delete('search');
+        url.search = searchParams.toString();
+        window.history.replaceState({}, document.title, url.toString());
+    }
+    var search
+    if(["romance", 'fiction', 'dystopian'].includes(x)){
+        search = x
+    }
+
 
     function fetchCatalogue() {
         let url = `/get-catalogue?page=${page}`;
