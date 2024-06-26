@@ -20,7 +20,7 @@ import concurrent.futures
 #Login redirection endpoint
 @login_manager.user_loader
 def loadUser(user_id):
-    return User.query.get(int(user_id))
+    return User.filter_by(id=user_id).first()
 
 #Endpoints
 @app.route("/templatetest")
