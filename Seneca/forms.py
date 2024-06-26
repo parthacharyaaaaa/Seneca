@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField
+from wtforms import StringField, IntegerField, SelectField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo, NumberRange, ValidationError
 
 import re
@@ -92,4 +92,24 @@ class SignupForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     emailPhone = customStringField(validators=[IdentityCheck()], description="Enter Email Address/Phone Number")
+
     password = customStringField(validators=[Length(min=8, max=32, message="Passwords are between 8 and 32 characters")], render_kw = {'type' : 'password'}, description="Enter password")
+
+class FeedbackForm(FlaskForm):
+    email = customStringField(validators=[EmailCheck()], description="Enter Email Address")
+    title = customStringField(validators=[Length(min=6, max=32, message="Title length must be between 6 and 32 characters")], description="Add Title")
+    flag = SelectField('Flag', choices=[
+        ('support', 'Support'),
+        ('bug', 'Bug'),
+        ('query', 'Query'),
+        ('order', 'Orders'),
+        ('legal', 'Legal'),
+        ('api', 'APIs')
+    ])
+    query = TextAreaField(validators=[Length(min=6, max=1024, message="Your query details must be between 6 and 1024 characters long"), InputRequired("Query is a required field")], render_kw={'placeholder' : "Add details"})
+
+
+class reviewForm(FlaskForm):
+    review_title = customStringField(validators=[Length(min=6, max=32, message="Review title should be between 6 and 32 characters")], description="Review Title")
+    review_body = customStringField(validators=[Length(min=16, max=1024, message="Review body must be between 18 and 1024 characters long")], description="Review Description")
+    
