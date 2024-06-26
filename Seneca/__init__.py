@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 
 from datetime import timedelta
 import os
@@ -22,5 +23,9 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=int(os.environ.get('SE
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+login_manager.login_view = "login"
 
 from Seneca import routes

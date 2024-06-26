@@ -1,6 +1,6 @@
 from Seneca.models import User, Product, Feedback, Review, Order_History, Order_Item
 from flask import jsonify, redirect, request, render_template, session, url_for, send_file
-from flask_login import login_required, login_user, current_user, LoginManager, logout_user
+from flask_login import login_required, login_user, current_user, logout_user
 from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -11,16 +11,13 @@ from Seneca.models import User, Product, Review, Feedback, Order_History, Order_
 from Seneca import db
 from Seneca import app
 from Seneca import bcrypt
+from Seneca import login_manager
 
 from datetime import timedelta, datetime
 import re as regex
 import concurrent.futures
 
-#Login management
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
-
+#Login redirection endpoint
 @login_manager.user_loader
 def loadUser(user_id):
     return User.query.get(int(user_id))
