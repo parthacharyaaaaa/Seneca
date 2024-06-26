@@ -10,41 +10,43 @@
         <h1>Signup</h1>
         <hr>
         <form id="signupForm" method="POST">
+            {{ form.csrf_token }}
             <div class="input-wrapper">
-                <input type="text" id="first_name" name="first_name" required class="form-field"
-                    placeholder="First Name">
-
-                <input type="text" id="last_name" name="last_name" class="form-field" required placeholder="Last Name">
+                {{ form.first_name }}
+                {{ form.last_name}}
             </div>
 
             <div class="input-wrapper">
-                <input type="number" id="age" name="age" required class="form-field" placeholder="Age">
+                {{ form.age }}
             </div>
             <div class="input-wrapper">
-
-                <input type="text" id="phone_number" name="phone_number" required class="form-field"
-                    placeholder="Phone Number">
-
-                <input type="email" id="email_id" name="email_id" required class="form-field"
-                    placeholder="Email Address">
+                {{ form.phone_number}}
+                {{ form.email_id }}
             </div>
             <div class="input-wrapper">
-
-                <input type="password" id="password" name="password" required class="form-field" placeholder="Password">
-
-                <input type="password" id="confirm_password" name="confirm_password" required class="form-field"
-                    placeholder="Confirm Password">
+                {{form.password}}
+                {{form.confirm_password}}
             </div>
 
             <input type="submit" class="hover-button"> <!-- Are you fucking kidding me -->
         </form>
     </div>
     <div class="quote">
-        <h2>Join Seneca</h2><hr>
+        <h2>Join Seneca</h2>
+        <hr>
         <h3>"The whole is greater than the sum of its parts."</h3>
-            <p class="promo">
-                Ready to elevate your reading experience? Become a member today and discover a realm of privileges designed exclusively for you! Imagine effortlessly curating your personal library with the click of a button, knowing your favorites are always at your fingertips. <br><br>Your cart? Consider it stored permanently—because convenience should never be compromised. As a trendsetter, you'll savor exclusive access to the latest book releases before they hit the shelves, setting the pace for literary aficionados everywhere. <br><br>But why stop there? Brace yourself for VIP treatment with personalized recommendations, irresistible discounts, and exclusive invites to events where fellow book enthusiasts gather to celebrate the written word. Join us now and seize the opportunity to indulge in a world where every chapter is a discovery and every page turn leaves you craving more.<br><br> It's not just membership—it's a declaration of literary sophistication. Join the club and elevate your reading game today!
-            </p>
+        <p class="promo">
+            Ready to elevate your reading experience? Become a member today and discover a realm of privileges designed
+            exclusively for you! Imagine effortlessly curating your personal library with the click of a button, knowing
+            your favorites are always at your fingertips. <br><br>Your cart? Consider it stored permanently—because
+            convenience should never be compromised. As a trendsetter, you'll savor exclusive access to the latest book
+            releases before they hit the shelves, setting the pace for literary aficionados everywhere. <br><br>But why
+            stop there? Brace yourself for VIP treatment with personalized recommendations, irresistible discounts, and
+            exclusive invites to events where fellow book enthusiasts gather to celebrate the written word. Join us now
+            and seize the opportunity to indulge in a world where every chapter is a discovery and every page turn
+            leaves you craving more.<br><br> It's not just membership—it's a declaration of literary sophistication.
+            Join the club and elevate your reading game today!
+        </p>
     </div>
 
 

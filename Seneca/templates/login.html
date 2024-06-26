@@ -8,9 +8,10 @@
     <h2>Login</h2>
     <hr>
     <form id="loginForm" method="POST">
-        <input type="text" id="emailPhone" name="emailPhone" required class='bg-field' placeholder="Email/Phone"><br><br>
+        {{ loginForm.csrf_token }}
 
-        <input type="password" id="password" name="password" required class='bg-field' placeholder="Password"><br><br>
+        {{loginForm.emailPhone}}
+        {{loginForm.password}}
 
         <input type="submit" class="hover-button">
     </form>

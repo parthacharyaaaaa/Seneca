@@ -7,6 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
+from Seneca.forms import SignupForm, LoginForm
 
 from Seneca import db
 from Seneca import app
@@ -20,7 +21,7 @@ import concurrent.futures
 #Login redirection endpoint
 @login_manager.user_loader
 def loadUser(user_id):
-    return User.filter_by(id=user_id).first()
+    return User.query.filter_by(id=user_id).first()
 
 #Endpoints
 @app.route("/templatetest")
@@ -38,12 +39,11 @@ def home():
 #---------------------------------------------------------------User Management
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    signupForm = SignupForm()
     if request.method == 'POST':
-        print("Endpoint signup")
-        if not validateSignup(request.form):
-            print('error validating form')
-            return jsonify({"alert" : "Invalid details submitted"})
-        
+        if not signupForm.validate_on_submit():
+            print(signupForm.errors)
+            return jsonify({"alert": signupForm.errors})
         else:
             email = request.form['email_id']
             phone = str(request.form['phone_number'])
@@ -89,31 +89,24 @@ def signup():
             else:
                 print("Account made")
                 return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
-    return render_template('signup.html')
+    else:
+        return render_template('signup.html', form=signupForm)
 
 @app.route("/login", methods = ['POST', 'GET'])
 def login():
+    loginForm = LoginForm()
     if request.method == 'POST':
         print(request.form)
-        if not valdiateLogin(request.form):
+        if not loginForm.validate_on_submit():
             print("Login validation failed: Backend")
+            print(loginForm.errors)
             return jsonify({'alert' : 'Invalid details submitted'})
         
         identity = request.form['emailPhone']
         password = request.form['password']
         time = request.form['formattedDateTime']
 
-        email_regex = r"[^@]+@[^@]+\.[^@]+"
-        phone_regex = r"^\+?[\d\s\-()]+$"
-
-        #Check whether the given data matches first, before checking whether the user actually exists or not :3
-        if regex.match(email_regex, identity):
-            registeredUser = User.query.filter_by(email_id = identity).first()
-        elif regex.match(phone_regex, identity):
-            registeredUser = User.query.filter_by(phone_number = identity).first()
-        else:
-            print("Invalid identity data sent from client\nTERMINATING----------------------------")
-            return jsonify({'authenticated' : False,'alert' : 'Error: Invalid identity syntax'})      #Ideally, this message should never pop up since input validation is performed at clinet-side itself
+        registeredUser = User.query.filter_by(email_id = identity).first() or User.query.filter_by(phone_number = identity).first()
         
         if registeredUser:
             print("User found")
@@ -149,7 +142,7 @@ def login():
                     'alert' : 'No account with the given email address/phone number exists with Seneca'})
     else:
         print("Rendering Login")
-        return render_template('login.html')
+        return render_template('login.html', loginForm = loginForm)
 
 @app.route("/dashboard")
 @login_required

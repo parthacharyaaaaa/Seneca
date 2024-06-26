@@ -8,7 +8,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     console.log(formattedDateTime);
 
     var formData = new FormData(this);
-    if(checkForm('login', formData)){
+    // if(checkForm('login', formData)){
         formData.append("formattedDateTime", formattedDateTime)
         fetch('/login', {
             method: 'POST',
@@ -25,5 +25,5 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         })
         
         .catch(error => console.error('Error:', error));
-    }
+    // }
 });
