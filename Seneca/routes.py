@@ -7,7 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
-from Seneca.forms import SignupForm, LoginForm
+from Seneca.forms import SignupForm, LoginForm, FeedbackForm
 
 from Seneca import db
 from Seneca import app
@@ -612,19 +612,21 @@ def addReview():
 
     return jsonify({"alert" : "review added"})
 
-@app.route("/contact")
+@app.route("/contact", methods=['GET', 'POST'])
 def contact():
-    return render_template("contact.html")
+    feedbackForm = FeedbackForm()
+    if request.method == "POST":
+        print(feedbackForm.data)
+        if feedbackForm.validate_on_submit():
+            title = request.form["title"]
+            email = request.form["email"]
+            flag = request.form["flag"]
+            query = request.form["query"]
 
-@app.route("/send-feedback", methods = ["POST"])
-def sendFeedback():
-    print(request.form)
-    title = request.form["title"]
-    email = request.form["email"]
-    flag = request.form["flag"]
-    query = request.form["query"]
-    newFeedback = Feedback(title, query, email, flag)
-    db.session.add(newFeedback)
-    db.session.commit()
+            newFeedback = Feedback(title, query, email, flag)
+            db.session.add(newFeedback)
+            db.session.commit()
+        return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
 
-    return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
+    else:
+        return render_template("contact.html", feedbackForm=feedbackForm)

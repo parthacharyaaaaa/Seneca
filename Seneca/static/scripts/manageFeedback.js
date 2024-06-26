@@ -2,8 +2,8 @@ import { checkForm } from "./formFunctions.js";
 document.getElementById("contact-form").addEventListener('submit', function (event) {
     event.preventDefault();
     const formData = new FormData(this)
-    if (checkForm('feedback', formData)) {
-        fetch("/send-feedback", {
+    // if (checkForm('feedback', formData)) {
+        fetch("/contact", {
             method: "POST",
             body: formData
         })
@@ -18,5 +18,5 @@ document.getElementById("contact-form").addEventListener('submit', function (eve
                 }
             })
             .catch(error => alert("Error: ", error))
-    }
+    // }
 })
