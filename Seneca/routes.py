@@ -594,24 +594,33 @@ def getReviews():
 
 @app.route('/add-review', methods = ["POST"])
 def addReview():
-    print("Adding review")
-    if not current_user.is_authenticated:
-        return jsonify({"error" : "penis man"})
-    
-    targetID = int(request.form.get("id"))
-    body = request.form.get("review-body")
-    title = request.form.get("review-title")
-    rating = float(request.form.get("rating3"))
+    form = ReviewForm()
+    if form.validate_on_submit():
+        print(form.data)
+        print("Adding review")
+        if not current_user.is_authenticated:
+            return jsonify({"error" : "penis man"})
+        
+        targetID = int(request.form.get("id"))
+        body = request.form.get("review-body")
+        title = request.form.get("review-title")
+        try:
+            rating = int(request.form.get("rating3"))
+            assert rating >= 1 and rating <= 5
+        except (ValueError, AssertionError, TypeError):
+            return jsonify({"alert" : "Invalid rating"})
+        newReview = Review(current_user.id, targetID, rating, title, body)
+        db.session.add(newReview)
 
-    newReview = Review(current_user.id, targetID, rating, title, body)
-    db.session.add(newReview)
+        targetProduct = Product.query.filter_by(id = targetID).first()
+        targetProduct.total_reviews += 1
+        targetProduct.rating = (targetProduct.rating*targetProduct.total_reviews + rating)/(targetProduct.total_reviews+1)
+        db.session.commit()
 
-    targetProduct = Product.query.filter_by(id = targetID).first()
-    targetProduct.total_reviews += 1
-    targetProduct.rating = (targetProduct.rating*targetProduct.total_reviews + rating)/(targetProduct.total_reviews+1)
-    db.session.commit()
-
-    return jsonify({"alert" : "review added"})
+        return jsonify({"alert" : "review added"})
+    else:
+        print(form.errors)
+        return jsonify({"alert" : form.errors})
 
 @app.route("/contact", methods=['GET', 'POST'])
 def contact():

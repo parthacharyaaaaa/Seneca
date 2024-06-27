@@ -112,6 +112,4 @@ class FeedbackForm(FlaskForm):
 class ReviewForm(FlaskForm):
     review_title = customStringField(validators=[Length(min=6, max=32, message="Review title should be between 6 and 32 characters")], description="Review Title", render_kw={'id' : 'review-title'}, name="review-title")
 
-
     review_body = customStringField(validators=[Length(min=16, max=1024, message="Review body must be between 18 and 1024 characters long")], description="Review Description", render_kw={"class" : "review-body"}, name="review-body")
-
