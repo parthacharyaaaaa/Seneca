@@ -1,98 +1,114 @@
-body{
+body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
-.login-wrapper{
+
+.login-wrapper {
     margin: 0 auto;
     padding: 1rem;
     background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 15px;
+    width: 22rem;
 }
-.form-wrapper{
+#loginForm {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+#loginForm .hover-button{
+    justify-self: center;
+}
+
+.form-wrapper {
     display: grid;
 }
 
-.form-container{
-    padding:1rem;
+.form-container {
+    padding: 1rem;
 }
 
-.bg-field{
+.bg-field {
     width: fit-content;
 }
 
-#signupForm{
+#signupForm {
     display: flex;
     flex-flow: column nowrap;
-    gap:1rem;
+    gap: 1rem;
 
-    .input-wrapper{
+    .input-wrapper {
         display: flex;
-        flex-flow:row;
+        flex-flow: row;
         gap: 0.5rem;
     }
 
-    .form-field{
-        border-top: none;
-        border-left: none;
-        border-right: none;
-        /* border-bottom: black; */
-        height: 3rem;
-        padding: 5px;
-
-        border-radius: 10px;
-        font-size: var(--FSIZE-SLIGHTLY-LARGER);
-    }
-
-    .input-wrapper:nth-of-type(2) .form-field{
+    .input-wrapper:nth-of-type(2) .form-field {
         width: 3.5rem;
     }
-
 }
 
-footer{
+.form-field {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    /* border-bottom: black; */
+    height: 3rem;
+    padding: 5px;
+
+    border-radius: 10px;
+    font-size: var(--FSIZE-SLIGHTLY-LARGER);
+}
+
+footer {
     display: absolute;
     bottom: 0;
 }
 
 
-body{
+body {
     display: block;
 }
 
-.quote{
+.quote {
     background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 15px;
     padding: 1.2rem;
 }
-.desc{
+
+.desc {
     font-size: var(--FSIZE-SLIGHTLY-SMALLER);
 }
-.promo{
+
+.promo {
     font-size: var(--FSIZE-SLIGHTLY-LARGER);
 }
 
-@media screen and (min-width: 480px){
-    .form-wrapper{
+@media screen and (min-width: 480px) {
+    .form-wrapper {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
     }
-    .form-container{
+
+    .form-container {
         justify-self: center;
     }
 }
 
-@media screen and (min-width: 992px){
-    .form-wrapper{
+@media screen and (min-width: 992px) {
+    .form-wrapper {
         grid-template-columns: 50% 50%;
         justify-content: space-between;
     }
-    .form-container{
+
+    .form-container {
         align-self: center;
     }
 }
-@media screen and (min-width: 1200px){
-    .form-wrapper{
+
+@media screen and (min-width: 1200px) {
+    .form-wrapper {
         grid-template-columns: 45% 50%;
     }
 }
