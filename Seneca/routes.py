@@ -7,7 +7,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
-from Seneca.forms import SignupForm, LoginForm, FeedbackForm
+from Seneca.forms import SignupForm, LoginForm, FeedbackForm, ReviewForm
 
 from Seneca import db
 from Seneca import app
@@ -198,13 +198,14 @@ def logout():
 #------------------------------------------------------------------Cart Management
 @app.route("/products", methods=['GET'])
 def product():
+    reviewForm = ReviewForm()
     id = request.args.get('viewkey')
     print(id)
     requestedProduct = Product.query.filter_by(id = id).first().loadInfo()
     print(requestedProduct)
     print(current_user.is_authenticated)
 
-    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct)
+    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct, reviewForm = reviewForm)
 
 @app.route('/cart')
 def cart():
