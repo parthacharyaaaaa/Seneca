@@ -42,14 +42,15 @@ function renderUserInfo(userInfo) {
         fetch('/logout', {
             method : 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                "X-CSRFToken" : document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({ formattedDateTime: formattedDateTime })
         })
         .then(response => response.json())
         .then(data => {
-            if(data.alert){
-                alert(data.alert)
+            if(data.CSRFError){
+                alert(data.CSRFError)
             }
             if(data.redirect_url){
                 window.location.href = data.redirect_url
@@ -159,20 +160,3 @@ function renderOrders(orderInfo) {
         ordersContainer.appendChild(orderCard);
     }
 }
-
-// function addToCart(id) {
-//     var formData = new FormData()
-//     formData.append('id', id);
-
-//     fetch("/addToCart", {
-//         method: 'POST',
-//         body: formData
-//     })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.message) {
-//                 alert(data.message)
-//             }
-//         })
-//         .catch(error => alert("Error: ", error))
-// }

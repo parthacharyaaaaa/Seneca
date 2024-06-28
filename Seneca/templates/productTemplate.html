@@ -22,6 +22,9 @@
     <meta name="twitter:description" content="{{ product['summary'] }}">
     <meta name="twitter:image" content="{{product['cover']}}">
 
+    <meta name="csrf-token" content = "{{ csrf_token() }}">
+
+
     <!-- Schema.org Markup -->
     <script type="application/ld+json">
         {

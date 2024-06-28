@@ -1,6 +1,7 @@
 {% extends 'baseTemplate.html' %}
 {% block title %} Dashboard | Seneca {% endblock %}
 {% block additionalDependencies %}
+<meta name="csrf-token" content = "{{ csrf_token() }}">
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dashboard.css')}}" />
 {% endblock %}
 

@@ -8,7 +8,7 @@ from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
 from Seneca.forms import SignupForm, LoginForm, FeedbackForm, ReviewForm, BillingCheck
-from flask_wtf.csrf import validate_csrf, ValidationError
+from flask_wtf.csrf import validate_csrf, ValidationError, CSRFError
 
 from Seneca import db
 from Seneca import app
@@ -24,6 +24,10 @@ import concurrent.futures
 @login_manager.user_loader
 def loadUser(user_id):
     return User.query.filter_by(id=user_id).first()
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    return jsonify({'CSRFError': 'CSRF protection failed'}), 400
 
 #Endpoints
 @app.route("/templatetest")
@@ -183,8 +187,8 @@ def getUserInfo():
             }
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
 
+@login_required
 @app.route("/logout", methods = ['POST'])
-@csrf.exempt
 def logout():
     if request.method == 'POST':
         print("Logging Out user")
@@ -248,7 +252,6 @@ def removeFromCart():
         return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
 @app.route('/addToCart', methods=['POST'])
-@csrf.exempt
 def addToCart():
     if request.method == 'POST':
         product_id = request.form['id']
@@ -309,7 +312,6 @@ def getCart():
 
 #-------------------------------------------------------------------Favourites Management
 @app.route("/toggle-favourites", methods = ['POST'])
-@csrf.exempt
 def toggleFav():
     if not current_user.is_authenticated:
         return jsonify({'alert' : 'You must have an account to keep favourites'})
