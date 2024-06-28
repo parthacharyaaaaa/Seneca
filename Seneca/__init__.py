@@ -2,6 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
+
 
 from datetime import timedelta
 import os
@@ -12,8 +14,6 @@ app = Flask(__name__)
 
 env_path = os.path.join(os.path.dirname(__file__)[:-7], "instance", ".env")
 load_dotenv(env_path)
-# print(os.path.dirname(__file__)[:-7])
-# print(load_dotenv(env_path))
 
 #Configs
 app.secret_key = os.environ.get('SENECA_KEY')
@@ -23,6 +23,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=int(os.environ.get('SE
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+csrf = CSRFProtect(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
