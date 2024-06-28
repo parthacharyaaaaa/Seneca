@@ -7,11 +7,13 @@ from sqlalchemy.orm.attributes import flag_modified
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
-from Seneca.forms import SignupForm, LoginForm, FeedbackForm, ReviewForm
+from Seneca.forms import SignupForm, LoginForm, FeedbackForm, ReviewForm, BillingCheck
+from flask_wtf.csrf import validate_csrf, ValidationError
 
 from Seneca import db
 from Seneca import app
 from Seneca import bcrypt
+from Seneca import csrf
 from Seneca import login_manager
 
 from datetime import timedelta, datetime
@@ -182,6 +184,7 @@ def getUserInfo():
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
 
 @app.route("/logout", methods = ['POST'])
+@csrf.exempt
 def logout():
     if request.method == 'POST':
         print("Logging Out user")
@@ -226,6 +229,7 @@ def cart():
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, backup_price = backup_price, backup_quantity = backup_quantity)
 
 @app.route("/remove-from-cart", methods = ['POST'])
+@csrf.exempt
 def removeFromCart():
     if request.method == 'POST':
         productID = request.get_json().get('id')
@@ -244,6 +248,7 @@ def removeFromCart():
         return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
 @app.route('/addToCart', methods=['POST'])
+@csrf.exempt
 def addToCart():
     if request.method == 'POST':
         product_id = request.form['id']
@@ -304,6 +309,7 @@ def getCart():
 
 #-------------------------------------------------------------------Favourites Management
 @app.route("/toggle-favourites", methods = ['POST'])
+@csrf.exempt
 def toggleFav():
     if not current_user.is_authenticated:
         return jsonify({'alert' : 'You must have an account to keep favourites'})
@@ -406,12 +412,20 @@ def getCatalogue():
 #Order Management
 @app.route("/process-order", methods = ['POST'])
 def processOrder():
-    print("Request Form: ",request.form)
+    print("Request Form: ", request.form)
     if int(request.form.get('validation')) != 1:
         print("API call dirty >:(")
         return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
     else:
+        try:
+            validate_csrf(request.headers['X-CSRFToken'])
+        except ValidationError:
+            return jsonify({"alert" : "CSRF Validation Failed. Please refresh the form and check your network's security"})
         action = request.form['flag']
+        formChecker = BillingCheck(action, current_user.email_id if current_user.is_authenticated else request.form['billing_email'], request.form['shipping-address'], request.form['confirm-shipping-address'])
+
+        if not formChecker():
+            return jsonify({"alert" : "Invalid form details submitted"})
 
         temp_storage = loadCart()
         price = 0.0
@@ -419,62 +433,60 @@ def processOrder():
             print(items)
             price += items['price'] - items['discount']
 
-        # if current_user.is_authenticated:
-        #     print("Processing order: user")
-        #     order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else Billingform.data.get("email"), None if action == "download" else Billingform.data.get("email"))
-        #     db.session.add(order)
-        #     db.session.commit()
-        #     for item in temp_storage.keys():
-        #         orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
-        #         Product.query.filter_by(id = int(item)).first().units_sold += 1
-        #         db.session.add(orderItem)
-        #     current_user.cart = []
-        #     flag_modified(current_user, 'cart')
-        #     db.session.commit()
-        #     print("Order committed")
+        if current_user.is_authenticated:
+            print("Processing order: user")
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else request.form['shipping-address'], None if action == "download" else request.form['gift-message'])
+            db.session.add(order)
+            db.session.commit()
+            for item in temp_storage.keys():
+                orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+                Product.query.filter_by(id = int(item)).first().units_sold += 1
+                db.session.add(orderItem)
+            current_user.cart = []
+            flag_modified(current_user, 'cart')
+            db.session.commit()
+            print("Order committed")
 
-        #     #Generating download token
-        #     token = generateDownloadToken(orderID=order.id, userID=current_user.id)
-        #     order.token = token
-        #     flag_modified(order, 'token')
-        #     db.session.commit()
+            #Generating download token
+            token = generateDownloadToken(orderID=order.id, userID=current_user.id)
+            order.token = token
+            flag_modified(order, 'token')
+            db.session.commit()
 
-        #     #Sending receipt
-        #     with concurrent.futures.ThreadPoolExecutor() as executor:
-        #             future = executor.submit(sendReceipt(current_user.email_id, temp_storage, order))
+            #Sending receipt
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(sendReceipt(current_user.email_id, temp_storage, order))
 
-        #     return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
-        # #Guest Transaction
-        # else:
-        #     billingEmail = Billingform.data.get('billingEmail')
-        #     print(billingEmail)
-        #     if validateCart():
-        #         print("Processing order: guest")
+            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
+        #Guest Transaction
+        else:
+            if validateCart():
+                print("Processing order: guest")
 
-        #         order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else Billingform.data.get("email"), None if action == "download" else Billingform.data.get("message")) 
-        #         db.session.add(order)
-        #         db.session.commit()
+                order = Order_History(None, datetime.now(), "Processed", price, request.form['billing_email'], "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else request.form['shipping-address'], None if action == "download" else request.form['gift-message']) 
+                db.session.add(order)
+                db.session.commit()
 
-        #         for item in temp_storage.keys():
-        #             orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
-        #             Product.query.filter_by(id = int(item)).first().units_sold += 1
-        #             db.session.add(orderItem)
-        #         db.session.commit()
-        #         print("Order committed")
-        #         session['cart'] = []
+                for item in temp_storage.keys():
+                    orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+                    Product.query.filter_by(id = int(item)).first().units_sold += 1
+                    db.session.add(orderItem)
+                db.session.commit()
+                print("Order committed")
+                session['cart'] = []
 
-        #         token = generateDownloadToken(orderID=order.id)
-        #         order.token = token
-        #         flag_modified(order, 'token')
-        #         db.session.commit()
+                token = generateDownloadToken(orderID=order.id)
+                order.token = token
+                flag_modified(order, 'token')
+                db.session.commit()
 
-        #         #Sending receipt
-        #         sendReceipt(str(billingEmail), temp_storage, order)
+                #Sending receipt
+                sendReceipt(request.form['billing_email'], temp_storage, order)
 
-        #         return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
+                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
 
-        #     else:
-        #         return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
+            else:
+                return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
 
 @app.route("/sendMail/id=<order_id>/<download_url>")
 def sendMail(order_id, download_url):

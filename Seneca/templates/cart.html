@@ -25,8 +25,7 @@
     <div class="product-container" id="product-container">
     </div>
     <form class="bill" id="checkout-form">
-        <!-- <form method="POST" id="checkout-form" name="checkout-form"> -->
-            {{ Billingform.csrf_token }}
+        <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
             {% if(signedIn) %}
             <h2>Checkout</h2>
             <hr>
@@ -42,9 +41,8 @@
                 <h3>Contact Details:</h3>
                 <div class="input-container">
                     <h5>Billing email:</h5>
-                    <!-- <input type=email id="billing-email" placeholder="Billing address (required)" required
-                        class="bg-field" /> -->
-                    {{ Billingform.billingEmail }}
+                    <input type=email id="billing-email" placeholder="Billing address (required)" required
+                    class="bg-field" />
                 </div>
                 <span class="utility-disclaimer-text-small">*For tracking and storing our orders, we require guests to
                     provide an address to assosciate the purchase with.</span>
@@ -57,7 +55,7 @@
                 <span id="total-items" class="text-span">{{backup_quantity}}</span>
                 <label for="total-bill">Total: </label>
                 <span id="total-bill" class="text-span">${{backup_price}}</span>
-                <input type="button" value="Buy" id="confirm-purchase" class="hover-button" />
+                <input type="submit" value="Buy" id="confirm-purchase" class="hover-button" />
                 <hr>
             </div>
             <div class="mail">
@@ -65,16 +63,12 @@
                 <span class="text-span">Email your books in a zip file directly to an email inbox, either yours or a
                     special someone ;)</span>
                 <div class="mail-container">
-                    <!-- <input type="text" value="" id="mail-id" name="mail-id" class="mail-field" placeholder="Enter email address" /> -->
-                    {{ Billingform.email }}
-                    <!-- <input type="text" value="" id="confirm-mail-id" class="mail-field" placeholder="Confirm email address" /> -->
-                    {{ Billingform.confirmEmail }}
-                    <!-- <textarea id="gift-message" class="bg-field" placeholder="Optionally, Enter a message to send alongside your purchase :D"></textarea> -->
-                    {{ Billingform.message }}
-                    <input type="button" value="mail" id="mail-button" class="hover-button" />
+                    <input type="text" value="" name="shipping-address" id="mail-id" class="mail-field" placeholder="Enter email address" />
+                    <input type="text" value="" name="confirm-shipping-address" id="confirm-mail-id" class="mail-field" placeholder="Confirm email address" />
+                    <textarea form="checkout-form" id="gift-message" name="gift-message" class="bg-field" placeholder="Optionally, Enter a message to send alongside your purchase :D"></textarea>
+                    <input type="submit" value="mail" id="mail-button" class="hover-button" />
                 </div>
             </div>
-        <!-- </form> -->
     </form>
 </section>
 <script src="{{url_for('static', filename='scripts/billGenerator.js')}}"></script>

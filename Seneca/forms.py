@@ -70,6 +70,27 @@ class lengthCheck:
             print("pp")
             raise ValidationError(self.message)
 
+class BillingCheck:
+    def __init__(self, flag, billingEmail, shippingAddress, confirmShippingAddress):
+        self.flag = flag
+        self.billingEmail = billingEmail
+        self.shippingAddress = shippingAddress
+        self.confirmShippingAddress = confirmShippingAddress
+
+    def __call__(self) -> bool:
+        print("BillingCheck called")
+        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.billingEmail):
+            return False
+
+        if self.flag == "mail":
+            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.shippingAddress):
+                return False
+
+            if self.confirmShippingAddress != self.shippingAddress:
+                return False
+        print("Valid")
+        return True
+            
 #Custom Form Fields
 class customStringField(StringField):
     def __init__(self, label='', validators=None, **kwargs):
