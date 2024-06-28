@@ -26,7 +26,7 @@
 }
 
 /* Input and select field styling */
-.contact-field,
+.form-field,
 #flag {
     width: 100%;
     padding: 10px;
@@ -41,7 +41,7 @@
 }
 
 /* Focus effect */
-.contact-field:focus,
+.form-field:focus,
 #flag:focus {
     border-color: #000;
     outline: none;

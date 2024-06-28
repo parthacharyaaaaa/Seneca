@@ -13,19 +13,14 @@
     experience.
 </section>
 <form class="container" id="contact-form">
+    {{feedbackForm.csrf_token}}
     <div class="upper-fields">
-        <input id="email" name="email" class="contact-field" placeholder="Contact Email (Required)" />
-        <input id="title" name="title" class="contact-field" placeholder="Query/Complaint Title" />
-        <select name="flag" id="flag">
-            <option value="support">Support</option>
-            <option value="bug">Bug</option>
-            <option value="query">Query</option>
-            <option value="order">Orders</option>
-            <option value="legal">Legal</option>
-            <option value="api">APIs</option>
-        </select>
+            {{feedbackForm.email}}
+            {{feedbackForm.title}}
+            {{feedbackForm.flag}}
+
     </div>
-    <textarea id="query" name="query" form="contact-form" maxlength="1024"></textarea>
+    {{feedbackForm.query}}
     <button type="submit" class="feedback-button">Submit</button>
 </form>
 

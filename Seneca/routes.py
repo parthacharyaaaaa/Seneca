@@ -7,10 +7,13 @@ from sqlalchemy.orm.attributes import flag_modified
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
+from Seneca.forms import SignupForm, LoginForm, FeedbackForm, ReviewForm, BillingCheck
+from flask_wtf.csrf import validate_csrf, ValidationError
 
 from Seneca import db
 from Seneca import app
 from Seneca import bcrypt
+from Seneca import csrf
 from Seneca import login_manager
 
 from datetime import timedelta, datetime
@@ -20,7 +23,7 @@ import concurrent.futures
 #Login redirection endpoint
 @login_manager.user_loader
 def loadUser(user_id):
-    return User.filter_by(id=user_id).first()
+    return User.query.filter_by(id=user_id).first()
 
 #Endpoints
 @app.route("/templatetest")
@@ -38,12 +41,11 @@ def home():
 #---------------------------------------------------------------User Management
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    signupForm = SignupForm()
     if request.method == 'POST':
-        print("Endpoint signup")
-        if not validateSignup(request.form):
-            print('error validating form')
-            return jsonify({"alert" : "Invalid details submitted"})
-        
+        if not signupForm.validate_on_submit():
+            print(signupForm.errors)
+            return jsonify({"alert": signupForm.errors})
         else:
             email = request.form['email_id']
             phone = str(request.form['phone_number'])
@@ -89,31 +91,24 @@ def signup():
             else:
                 print("Account made")
                 return jsonify({'alert' : 'Welcome to Seneca!', 'redirect_url' : url_for('home')})
-    return render_template('signup.html')
+    else:
+        return render_template('signup.html', form=signupForm)
 
 @app.route("/login", methods = ['POST', 'GET'])
 def login():
+    loginForm = LoginForm()
     if request.method == 'POST':
         print(request.form)
-        if not valdiateLogin(request.form):
+        if not loginForm.validate_on_submit():
             print("Login validation failed: Backend")
+            print(loginForm.errors, loginForm.data)
             return jsonify({'alert' : 'Invalid details submitted'})
         
         identity = request.form['emailPhone']
         password = request.form['password']
         time = request.form['formattedDateTime']
 
-        email_regex = r"[^@]+@[^@]+\.[^@]+"
-        phone_regex = r"^\+?[\d\s\-()]+$"
-
-        #Check whether the given data matches first, before checking whether the user actually exists or not :3
-        if regex.match(email_regex, identity):
-            registeredUser = User.query.filter_by(email_id = identity).first()
-        elif regex.match(phone_regex, identity):
-            registeredUser = User.query.filter_by(phone_number = identity).first()
-        else:
-            print("Invalid identity data sent from client\nTERMINATING----------------------------")
-            return jsonify({'authenticated' : False,'alert' : 'Error: Invalid identity syntax'})      #Ideally, this message should never pop up since input validation is performed at clinet-side itself
+        registeredUser = User.query.filter_by(email_id = identity).first() or User.query.filter_by(phone_number = identity).first()
         
         if registeredUser:
             print("User found")
@@ -149,7 +144,7 @@ def login():
                     'alert' : 'No account with the given email address/phone number exists with Seneca'})
     else:
         print("Rendering Login")
-        return render_template('login.html')
+        return render_template('login.html', loginForm = loginForm)
 
 @app.route("/dashboard")
 @login_required
@@ -189,6 +184,7 @@ def getUserInfo():
         return jsonify({"user_info" : userInfo, "order_info" : orderHolder, "fav_info" : favourites})
 
 @app.route("/logout", methods = ['POST'])
+@csrf.exempt
 def logout():
     if request.method == 'POST':
         print("Logging Out user")
@@ -205,15 +201,16 @@ def logout():
 #------------------------------------------------------------------Cart Management
 @app.route("/products", methods=['GET'])
 def product():
+    reviewForm = ReviewForm()
     id = request.args.get('viewkey')
-    print(id)
+    # print(id)
     requestedProduct = Product.query.filter_by(id = id).first().loadInfo()
-    print(requestedProduct)
+    # print(requestedProduct)
     print(current_user.is_authenticated)
 
-    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct)
+    return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct, reviewForm = reviewForm)
 
-@app.route('/cart')
+@app.route('/cart', methods = ["GET"])
 def cart():
     fallback = loadCart()
     backup_price = 0.0
@@ -232,6 +229,7 @@ def cart():
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, backup_price = backup_price, backup_quantity = backup_quantity)
 
 @app.route("/remove-from-cart", methods = ['POST'])
+@csrf.exempt
 def removeFromCart():
     if request.method == 'POST':
         productID = request.get_json().get('id')
@@ -250,9 +248,9 @@ def removeFromCart():
         return jsonify({"valid" : 1, 'new_total' : product.price - product.discount})
 
 @app.route('/addToCart', methods=['POST'])
+@csrf.exempt
 def addToCart():
     if request.method == 'POST':
-        # print("ID: ", type(request.form['id']))
         product_id = request.form['id']
         try:
             int(product_id)
@@ -306,11 +304,12 @@ def getCart():
                 return jsonify([])
     else:
         billItems = loadCart()
-        print("Final bill: ", billItems)
+        # print("Final bill: ", billItems)
         return jsonify(billItems)
 
 #-------------------------------------------------------------------Favourites Management
 @app.route("/toggle-favourites", methods = ['POST'])
+@csrf.exempt
 def toggleFav():
     if not current_user.is_authenticated:
         return jsonify({'alert' : 'You must have an account to keep favourites'})
@@ -413,17 +412,22 @@ def getCatalogue():
 #Order Management
 @app.route("/process-order", methods = ['POST'])
 def processOrder():
-    data = request.get_json()
-    print(data)
-    action = data.get("action")
-    email_regex = r"[^@]+@[^@]+\.[^@]+"
-
-    if data.get('validation') != "True":
+    print("Request Form: ", request.form)
+    if int(request.form.get('validation')) != 1:
         print("API call dirty >:(")
         return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
     else:
-        temp_storage = loadCart()                   #Load cart items
-        #Calculate total price
+        try:
+            validate_csrf(request.headers['X-CSRFToken'])
+        except ValidationError:
+            return jsonify({"alert" : "CSRF Validation Failed. Please refresh the form and check your network's security"})
+        action = request.form['flag']
+        formChecker = BillingCheck(action, current_user.email_id if current_user.is_authenticated else request.form['billing_email'], request.form['shipping-address'], request.form['confirm-shipping-address'])
+
+        if not formChecker():
+            return jsonify({"alert" : "Invalid form details submitted"})
+
+        temp_storage = loadCart()
         price = 0.0
         for items in temp_storage.values():
             print(items)
@@ -431,10 +435,9 @@ def processOrder():
 
         if current_user.is_authenticated:
             print("Processing order: user")
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else data.get("recipient"), None if action == "download" else data.get("message"))
+            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else request.form['shipping-address'], None if action == "download" else request.form['gift-message'])
             db.session.add(order)
             db.session.commit()
-            # print(temp_storage)
             for item in temp_storage.keys():
                 orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
                 Product.query.filter_by(id = int(item)).first().units_sold += 1
@@ -457,13 +460,10 @@ def processOrder():
             return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
         #Guest Transaction
         else:
-            billingEmail = data.get('billing_email')
-            if billingEmail == "" or not regex.match(email_regex, billingEmail) or billingEmail == None:
-                return jsonify({"alert" : "Error: Invalid billing email provided"})
             if validateCart():
                 print("Processing order: guest")
 
-                order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else data.get("recipient"), None if action == "download" else data.get("message")) 
+                order = Order_History(None, datetime.now(), "Processed", price, request.form['billing_email'], "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else request.form['shipping-address'], None if action == "download" else request.form['gift-message']) 
                 db.session.add(order)
                 db.session.commit()
 
@@ -481,9 +481,10 @@ def processOrder():
                 db.session.commit()
 
                 #Sending receipt
-                sendReceipt(str(billingEmail), temp_storage, order)
+                sendReceipt(request.form['billing_email'], temp_storage, order)
 
                 return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
+
             else:
                 return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
 
@@ -600,38 +601,51 @@ def getReviews():
 
 @app.route('/add-review', methods = ["POST"])
 def addReview():
-    print("Adding review")
-    if not current_user.is_authenticated:
-        return jsonify({"error" : "penis man"})
-    
-    targetID = int(request.form.get("id"))
-    body = request.form.get("review-body")
-    title = request.form.get("review-title")
-    rating = float(request.form.get("rating3"))
+    form = ReviewForm()
+    if form.validate_on_submit():
+        print(form.data)
+        print("Adding review")
+        if not current_user.is_authenticated:
+            return jsonify({"error" : "penis man"})
+        
+        targetID = int(request.form.get("id"))
+        body = request.form.get("review-body")
+        title = request.form.get("review-title")
+        try:
+            rating = int(request.form.get("rating3"))
+            assert rating >= 1 and rating <= 5
+        except (ValueError, AssertionError, TypeError):
+            return jsonify({"alert" : "Invalid rating"})
+        newReview = Review(current_user.id, targetID, rating, title, body)
+        db.session.add(newReview)
 
-    newReview = Review(current_user.id, targetID, rating, title, body)
-    db.session.add(newReview)
+        targetProduct = Product.query.filter_by(id = targetID).first()
+        targetProduct.total_reviews += 1
+        targetProduct.rating = (targetProduct.rating*targetProduct.total_reviews + rating)/(targetProduct.total_reviews+1)
+        db.session.commit()
 
-    targetProduct = Product.query.filter_by(id = targetID).first()
-    targetProduct.total_reviews += 1
-    targetProduct.rating = (targetProduct.rating*targetProduct.total_reviews + rating)/(targetProduct.total_reviews+1)
-    db.session.commit()
+        return jsonify({"alert" : "review added"})
+    else:
+        print(form.errors)
+        return jsonify({"alert" : form.errors})
 
-    return jsonify({"alert" : "review added"})
-
-@app.route("/contact")
+@app.route("/contact", methods=['GET', 'POST'])
 def contact():
-    return render_template("contact.html")
+    feedbackForm = FeedbackForm()
+    if request.method == "POST":
+        print(feedbackForm.data)
+        if feedbackForm.validate_on_submit():
+            title = feedbackForm.title.data
+            email = feedbackForm.email.data
+            flag = feedbackForm.flag.data
+            query = feedbackForm.query.data
 
-@app.route("/send-feedback", methods = ["POST"])
-def sendFeedback():
-    print(request.form)
-    title = request.form["title"]
-    email = request.form["email"]
-    flag = request.form["flag"]
-    query = request.form["query"]
-    newFeedback = Feedback(title, query, email, flag)
-    db.session.add(newFeedback)
-    db.session.commit()
+            newFeedback = Feedback(title, query, email, flag)
+            db.session.add(newFeedback)
+            db.session.commit()
+            return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
+        else:
+            return jsonify({"flag" : 0, "alert" : "Submission Failed"})
 
-    return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
+    else:
+        return render_template("contact.html", feedbackForm=feedbackForm)
