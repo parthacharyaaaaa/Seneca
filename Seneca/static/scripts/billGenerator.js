@@ -54,12 +54,18 @@ function displayContent(products) {
             fetch("/remove-from-cart", {
                 method : "POST",
                 headers : {
-                    "Content-Type" : "application/json"
+                    "Content-Type" : "application/json",
+                    "X-CSRFToken" : document.querySelector("meta[name='csrf-token']").getAttribute('content')
                 },
                 body : JSON.stringify({id : this.id})
             })
             .then(response => response.json())
             .then(data => {
+                if(data.CSRFError){
+                    alert(data.CSRFError)
+                    return false;
+                }
+
                 if(data.valid == 0){
                     alert("Error: Cart removal")
                 }

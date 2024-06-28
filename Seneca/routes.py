@@ -233,7 +233,6 @@ def cart():
             return render_template('cart.html', signedIn = current_user.is_authenticated, isEmpty = False, backup_price = backup_price, backup_quantity = backup_quantity)
 
 @app.route("/remove-from-cart", methods = ['POST'])
-@csrf.exempt
 def removeFromCart():
     if request.method == 'POST':
         productID = request.get_json().get('id')

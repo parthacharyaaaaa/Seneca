@@ -2,6 +2,7 @@
 {% block title %} Checkout | Seneca {% endblock %}
 {% block additionalDependencies %}
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='cart.css')}}">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 {% endblock %}
 {% block content %}
 
@@ -25,7 +26,6 @@
     <div class="product-container" id="product-container">
     </div>
     <form class="bill" id="checkout-form">
-        <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
             {% if(signedIn) %}
             <h2>Checkout</h2>
             <hr>
