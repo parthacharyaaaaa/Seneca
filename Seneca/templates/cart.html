@@ -24,52 +24,60 @@
 <section class="page-container">
     <div class="product-container" id="product-container">
     </div>
-    <div class="bill">
-        {% if(signedIn) %}
-        <h2>Checkout</h2>
-        <hr>
-        <div class="contact-details">
-            <h3>Contact Details:</h3>
-            <h5 style="margin-bottom: 0; padding-bottom: 0; ">Billing email: <span id="billing-email">{{billingEmail}}</span></h5>
-        </div>
-        {% else %}
-        <h2>Guest Checkout</h2>
-        <hr>
-        <div class="contact-details">
-            <h3>Contact Details:</h3>
-            <div class="input-container">
-                <h5>Billing email:</h5>
-                <input type=email id="billing-email" placeholder="Billing address (required)" required
-                    class="bg-field" />
-            </div>
-            <span class="utility-disclaimer-text-small">*For tracking and storing our orders, we require guests to
-                provide an address to assosciate the purchase with.</span>
-        </div>
-        {% endif %}
-        <hr>
-        <div class="paymentinfo">
-            <h3>Payment Summary</h3>
-            <label for="total-items">Total-items: </label>
-            <span id="total-items" class="text-span">{{backup_quantity}}</span>
-            <label for="total-bill">Total: </label>
-            <span id="total-bill" class="text-span">${{backup_price}}</span>
-            <input type="submit" value="Buy" id="confirm-purchase" class="hover-button" />
+    <form class="bill" id="checkout-form">
+        <!-- <form method="POST" id="checkout-form" name="checkout-form"> -->
+            {{ Billingform.csrf_token }}
+            {% if(signedIn) %}
+            <h2>Checkout</h2>
             <hr>
-        </div>
-        <div class="mail">
-            <h3>Email your order</h3>
-            <span class="text-span">Email your books in a zip file directly to an email inbox, either yours or a special someone ;)</span>
-            <div class="mail-container">
-                <input type="text" value="" id="mail-id" class="mail-field" placeholder="Enter email address" />
-                <input type="text" value="" id="confirm-mail-id" class="mail-field" placeholder="Confirm email address" />
-                <textarea id="gift-message" class="bg-field" placeholder="Optionally, Enter a message to send alongside your purchase :D"></textarea>
-                <input type="submit" value="mail" id="mail-button" class="hover-button" />
+            <div class="contact-details">
+                <h3>Contact Details:</h3>
+                <h5 style="margin-bottom: 0; padding-bottom: 0; ">Billing email: <span
+                        id="billing-email">{{billingEmail}}</span></h5>
             </div>
-        </div>
-    </div>
+            {% else %}
+            <h2>Guest Checkout</h2>
+            <hr>
+            <div class="contact-details">
+                <h3>Contact Details:</h3>
+                <div class="input-container">
+                    <h5>Billing email:</h5>
+                    <!-- <input type=email id="billing-email" placeholder="Billing address (required)" required
+                        class="bg-field" /> -->
+                    {{ Billingform.billingEmail }}
+                </div>
+                <span class="utility-disclaimer-text-small">*For tracking and storing our orders, we require guests to
+                    provide an address to assosciate the purchase with.</span>
+            </div>
+            {% endif %}
+            <hr>
+            <div class="paymentinfo">
+                <h3>Payment Summary</h3>
+                <label for="total-items">Total-items: </label>
+                <span id="total-items" class="text-span">{{backup_quantity}}</span>
+                <label for="total-bill">Total: </label>
+                <span id="total-bill" class="text-span">${{backup_price}}</span>
+                <input type="button" value="Buy" id="confirm-purchase" class="hover-button" />
+                <hr>
+            </div>
+            <div class="mail">
+                <h3>Email your order</h3>
+                <span class="text-span">Email your books in a zip file directly to an email inbox, either yours or a
+                    special someone ;)</span>
+                <div class="mail-container">
+                    <!-- <input type="text" value="" id="mail-id" name="mail-id" class="mail-field" placeholder="Enter email address" /> -->
+                    {{ Billingform.email }}
+                    <!-- <input type="text" value="" id="confirm-mail-id" class="mail-field" placeholder="Confirm email address" /> -->
+                    {{ Billingform.confirmEmail }}
+                    <!-- <textarea id="gift-message" class="bg-field" placeholder="Optionally, Enter a message to send alongside your purchase :D"></textarea> -->
+                    {{ Billingform.message }}
+                    <input type="button" value="mail" id="mail-button" class="hover-button" />
+                </div>
+            </div>
+        <!-- </form> -->
+    </form>
 </section>
 <script src="{{url_for('static', filename='scripts/billGenerator.js')}}"></script>
-<script src="{{url_for('static', filename='scripts/mailOrder.js')}}"></script>
 <script src="{{url_for('static', filename='scripts/purchaseProcessor.js')}}"></script>
 
 

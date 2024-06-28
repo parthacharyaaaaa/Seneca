@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SelectField, TextAreaField
-from wtforms.validators import InputRequired, Length, EqualTo, NumberRange, ValidationError
+from wtforms.validators import InputRequired, Length, EqualTo, NumberRange, ValidationError, Optional, ReadOnly
 
 import re
 
@@ -113,3 +113,12 @@ class ReviewForm(FlaskForm):
     review_title = customStringField(validators=[Length(min=6, max=32, message="Review title should be between 6 and 32 characters")], description="Review Title", render_kw={'id' : 'review-title'}, name="review-title")
 
     review_body = customStringField(validators=[Length(min=16, max=1024, message="Review body must be between 18 and 1024 characters long")], description="Review Description", render_kw={"class" : "review-body"}, name="review-body")
+
+class BillingForm(FlaskForm):
+    billingEmail = customStringField(validators=[EmailCheck()], name = "billing-email", description="Billing Address (Required)", render_kw={'class' : 'bg-field'})
+
+    email = customStringField(validators=[EmailCheck()], name = "mail-id", description="Enter Billing Email Address", render_kw={"type" : "email", "id" : "mail-id", "class" : "mail-field"})
+
+    confirmEmail = customStringField(validators=[EmailCheck(), EqualTo(email, message="Please ensure that the email addresses match before mailing your order")], description="Enter Billing Email Address", render_kw={"type" : "email", "id" : "confirm-mail-id", "class" : "mail-field"}, name="confirm-mail-id")
+
+    message = TextAreaField(validators=[Optional(strip_whitespace=True)], name="gift-message", render_kw={"class" : "bg-field", "placeholder" : "Optionally, Enter a message to send alongside your purchase :D"})

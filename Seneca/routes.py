@@ -99,7 +99,7 @@ def login():
         print(request.form)
         if not loginForm.validate_on_submit():
             print("Login validation failed: Backend")
-            print(loginForm.errors)
+            print(loginForm.errors, loginForm.data)
             return jsonify({'alert' : 'Invalid details submitted'})
         
         identity = request.form['emailPhone']
@@ -200,14 +200,14 @@ def logout():
 def product():
     reviewForm = ReviewForm()
     id = request.args.get('viewkey')
-    print(id)
+    # print(id)
     requestedProduct = Product.query.filter_by(id = id).first().loadInfo()
-    print(requestedProduct)
+    # print(requestedProduct)
     print(current_user.is_authenticated)
 
     return render_template('productTemplate.html',signedIn = current_user.is_authenticated, product=requestedProduct, reviewForm = reviewForm)
 
-@app.route('/cart')
+@app.route('/cart', methods = ["GET"])
 def cart():
     fallback = loadCart()
     backup_price = 0.0
@@ -246,7 +246,6 @@ def removeFromCart():
 @app.route('/addToCart', methods=['POST'])
 def addToCart():
     if request.method == 'POST':
-        # print("ID: ", type(request.form['id']))
         product_id = request.form['id']
         try:
             int(product_id)
@@ -300,7 +299,7 @@ def getCart():
                 return jsonify([])
     else:
         billItems = loadCart()
-        print("Final bill: ", billItems)
+        # print("Final bill: ", billItems)
         return jsonify(billItems)
 
 #-------------------------------------------------------------------Favourites Management
@@ -407,79 +406,75 @@ def getCatalogue():
 #Order Management
 @app.route("/process-order", methods = ['POST'])
 def processOrder():
-    data = request.get_json()
-    print(data)
-    action = data.get("action")
-    email_regex = r"[^@]+@[^@]+\.[^@]+"
-
-    if data.get('validation') != "True":
+    print("Request Form: ",request.form)
+    if int(request.form.get('validation')) != 1:
         print("API call dirty >:(")
         return jsonify({"alert" : "Error processing order", "redirect_url" : url_for('home')})
     else:
-        temp_storage = loadCart()                   #Load cart items
-        #Calculate total price
+        action = request.form['flag']
+
+        temp_storage = loadCart()
         price = 0.0
         for items in temp_storage.values():
             print(items)
             price += items['price'] - items['discount']
 
-        if current_user.is_authenticated:
-            print("Processing order: user")
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else data.get("recipient"), None if action == "download" else data.get("message"))
-            db.session.add(order)
-            db.session.commit()
-            # print(temp_storage)
-            for item in temp_storage.keys():
-                orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
-                Product.query.filter_by(id = int(item)).first().units_sold += 1
-                db.session.add(orderItem)
-            current_user.cart = []
-            flag_modified(current_user, 'cart')
-            db.session.commit()
-            print("Order committed")
+        # if current_user.is_authenticated:
+        #     print("Processing order: user")
+        #     order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else Billingform.data.get("email"), None if action == "download" else Billingform.data.get("email"))
+        #     db.session.add(order)
+        #     db.session.commit()
+        #     for item in temp_storage.keys():
+        #         orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+        #         Product.query.filter_by(id = int(item)).first().units_sold += 1
+        #         db.session.add(orderItem)
+        #     current_user.cart = []
+        #     flag_modified(current_user, 'cart')
+        #     db.session.commit()
+        #     print("Order committed")
 
-            #Generating download token
-            token = generateDownloadToken(orderID=order.id, userID=current_user.id)
-            order.token = token
-            flag_modified(order, 'token')
-            db.session.commit()
+        #     #Generating download token
+        #     token = generateDownloadToken(orderID=order.id, userID=current_user.id)
+        #     order.token = token
+        #     flag_modified(order, 'token')
+        #     db.session.commit()
 
-            #Sending receipt
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(sendReceipt(current_user.email_id, temp_storage, order))
+        #     #Sending receipt
+        #     with concurrent.futures.ThreadPoolExecutor() as executor:
+        #             future = executor.submit(sendReceipt(current_user.email_id, temp_storage, order))
 
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
-        #Guest Transaction
-        else:
-            billingEmail = data.get('billing_email')
-            if billingEmail == "" or not regex.match(email_regex, billingEmail) or billingEmail == None:
-                return jsonify({"alert" : "Error: Invalid billing email provided"})
-            if validateCart():
-                print("Processing order: guest")
+        #     return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
+        # #Guest Transaction
+        # else:
+        #     billingEmail = Billingform.data.get('billingEmail')
+        #     print(billingEmail)
+        #     if validateCart():
+        #         print("Processing order: guest")
 
-                order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else data.get("recipient"), None if action == "download" else data.get("message")) 
-                db.session.add(order)
-                db.session.commit()
+        #         order = Order_History(None, datetime.now(), "Processed", price, billingEmail, "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else Billingform.data.get("email"), None if action == "download" else Billingform.data.get("message")) 
+        #         db.session.add(order)
+        #         db.session.commit()
 
-                for item in temp_storage.keys():
-                    orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
-                    Product.query.filter_by(id = int(item)).first().units_sold += 1
-                    db.session.add(orderItem)
-                db.session.commit()
-                print("Order committed")
-                session['cart'] = []
+        #         for item in temp_storage.keys():
+        #             orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+        #             Product.query.filter_by(id = int(item)).first().units_sold += 1
+        #             db.session.add(orderItem)
+        #         db.session.commit()
+        #         print("Order committed")
+        #         session['cart'] = []
 
-                token = generateDownloadToken(orderID=order.id)
-                order.token = token
-                flag_modified(order, 'token')
-                db.session.commit()
+        #         token = generateDownloadToken(orderID=order.id)
+        #         order.token = token
+        #         flag_modified(order, 'token')
+        #         db.session.commit()
 
-                #Sending receipt
-                sendReceipt(str(billingEmail), temp_storage, order)
+        #         #Sending receipt
+        #         sendReceipt(str(billingEmail), temp_storage, order)
 
-                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
-            else:
-                return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
+        #         return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
+
+        #     else:
+        #         return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
 
 @app.route("/sendMail/id=<order_id>/<download_url>")
 def sendMail(order_id, download_url):
@@ -628,15 +623,17 @@ def contact():
     if request.method == "POST":
         print(feedbackForm.data)
         if feedbackForm.validate_on_submit():
-            title = request.form["title"]
-            email = request.form["email"]
-            flag = request.form["flag"]
-            query = request.form["query"]
+            title = feedbackForm.title.data
+            email = feedbackForm.email.data
+            flag = feedbackForm.flag.data
+            query = feedbackForm.query.data
 
             newFeedback = Feedback(title, query, email, flag)
             db.session.add(newFeedback)
             db.session.commit()
-        return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
+            return jsonify({"flag" : 1, "alert" : "Submitted Successfully"})
+        else:
+            return jsonify({"flag" : 0, "alert" : "Submission Failed"})
 
     else:
         return render_template("contact.html", feedbackForm=feedbackForm)

@@ -113,7 +113,6 @@
     {{ reviewForm.csrf_token }}
     <legend>Write A Review</legend>
     <div class='review-top'>
-        <!-- <input id="review-title" name="review-title" maxlength="32" placeholder="Add a title" /> -->
         {{ reviewForm.review_title}}
 
         <div id="full-stars-example-two">
@@ -139,8 +138,6 @@
         </div>
 
     </div>
-    <!-- <textarea placeholder="Write a review" name="review-body" maxlength="1024" spellcheck="true" class="review-body"
-        form="review-form"></textarea> -->
     {{reviewForm.review_body}}
     <button type="submit" id="submit-review" class="hover-button">Send Review</button>
 </form>

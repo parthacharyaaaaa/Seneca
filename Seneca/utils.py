@@ -107,7 +107,7 @@ def loadCart() -> dict:
     for itemKey in itemKeys:
         item = Product.query.filter_by(id = int(itemKey)).first()
         cart.update({str(item.id) : item.to_dict()})
-    print(cart)
+    # print(cart)
     return cart
 
 def validateCart() -> bool:
