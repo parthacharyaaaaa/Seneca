@@ -51,6 +51,12 @@ def error_403(e):
     message = "The file you requested could not be found. Your order has been marked as 'Under Review', which means that our support team has been notified of this discrepency and this error has been recorded in our database. Expect resolution shortly.",
     code = 500)
 
+@app.errorhandler(500)
+def error_500(e):
+    return render_template('error.html',
+    head="Internal Server Error",
+    message="An unexpected error occurred on our side. Please try again later, or contact support if the issue persists.",
+    code=500)
 #Endpoints
 @app.route("/templatetest")
 def template():
