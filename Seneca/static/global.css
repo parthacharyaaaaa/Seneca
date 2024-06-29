@@ -23,8 +23,6 @@ html body::-webkit-scrollbar {
 /* VARIABLES */
 :root{
     /* BACKGROUND IMAGES */
-    /* Alt: Light mode
-       Main: Dark mode */
     --BGIMG: url('assets/background.png');
     --BGIMG-ALT: url('assets/background.png');          /*  Light mode background */
     --BGCOLOR: rgb(59, 59, 59);
@@ -45,21 +43,8 @@ html body::-webkit-scrollbar {
     --FF-BRAND: French-Canon-Bold;
     --FF-BRAND-2: French;
     
-    /* Text colors for color theme: dark) */
     --TEXT-COLOR-LIGHT: antiquewhite;
     --TEXT-COLOR-LIGHTER: white;
-    
-    /* TYPOGRAPHY: To be added later */
-    /*--FF-ALT-1
-    --FF-ALT-2
-
-
-    --TEXT-COLOR-DARK
-    --TEXT-COLOR-DARK-ALT-1
-    --TEXT-COLOR-DARK-ALT-2
-    --TEXT-COLOR-LIGHT-ALT-1
-    --TEXT-COLOR-LIGHT-ALT-2
-    */
 }
 .brand-text{
     font-family: var(--FF-BRAND);
@@ -86,17 +71,13 @@ html body::-webkit-scrollbar {
 /* GLOBAL STYLES */
 html body{
     /* background-image: var(--BGIMG); */
-    background-color: rgb(37, 37, 37);
+    background-color: var(--BGCOLOR);
     min-height: 100vh;
 
     color: var(--TEXT-COLOR-LIGHT);
     font-family: var(--FF-MAIN);
     display: flex;
     flex-direction: column;
-    /* flex: 1; */
-    /* justify-content: space-between; */
-
-
 }
 html{
     position: relative;
@@ -116,7 +97,7 @@ html{
 .navbar{
     background-color: var(--BGCOLOR-ICONS-1);
     color: var(--TEXT-COLOR-LIGHT);
-    box-shadow: 0px 3px 3px rgba(0,0,0,0.7);
+    box-shadow: 0px 3px 3px rgba(0,0,0,0.2);
     margin-bottom: 1rem;
 } 
 
@@ -143,6 +124,10 @@ html{
 .fa-shopping-cart{
     transform: scale(150%);
     padding-right: 0.5rem;
+}
+
+.navbar-brand.haki-logo{
+    color: var(--TEXT-COLOR-LIGHT)
 }
 /* Footer */
 footer{
@@ -476,11 +461,19 @@ footer a:is(:hover, :focus){
 .bg-field:hover {
     outline: 2px solid green;
     box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.4); /* Stronger shadow */
-    background-color: #f7f7f7; /* Slightly darker background */
+    background-color: var(--BGCOLOR-ICONS-1); /* Slightly darker background */
     transform: translateY(-2px);
 }
 
-
+@media (prefers-color-scheme: light){
+    :root{
+        --BGCOLOR: antiquewhite; /* Light grey */
+        --BGCOLOR-ICONS-1: #FAF0E6; /* White */
+        --TEXT-COLOR-LIGHT: rgb(50, 50, 50); /* Dark grey */
+        --TEXT-COLOR-LIGHTER: rgb(30, 30, 30); /* Darker grey */
+        
+    }
+}
 @media screen and (min-width: 480px){
     footer{
         flex-flow: column nowrap;

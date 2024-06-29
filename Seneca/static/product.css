@@ -29,10 +29,11 @@
 }
 
 .product-info{
-    background-color: black;
+    background-color: var(--BGCOLOR-ICONS-1);
     padding: 1rem;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
+    margin-bottom: 1rem;
 }
 
 .upper-specs{
@@ -82,9 +83,7 @@
 .form-top{
     text-align: center;
     background-color: var(--BGCOLOR-ICONS-1);
-    /* margin-top: 1rem; */
     padding: 1rem;
-    border-top: 1px solid var(--TEXT-COLOR-LIGHTER)
 }
 
 .form-top hr{
@@ -92,13 +91,11 @@
 }
 #review-form{
     background-color: var(--BGCOLOR-ICONS-1);
-    /* margin-top: 3rem; */
     padding: 1rem;
 }
 
 .review-top{
     display: flex;
-    /* justify-content: space-around; */
     gap: 2rem;
     align-items: center;
 }

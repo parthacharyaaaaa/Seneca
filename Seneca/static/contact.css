@@ -31,12 +31,12 @@
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
-    border: 1px solid #ccc;
+    border: var(--BGCOLOR);
     border-radius: 4px;
     font-size: 16px;
     transition: border-color 0.3s;
 
-    background-color: rgb(37, 37, 37);
+    background-color: var(--BGCOLOR);
     color: var(--TEXT-COLOR-LIGHT)
 }
 
@@ -58,7 +58,7 @@ textarea {
     font-size: 16px;
     resize: none;
     transition: border-color 0.3s;
-    background-color: rgb(37, 37, 37);
+    background-color: var(--BGCOLOR);
     color: var(--TEXT-COLOR-LIGHT)
 }
 
