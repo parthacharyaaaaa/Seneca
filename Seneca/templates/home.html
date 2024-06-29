@@ -17,7 +17,7 @@
             Discover the joy of reading with us, and let Seneca be your ultimate literary companion.<br>
         </span>
         <div class="container">
-            <button id="redirect-catalogue" class="sideswipe-btn" type="button">Explore</button>
+            <button id="redirect-catalogue" class="sideswipe-btn" type="button" onclick="window.location ='/catalogue'">Explore</button>
         </div>
     </div>
 </section>
@@ -133,9 +133,8 @@
     </div>
     <div class="bestsellers-ribbon">
         {% for item in bestSellers %}
-        <a href="products/id={{item['id']}}">
+        <a href="products?viewkey={{item['id']}}">
             <div class="container">
-                <img class="backdrop" src="{{item['cover']}}"></img>
                 <img src="{{item['cover']}}" alt="{{item['title']}}">
                 <hr>
                 <span class="text">
