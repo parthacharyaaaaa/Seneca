@@ -3,8 +3,8 @@ from flask import jsonify, redirect, request, render_template, session, url_for,
 from flask_login import login_required, login_user, current_user, logout_user
 from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
-from werkzeug.exceptions import NotFound
-
+from werkzeug.exceptions import NotFound, HTTPException
+from sqlite3 import IntegrityError
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder, sendErrorReports
 from Seneca.utils import *
 from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item, Order_Error
@@ -25,10 +25,18 @@ import concurrent.futures
 def loadUser(user_id):
     return User.query.filter_by(id=user_id).first()
 
+
 @app.errorhandler(CSRFError)
 def HandleCSRFError(e):
     return jsonify({'CSRFError': 'CSRF protection failed'}), 400
 
+@app.errorhandler(IntegrityError)
+def handle_IntegrityError(e):
+    return render_template('error.html',
+    head="Cart Integrity Check Failed",
+    message="Please refresh the page. This error may also be raised in case an order was attempted again via browser cache methods (pressing the back button and trying to place an order again)",
+    code=409)
+    
 @app.errorhandler(NotFound)
 def error_404(e):
     return render_template('error.html',
@@ -40,7 +48,7 @@ def error_404(e):
 def error_403(e):
     return render_template('error.html',
     head = "File Not Found",
-    message = "The file you requested could not be found. Please check the file name and try again. Your order has been marked as 'Under Review', which means that our support team has been notified of this discrepency and this error has been recorded in our database. Expect resolution shortly.",
+    message = "The file you requested could not be found. Your order has been marked as 'Under Review', which means that our support team has been notified of this discrepency and this error has been recorded in our database. Expect resolution shortly.",
     code = 500)
 
 #Endpoints
@@ -453,8 +461,11 @@ def processOrder():
         
         #All checks passed
         signedIn = current_user.is_authenticated
-        order = Order_History(user = current_user.id if signedIn else None, date = datetime.now(), status = "Processing", price = price, bill=current_user.email_id if signedIn else request.form['billing_email'], method="Download" if action == "download" else "mail", quantity=len(temp_storage), mail_to= None if action == "download" else request.form['shipping-address'], mail_message=None if action == "download" else request.form['gift-message'])
-
+        try:
+            order = Order_History(user = current_user.id if signedIn else None, date = datetime.now(), status = "Processing", price = price, bill=current_user.email_id if signedIn else request.form['billing_email'], method="Download" if action == "download" else "mail", quantity=len(temp_storage), mail_to= None if action == "download" else request.form['shipping-address'], mail_message=None if action == "download" else request.form['gift-message'])
+        except:
+            raise IntegrityError
+        #MUST FIX 25/6/24: ERROR RAISED IN SQLALCHEMY AND NOT TO THIS CONTROL? WHAT? I WANT TO KILL MYSELF DAWG
         db.session.add(order)
         db.session.commit()
 
@@ -485,8 +496,6 @@ def processOrder():
             executor = sendReceipt(current_user.email_id if signedIn else request.form['billing_email'], temp_storage, order)
 
         return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
-
-
 
 @app.route("/sendMail/id=<order_id>/<download_url>")
 def sendMail(order_id, download_url):
@@ -520,14 +529,23 @@ def sendMail(order_id, download_url):
     for packageItem in packageItems:
         zipList.append(Product.query.filter_by(id = packageItem.product_id).first().url)
     print(zipList)
-    package = createZip(f"Seneca: Order-{order_id}", zipList)
-    # print(package)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        sentOrder = executor.submit(sendOrder(order.mail_to, package, order.mail_message))
-    token["used"] = 1
-    flag_modified(order, "token")
-    db.session.commit()
-    return redirect(url_for('mailConfirmation', recipient = order.mail_to, order=order))
+
+    try:
+        package = createZip(f"Seneca: Order-{order_id}", zipList)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            sentOrder = executor.submit(sendOrder(order.mail_to, package, order.mail_message))
+        token["used"] = 1
+        flag_modified(order, "token")
+        db.session.commit()
+        return redirect(url_for('mailConfirmation', recipient = order.mail_to, order=order))
+    except FileNotFoundError:
+        token['used'] = -1
+        flag_modified(order, 'token')
+        db.session.commit()
+
+        orderError = Order_Error(404, "FileNotFound", order.order_time, order.billing_address, 0)
+        db.session.add(orderError)
+        db.session.commit()
 
 @app.route("/order-success")
 def mailConfirmation():

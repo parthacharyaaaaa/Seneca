@@ -79,15 +79,24 @@ class BillingCheck:
 
     def __call__(self) -> bool:
         print("BillingCheck called")
-        if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.billingEmail):
+
+        if self.flag not in ['download', 'mail']:
+            print("Invalid Flag")
+            return False
+        
+        if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.billingEmail) == None:
             return False
 
         if self.flag == "mail":
-            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.shippingAddress):
+            if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.shippingAddress) == None:
+                return False
+            
+            if self.shippingAddress in (None, 'undefined', '') or len((self.shippingAddress).strip()) < 6:
                 return False
 
             if self.confirmShippingAddress != self.shippingAddress:
                 return False
+    
         print("Valid")
         return True
             
