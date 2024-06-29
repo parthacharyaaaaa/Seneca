@@ -1,8 +1,7 @@
 document.addEventListener("DOMContentLoaded", function (event) {
-    const csrfToken = document.getElementById('csrf_token').value;
+    const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute('content')
 
     document.getElementById('confirm-purchase').addEventListener('click', function (event) {
-        event.preventDefault()
         console.log("Processing payment")
         var formData = new FormData(document.getElementById('checkout-form'))
         formData.append("flag", "download")
@@ -38,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
     })
 
     document.getElementById("mail-button").addEventListener("click", function (event) {
-        event.preventDefault()
         console.log("SENDING MAIL")
         var formData = new FormData(document.getElementById('checkout-form'))
         formData.append("flag", "mail")
