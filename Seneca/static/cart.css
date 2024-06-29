@@ -14,7 +14,7 @@ body{
 }
 
 .product-container{
-    border-right: 1px solid white;
+    border-right: 1px solid var(--TEXT-COLOR-LIGHT);
     column-count: 1; 
     column-gap: 3rem; 
     padding: 20px;
@@ -36,6 +36,9 @@ body{
     align-items: center;
     padding: 10px;
 }
+.bill-card:nth-child(odd){
+    background-color: var(--BGCOLOR-BUTTONS-2);
+}
 .bill-card:nth-child(even){
     background-color: var(--BGCOLOR-ICONS-1);
 }
@@ -47,7 +50,7 @@ body{
 .bill-card {
     border-radius: 8px;
     margin: 10px 0;
-    box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px;
+    box-shadow: var(--SHADOW-COLOR) 0 2px 4px;
 }
 
 .bill-card .product-image img {

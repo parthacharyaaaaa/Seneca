@@ -37,7 +37,6 @@
         gap: 1rem;
     
         background-color: var(--BGCOLOR-ICONS-1);
-        /* margin-top: 1rem; */
     
         font-size: 1.1rem;
         height: fit-content;
@@ -45,7 +44,7 @@
 
         legend {
             font-weight: bold;
-            color: #333;
+            color: var(--TEXT-COLOR-LIGHT);
             border: none; 
             margin-bottom: 0;
         }
@@ -62,12 +61,12 @@ select{
     padding-left: 5px;
     margin: 8px 0;
     box-sizing: border-box;
-    border: 1px solid white;
+    border: none;
     border-radius: 4px;
     font-size: 16px;
     transition: border-color 0.3s ease;
     height: 2rem;
-    background-color: transparent;
+    background-color: var(--BGCOLOR-BUTTONS-1);
 
     color: var(--TEXT-COLOR-LIGHT   )
 }
@@ -91,12 +90,12 @@ option{
 }
 
 .input-field::placeholder {
-    color: rgba(255, 255, 255, 0.15);
+    color: var(--TEXT-COLOR-LIGHT);
     font-style: italic;
 }
 
 .input-field:is(:hover, :focus)::placeholder {
-    color: rgba(36, 36, 36, 0.65);
+    color: var(--TEXT-COLOR-LIGHTER);
     font-style: italic;
 }
 
@@ -104,9 +103,7 @@ option{
 .product-container {
     display: flex;
     flex-flow: row wrap;
-    /* gap: 1rem; */
     justify-content: space-evenly;
-    /* margin-top: 1rem; */
 }
 
 .option-container {
@@ -163,14 +160,12 @@ option{
 
     .product-card .product-details{
         width: 100%;
-        /* margin-left: 5rem; */
         flex-grow: 1;
     }
 
     .book-credentials{
         height: 25%;
-        /* margin-bottom: 0.2rem; */
-    }
+        }
     
     .book-credentials .product-title{
         font-size: var(--FSIZE);

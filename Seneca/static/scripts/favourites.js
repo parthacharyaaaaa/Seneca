@@ -20,7 +20,7 @@ document.addEventListener('contentLoaded', function (event) {
                 hearts.forEach(icon => {
                     console.log(icon)
                     if (favourites.includes(icon.id)) {
-                        icon.style.backgroundColor = 'red'
+                        icon.style.backgroundColor = 'var(--BGCOLOR-BUTTONS-2)'
                     }
                     icon.addEventListener('click', function (event) {
                         fetch('/toggle-favourites', {
@@ -39,7 +39,7 @@ document.addEventListener('contentLoaded', function (event) {
                                 }
                                 if (data.action === 'add') {
                                     console.log("Added")
-                                    icon.style.backgroundColor = 'red'
+                                    icon.style.backgroundColor = 'var(--BGCOLOR-BUTTONS-2)'
                                 }
                                 else {
                                     console.log('removed')

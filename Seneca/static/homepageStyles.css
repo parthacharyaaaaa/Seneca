@@ -253,19 +253,6 @@ html body{
         filter: grayscale(100%);
         position: relative;
     }
-
-    /* .container:is(:hover, :focus)::after {
-        content: "view";
-        position: absolute;
-        top: 8.5rem;
-        display: block;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 100;
-        font-size: var(--FSIZE-XL);
-        padding: 1rem;
-        border-radius: 10px;
-        color: var(--TEXT-COLOR-LIGHT);
-    } */
 }
 .team{
     margin-top: 1rem;
@@ -310,11 +297,11 @@ html .about>span {
 
 .sideswipe-btn {
     appearance: none;
-    background-color: transparent;
-    border: 2px solid #1A1A1A;
+    background-color: var(--BGCOLOR-BUTTONS-2);
+    border: none;
     border-radius: 15px;
     box-sizing: border-box;
-    color: #3B3B3B;
+    color: var(--TEXT-COLOR-LIGHT);
     cursor: pointer;
     display: inline-block;
     font-family: Roobert, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -328,7 +315,7 @@ html .about>span {
     padding: 16px 24px;
     text-align: center;
     text-decoration: none;
-    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    transition-duration: 400ms;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
@@ -342,7 +329,7 @@ html .about>span {
 
 .sideswipe-btn:hover {
     color: #fff;
-    background-color: #1A1A1A;
+    background-color: var(--BGCOLOR-BUTTONS-1);
     box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
     transform: translateY(-2px);
 }

@@ -18,15 +18,32 @@
     box-sizing: border-box;
 }
 html body::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for WebKit browsers */
+    display: none;
 }
 /* VARIABLES */
 :root{
     /* BACKGROUND IMAGES */
     --BGIMG: url('assets/background.png');
-    --BGIMG-ALT: url('assets/background.png');          /*  Light mode background */
-    --BGCOLOR: rgb(59, 59, 59);
-    --BGCOLOR-ICONS-1: black;
+    --BGIMG-ALT: url('assets/background.png');
+    --BGCOLOR: #040D12;
+    --BGCOLOR-ICONS-1: #032a2a;
+
+    /* TEXT COLORS */
+    --TEXT-COLOR-LIGHT: antiquewhite;
+    --TEXT-COLOR-LIGHTER: #93B1A6;
+
+    /* SHADOWS */
+    --SHADOW-COLOR: #040D12;
+
+    /* BUTTONS */
+    --BGCOLOR-BUTTONS-1: #040D12;
+    --BGCOLOR-BUTTONS-2: #183D3D;
+    /* 
+    040D12     Darkest
+    183D3D
+    5C8374
+    93B1A6     Lightest
+    */
     
     /* Font sizes */
     --FSIZE-SMALLEST: 0.5rem;
@@ -38,13 +55,11 @@ html body::-webkit-scrollbar {
     --FSIZE-XL: 1.7rem;
     --FSIZE-XXL: 4rem;
     --FSIZE-LARGEST: 6rem;
+
     /* Font Families */
     --FF-MAIN: Roobert,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";;
     --FF-BRAND: French-Canon-Bold;
     --FF-BRAND-2: French;
-    
-    --TEXT-COLOR-LIGHT: antiquewhite;
-    --TEXT-COLOR-LIGHTER: white;
 }
 .brand-text{
     font-family: var(--FF-BRAND);
@@ -70,7 +85,6 @@ html body::-webkit-scrollbar {
 }
 /* GLOBAL STYLES */
 html body{
-    /* background-image: var(--BGIMG); */
     background-color: var(--BGCOLOR);
     min-height: 100vh;
 
@@ -81,28 +95,18 @@ html body{
 }
 html{
     position: relative;
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar for Internet Explorer/Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 /* Navbar */
-.haki-logo{
-    /* font-size: var(--FSIZE-LARGEST); */
-    font-family: var(--FF-BRAND);
-    font-weight: bolder;
-    text-shadow: 1px 1px 1px gray;
-    color: red;
-    /* color: white; */
-
-}
 .navbar{
     background-color: var(--BGCOLOR-ICONS-1);
     color: var(--TEXT-COLOR-LIGHT);
-    box-shadow: 0px 3px 3px rgba(0,0,0,0.2);
+    box-shadow: 0px 3px 3px var(--BGCOLOR-ICONS-1);
     margin-bottom: 1rem;
 } 
 
 #navbarSupportedContent a{
-    /* background-color: aqua; */
     color: var(--TEXT-COLOR-LIGHT);
 }
 
@@ -161,7 +165,6 @@ footer ul{
 .left-footer-promo ul{
     display: flex;
     justify-content: space-evenly;
-    border: 2px red solid;
 }
 
 .right-footer{
@@ -171,7 +174,6 @@ footer ul{
     gap: 4rem;
     align-items: center;
     align-content: first baseline;
-    /* gap: 30%; */
     text-align: right;
 }
 
@@ -188,13 +190,12 @@ footer ul{
 footer a:is(:hover, :focus){
     color: var(--TEXT-COLOR-LIGHTER);
     text-decoration: underline;
-    /* font-weight: bold; */
 }
 
 .card-button {
     appearance: none;
-    background-color: transparent;
-    border: 2px solid #1A1A1A;
+    background-color: var(--BGCOLOR-BUTTONS-1);
+    border: none;
     border-radius: 7%;
     box-sizing: border-box;
     color: var(--TEXT-COLOR-LIGHT);
@@ -208,7 +209,7 @@ footer a:is(:hover, :focus){
     outline: none;
     text-align: center;
     text-decoration: none;
-    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    transition: all 600ms cubic-bezier(.23, 1, 0.32, 1);
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
@@ -224,8 +225,8 @@ footer a:is(:hover, :focus){
   
   .card-button:hover {
     color: #fff;
-    background-color: #1A1A1A;
-    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    background-color: var(--BGCOLOR-BUTTONS-2);
+    box-shadow: var(--SHADOW-COLOR) 0 4px 8px;
     transform: translateY(-2px);
   }
   
@@ -260,7 +261,7 @@ footer a:is(:hover, :focus){
 }
 
 .product-card:is(:hover, :focus) {
-    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    box-shadow: var(--BGCOLOR-ICONS-1) 0 8px 15px;
     transform: translateY(-2px);
 }
 
@@ -399,8 +400,8 @@ footer a:is(:hover, :focus){
 /* Button Styles */
 .hover-button {
     appearance: none;
-    background-color: #000000;
-    border: 2px solid #1A1A1A;
+    background-color: var(--BGCOLOR-BUTTONS-1);
+    border: none;
     border-radius: 15px;
     box-sizing: border-box;
     color: #FFFFFF;
@@ -430,7 +431,7 @@ footer a:is(:hover, :focus){
   }
   
   .hover-button:hover {
-    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    box-shadow: var(--BGCOLOR-ICONS-1) 0 8px 15px;
     transform: translateY(-2px);
   }
   
@@ -444,36 +445,26 @@ footer a:is(:hover, :focus){
     padding: 10px 15px;
     border: none;
     border-radius: 25px;
-    background-color: #ffffff; /* White background */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background-color: var(--BGCOLOR-BUTTONS-1);
+    color: var(--TEXT-COLOR-LIGHT);
+    box-shadow: 0 4px 6px var(--BGCOLOR-ICONS-1);
     font-size: 16px;
-    transition: all 0.3s ease;
-    /* margin-bottom: 0.5rem; */
+    transition-duration: 400ms;
 }
 
 /* Placeholder styling */
 .bg-field::placeholder {
-    color: #a9a9a9; /* Light gray placeholder text */
+    color: #a9a9a9;
 }
 
 /* Focus and hover effects */
 .bg-field:focus,
 .bg-field:hover {
-    outline: 2px solid green;
-    box-shadow: 2px 6px 12px rgba(0, 0, 0, 0.4); /* Stronger shadow */
-    background-color: var(--BGCOLOR-ICONS-1); /* Slightly darker background */
+    outline: 2px solid var(--BGCOLOR);
+    box-shadow: 2px 6px 12px var(--SHADOW-COLOR);
     transform: translateY(-2px);
 }
 
-@media (prefers-color-scheme: light){
-    :root{
-        --BGCOLOR: antiquewhite; /* Light grey */
-        --BGCOLOR-ICONS-1: #FAF0E6; /* White */
-        --TEXT-COLOR-LIGHT: rgb(50, 50, 50); /* Dark grey */
-        --TEXT-COLOR-LIGHTER: rgb(30, 30, 30); /* Darker grey */
-        
-    }
-}
 @media screen and (min-width: 480px){
     footer{
         flex-flow: column nowrap;

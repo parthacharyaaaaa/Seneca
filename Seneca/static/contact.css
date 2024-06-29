@@ -14,7 +14,7 @@
     padding: 20px;
     background-color: var(--BGCOLOR-ICONS-1);
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px var(--SHADOW-COLOR);
     font-family: 'Arial', sans-serif;
 }
 
@@ -34,10 +34,16 @@
     border: var(--BGCOLOR);
     border-radius: 4px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    transition-duration: 400ms;
 
     background-color: var(--BGCOLOR);
     color: var(--TEXT-COLOR-LIGHT)
+}
+
+.form-field:is(:hover, :focus),
+#flag:is(:hover, :focus){
+    background-color: var(--BGCOLOR-BUTTONS-2);
+    transform: translateY(-2px);
 }
 
 /* Focus effect */
@@ -48,37 +54,35 @@
 
 }
 
-/* Textarea styling */
 textarea {
     width: 100%;
     height: 150px;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: none;
     border-radius: 4px;
     font-size: 16px;
     resize: none;
-    transition: border-color 0.3s;
     background-color: var(--BGCOLOR);
-    color: var(--TEXT-COLOR-LIGHT)
+    color: var(--TEXT-COLOR-LIGHT);
+    transition-duration: 400ms;
 }
 
-/* Textarea focus effect */
-textarea:focus {
+textarea:is(:focus, :hover){
     border-color: #000;
     outline: none;
+    transform: translateY(-2px);
+    background-color: var(--BGCOLOR-BUTTONS-2);
 }
 
-/* Placeholder styling */
 ::placeholder {
     color: #aaa;
     font-style: italic;
 }
 
-/* Submit button styling (if you decide to add one) */
 .feedback-button {
     width: 100%;
     padding: 10px;
-    background-color: #000;
+    background-color: var(--BGCOLOR-BUTTONS-1);
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -87,11 +91,6 @@ textarea:focus {
     transition: background-color 0.3s;
 }   
 
-/* Submit button hover effect */
 .feedback-button:hover {
-    background-color: #333;
+    background-color: var(--BGCOLOR-BUTTONS-2);
 }
-
-/* footer{
-    display: none;
-} */
