@@ -3,6 +3,7 @@ from flask import jsonify, redirect, request, render_template, session, url_for,
 from flask_login import login_required, login_user, current_user, logout_user
 from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
+from werkzeug.exceptions import NotFound
 
 from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
 from Seneca.utils import *
@@ -17,7 +18,6 @@ from Seneca import csrf
 from Seneca import login_manager
 
 from datetime import timedelta, datetime
-import re as regex
 import concurrent.futures
 
 #Login redirection endpoint
@@ -26,8 +26,22 @@ def loadUser(user_id):
     return User.query.filter_by(id=user_id).first()
 
 @app.errorhandler(CSRFError)
-def handle_csrf_error(e):
+def HandleCSRFError(e):
     return jsonify({'CSRFError': 'CSRF protection failed'}), 400
+
+@app.errorhandler(NotFound)
+def error_404(e):
+    return render_template('error.html',
+    head = 'Page Not Found',
+    message="The page you're looking for doesn't exist. Please check the URL or return to the homepage.", 
+    code = 404)
+
+@app.errorhandler(FileNotFoundError)
+def error_403(e):
+    return render_template('error.html',
+    head = "File Not Found",
+    message = "The file you requested could not be found. Please check the file name and try again. Your order has been marked as 'Under Review', which means that our support team has been notified of this discrepency and this error has been recorded in our database. Expect resolution shortly.",
+    code = 500)
 
 #Endpoints
 @app.route("/templatetest")
