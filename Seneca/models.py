@@ -28,10 +28,10 @@ class User(UserMixin, db.Model):
         Index('users_cart', 'cart'),
         Index('users_favs', 'favourites'),
         CheckConstraint('age > 8 AND age < 100', name = 'check_age_range'),
-        CheckConstraint("email_id ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'", name="check_valid_email"),
-        CheckConstraint("phone ~ '^\+?[1-3]?\s?(\(\d{1,4}\)|\d{1,4})?[\s-]?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$'", name="check_valid_phone"),
-        CheckConstraint("first_name ~ '^[a-zA-Z0-9 ]+$'", name="check_first_name"),
-        CheckConstraint("last_name ~ '^[a-zA-Z0-9 ]+$'", name="check_last_name"),
+        # CheckConstraint("email_id ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'", name="check_valid_email"),
+        # CheckConstraint("phone ~ '^\+?[1-3]?\s?(\(\d{1,4}\)|\d{1,4})?[\s-]?\d{1,4}[\s-]?\d{1,4}[\s-]?\d{1,9}$'", name="check_valid_phone"),
+        # CheckConstraint("first_name ~ '^[a-zA-Z0-9 ]+$'", name="check_first_name"),
+        # CheckConstraint("last_name ~ '^[a-zA-Z0-9 ]+$'", name="check_last_name"),
     )
 
     def __init__(self, fname, lname, age, phone, email, password) -> None:
@@ -240,7 +240,7 @@ class Review(db.Model):
 
     __table_args__ = (
         CheckConstraint('rating <= 5', name = 'check_rating_max_value'),
-        CheckConstraint("title ~ '^[a-zA-Z0-9 .,!?;:'-]+$'", name='check_review_title'),
+        # CheckConstraint("title ~ '^[a-zA-Z0-9 .,!?;:'-]+$'", name='check_review_title'),
     )
 
     def __init__(self, user, product, rating, title, body, time=datetime.now()):
@@ -274,14 +274,32 @@ class Feedback(db.Model):
     flag = db.Column(db.String(16), nullable = True, default = "support")
     time = db.Column(db.DateTime, nullable = False)
 
-    __table_args__ = (
-        CheckConstraint("title ~ '^[a-zA-Z0-9 .,!?;:\'\"-]+$'", name="check_valid_characters_title"),
-        CheckConstraint("email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'", name="check_valid_email"),
-        CheckConstraint("title ~ '^[a-zA-Z0-9 .,!?;:'-]+$'", name='check_feedback_title')
-    )
+    # __table_args__ = (
+        # CheckConstraint("title ~ '^[a-zA-Z0-9 .,!?;:\'\"-]+$'", name="check_valid_characters_title"),
+        # CheckConstraint("email ~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'", name="check_valid_email"),
+        # CheckConstraint("title ~ '^[a-zA-Z0-9 .,!?;:'-]+$'", name='check_feedback_title')
+    # )
     def __init__(self, title, description, email, flag):
         self.email = email
         self.title = title
         self.description = description
         self.flag = flag
         self.time = datetime.now()
+
+
+class Order_Error(db.Model):
+    __tablename__ = "order_errors"
+
+    id = db.Column(db.Integer, primary_key = True)
+    error_code = db.Column(db.Integer, nullable = False, default = 404)
+    error_category = db.Column(db.String(32), nullable = False)
+    order_time = db.Column(db.DateTime, db.ForeignKey('order_history.order_time'), nullable = False)
+    victim = db.Column(db.String(128), db.ForeignKey('order_history.billing_address'), nullable = False)
+    resolved = db.Column(db.Boolean, nullable = False, default = 0)
+
+    def __init__(self, code, category, time, victim, res):
+        self.error_code = code
+        self.error_category = category
+        self.order_time = time
+        self.victim = victim
+        self.resolved = res

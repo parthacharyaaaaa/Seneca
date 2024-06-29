@@ -1,0 +1,8 @@
+header, footer{
+    display: none;
+}
+
+.wrapper{
+    display: block;
+    background-color: var(--BGCOLOR-ICONS-1);
+}
