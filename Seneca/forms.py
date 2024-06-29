@@ -1,4 +1,4 @@
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField, RecaptchaWidget
 from wtforms import StringField, IntegerField, SelectField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo, NumberRange, ValidationError, AnyOf, Regexp
 
@@ -125,10 +125,13 @@ class SignupForm(FlaskForm):
 
     confirm_password = customStringField(validators=[EqualTo('password', message="Password fields do not match")],description="Confirm Password", render_kw={"type" : "password"})
 
+    recaptcha = RecaptchaField()
+
 class LoginForm(FlaskForm):
     emailPhone = customStringField(validators=[IdentityCheck(), lengthCheck(5, 256)], description="Enter Email Address/Phone Number")
 
     password = customStringField(validators=[Length(min=8, max=32, message="Passwords are between 8 and 32 characters")], render_kw = {'type' : 'password'}, description="Enter password")
+    recaptcha = RecaptchaField()
 
 class FeedbackForm(FlaskForm):
     email = customStringField(validators=[EmailCheck()], description="Enter Email Address")

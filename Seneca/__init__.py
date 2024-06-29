@@ -20,6 +20,8 @@ app.secret_key = os.environ.get('SENECA_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI', default="sqlite:///instance/test1.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.environ.get('TRAACK_MODIFICATIONS', default=False)
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=int(os.environ.get('SESSION_LIFETIME')))
+app.config['RECAPTCHA_PUBLIC_KEY'] = os.environ.get("RECAPTCHA_SITE_KEY")
+app.config['RECAPTCHA_PRIVATE_KEY'] = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
