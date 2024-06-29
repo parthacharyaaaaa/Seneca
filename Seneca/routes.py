@@ -5,9 +5,9 @@ from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
 from werkzeug.exceptions import NotFound
 
-from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder
+from Seneca.mail_sender import sendReceipt, sendSalutation, sendOrder, sendErrorReports
 from Seneca.utils import *
-from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item
+from Seneca.models import User, Product, Review, Feedback, Order_History, Order_Item, Order_Error
 from Seneca.forms import SignupForm, LoginForm, FeedbackForm, ReviewForm, BillingCheck
 from flask_wtf.csrf import validate_csrf, ValidationError, CSRFError
 
@@ -97,7 +97,7 @@ def signup():
 
             #Guest user had a cart before creating an account
             if 'cart' in session:
-                if not validateCart():
+                if not validateCart(session['cart']):
                     print("Session cart data has been tampered with (Signup)")
                     return({'alert' : "Some data in your cart seems to be either outdated or tampered with. Although this may be an issue on our servers, for security measures we have removed the data in question. Please check your newly updated cart and refresh the page.", "redirect_url" : url_for('cart')})
                 else:
@@ -140,7 +140,7 @@ def login():
                 print('logged in')
                 #If guest user had a cart prior to loggin in, we need to merge both of them too
                 if 'cart' in session:
-                    if not validateCart():
+                    if not validateCart(session['cart']):
                         print("Session cart data has been tampered with (Login)")
                         mergeCarts()
                         session.pop('cart')
@@ -441,67 +441,52 @@ def processOrder():
 
         if not formChecker():
             return jsonify({"alert" : "Invalid form details submitted"})
-
+        
+        if not validateCart(current_user.cart if current_user.is_authenticated else session.get('cart')):
+            return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
+        
         temp_storage = loadCart()
         price = 0.0
         for items in temp_storage.values():
             print(items)
             price += items['price'] - items['discount']
+        
+        #All checks passed
+        signedIn = current_user.is_authenticated
+        order = Order_History(user = current_user.id if signedIn else None, date = datetime.now(), status = "Processing", price = price, bill=current_user.email_id if signedIn else request.form['billing_email'], method="Download" if action == "download" else "mail", quantity=len(temp_storage), mail_to= None if action == "download" else request.form['shipping-address'], mail_message=None if action == "download" else request.form['gift-message'])
 
-        if current_user.is_authenticated:
-            print("Processing order: user")
-            order = Order_History(current_user.id, datetime.now(), "Processed", price, current_user.email_id, "Download" if action == "download" else "Mail", len(temp_storage), None if action == "download" else request.form['shipping-address'], None if action == "download" else request.form['gift-message'])
-            db.session.add(order)
-            db.session.commit()
-            for item in temp_storage.keys():
-                orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
-                Product.query.filter_by(id = int(item)).first().units_sold += 1
-                db.session.add(orderItem)
+        db.session.add(order)
+        db.session.commit()
+
+        for item in temp_storage.keys():
+            orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
+            Product.query.filter_by(id = int(item)).first().units_sold += 1
+            db.session.add(orderItem)
+        db.session.commit()
+
+        if signedIn:
             current_user.cart = []
             flag_modified(current_user, 'cart')
             db.session.commit()
-            print("Order committed")
-
-            #Generating download token
-            token = generateDownloadToken(orderID=order.id, userID=current_user.id)
-            order.token = token
-            flag_modified(order, 'token')
-            db.session.commit()
-
-            #Sending receipt
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(sendReceipt(current_user.email_id, temp_storage, order))
-
-            return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for("download", order_id = order.id, download_url = token["download_url"]) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
-        #Guest Transaction
         else:
-            if validateCart():
-                print("Processing order: guest")
+            session['cart'] = []
+            session.modified = True
 
-                order = Order_History(None, datetime.now(), "Processed", price, request.form['billing_email'], "(Guest) Download" if action == "download" else "(Guest) Mail", len(temp_storage), None if action == "download" else request.form['shipping-address'], None if action == "download" else request.form['gift-message']) 
-                db.session.add(order)
-                db.session.commit()
+        print("Order Committed Fully: {}".format(signedIn))
 
-                for item in temp_storage.keys():
-                    orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])
-                    Product.query.filter_by(id = int(item)).first().units_sold += 1
-                    db.session.add(orderItem)
-                db.session.commit()
-                print("Order committed")
-                session['cart'] = []
+        #Generating download token
+        token = generateDownloadToken(orderID=order.id, userID=current_user.id if signedIn else 'guest')
+        order.token = token
+        flag_modified(order, 'token')
+        db.session.commit()
+ 
+        #Sending receipt
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor = sendReceipt(current_user.email_id if signedIn else request.form['billing_email'], temp_storage, order)
 
-                token = generateDownloadToken(orderID=order.id)
-                order.token = token
-                flag_modified(order, 'token')
-                db.session.commit()
+        return jsonify({"message" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
 
-                #Sending receipt
-                sendReceipt(request.form['billing_email'], temp_storage, order)
 
-                return jsonify({"alert" : "Your order has been processed", "redirect_url" : url_for('download', order_id = order.id, download_url = token['download_url']) if action == "download" else url_for("sendMail", order_id = order.id, download_url = token["download_url"]), "flag" : "valid"})
-
-            else:
-                return jsonify({"alert" : "There seems to be an error with processing the items in your cart. They may be outdated, or tampered with.", "redirect_url": url_for('cart'), "flag" : "invalid"})
 
 @app.route("/sendMail/id=<order_id>/<download_url>")
 def sendMail(order_id, download_url):
@@ -588,12 +573,25 @@ def validateDownload():
     for packageItem in packageItems:
         zipList.append(Product.query.filter_by(id = packageItem.product_id).first().url)
     print(zipList)
-    package = createZip(f"Seneca: Order-{order_id}", zipList)
-    # print(package)
-    token["used"] = 1
-    flag_modified(order, "token")
-    db.session.commit()
-    return send_file(package, as_attachment=True, download_name=f"Seneca: Order-{order_id}.zip")
+
+    try:
+        package = createZip(f"Seneca: Order-{order_id}", zipList)
+        token["used"] = 1
+        flag_modified(order, "token")
+        db.session.commit()
+        return send_file(package, as_attachment=True, download_name=f"Seneca: Order-{order_id}.zip")
+    except FileNotFoundError:
+        token["used"] = -1
+        flag_modified(order, 'token')
+        db.session.commit()
+
+        orderError = Order_Error(404, "FileNotFound", order.order_time, order.billing_address, 0)
+        db.session.add(orderError)
+        db.session.commit()
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor = sendErrorReports(order.billing_address, order.id)
+        raise FileNotFoundError
 
 @app.route('/get-reviews', methods = ['GET'])
 def getReviews():

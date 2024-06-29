@@ -110,12 +110,9 @@ def loadCart() -> dict:
     # print(cart)
     return cart
 
-def validateCart() -> bool:
+def validateCart(cart) -> bool:
     print("ValidateCart called")
-    if 'cart' not in session:
-        return True
-    
-    for productID in session['cart']:
+    for productID in cart:
         print(productID)
         cleanProduct = Product.query.filter_by(id = int(productID)).first()
         
@@ -123,7 +120,12 @@ def validateCart() -> bool:
             print(f"Product {productID} exists")
         else:
             print(f"Product not found in database. Outdated/Tampered data detected")
-            session['cart'].pop(productID)
+            cart.pop(productID)
+
+            if current_user.is_authenticated:
+                flag_modified(current_user, 'cart')
+                db.session.commit()
+
             return False
     print("ValidateCart ended")
     return True

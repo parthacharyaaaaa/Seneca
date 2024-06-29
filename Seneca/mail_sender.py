@@ -100,3 +100,31 @@ def sendOrder(receiver, payload, message) -> None:
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
         smtp.login(email_sender, email_password)
         smtp.send_message(email_message)
+
+def sendErrorReports(receiver, orderID, admin = "1008parth@gmail.com") -> None:
+    email_sender = os.environ.get("email_sender")
+    email_password = os.environ.get("email_pass")
+
+    context = ssl.create_default_context()
+
+    # Send email to the receiver
+    email_message_user = MIMEMultipart()
+    email_message_user["From"] = email_sender
+    email_message_user["To"] = receiver
+    email_message_user["Subject"] = "Seneca Order {}".format(orderID)
+    email_message_user.attach(MIMEText("Oopsies :P", 'plain'))
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.send_message(email_message_user)
+
+    # Send email to the admin
+    email_message_admin = MIMEMultipart()
+    email_message_admin["From"] = email_sender
+    email_message_admin["To"] = admin
+    email_message_admin["Subject"] = "Error: Seneca Order {}".format(orderID)
+    email_message_admin.attach(MIMEText("Its not looking good bruv", 'plain'))
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(email_sender, email_password)
+        smtp.send_message(email_message_admin)
