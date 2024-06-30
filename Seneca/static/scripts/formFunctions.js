@@ -102,5 +102,26 @@ export function checkForm(flag, formDetails) {
         }
         return true;
     }
-    
+    else if (flag == 'checkout'){
+        const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (formDetails.get('flag') == 'mail'){
+            if (!email.test(formDetails.get('shipping-address'))){
+                alert("Invalid Email Format: Recipient Address")
+                return false;
+            }
+            else if (formDetails.get('shipping-address' != formDetails.get('confirm-shipping-address'))){
+                alert("Email Fields must match")
+                return false;
+            }
+        }
+        else{
+            if (formDetails.get('billing_email') != 'undefined'){
+                if (!email.test(formDetails.get('billing_email'))){
+                    alert("Invalid billing address given")
+                    return false;
+                }
+            }
+        }
+        return true
+    }
 }

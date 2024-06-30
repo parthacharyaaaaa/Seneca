@@ -1,3 +1,5 @@
+import { checkForm } from "./formFunctions.js"
+
 document.addEventListener("DOMContentLoaded", function (event) {
     const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute('content')
 
@@ -14,30 +16,34 @@ document.addEventListener("DOMContentLoaded", function (event) {
         } catch (error) {
             console.log("User logged in, billing email set")
         }
-
-        fetch('/process-order', {
-            method: "POST",
-            headers: {
-                'X-CSRFToken': csrfToken
-            },
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data)
-                if (data.cartError){
-                    document.body.innerHTML = data.html
-                    throw new Error("Invalid cart")
-                }
-                if (data.alert) {
-                    alert(data.alert)
-                }
-                if (data.flag === "valid") {
-                    window.location.href = data.redirect_url
-                    return data
-                }
+        if(checkForm('checkout', formData)){
+            fetch('/process-order', {
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                body: formData
             })
-            .catch(error => console.log("Error: ", error))
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    if (data.cartError){
+                        document.body.innerHTML = data.html
+                        throw new Error("Invalid cart")
+                    }
+                    if (data.alert) {
+                        alert(data.alert)
+                    }
+                    if (data.flag === "valid") {
+                        window.location.href = data.redirect_url
+                        return data
+                    }
+                })
+                .catch(error => console.log("Error: ", error))
+        }
+        else{
+            throw new Error("Invalid Form Submission")
+        }
     })
 
     document.getElementById("mail-button").addEventListener("click", function (event) {

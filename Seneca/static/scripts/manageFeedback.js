@@ -2,7 +2,7 @@ import { checkForm } from "./formFunctions.js";
 document.getElementById("contact-form").addEventListener('submit', function (event) {
     event.preventDefault();
     const formData = new FormData(this)
-    // if (checkForm('feedback', formData)) {
+    if (checkForm('feedback', formData)) {
         fetch("/contact", {
             method: "POST",
             body: formData
@@ -18,5 +18,7 @@ document.getElementById("contact-form").addEventListener('submit', function (eve
                 }
             })
             .catch(error => alert("Error: ", error))
-    // }
+    }
+    else 
+        throw new Error("Invalid Form Submission")
 })

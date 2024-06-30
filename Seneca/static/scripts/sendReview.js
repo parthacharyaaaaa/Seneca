@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function(event){
             event.preventDefault()
             console.log("Send pp")
             var formData = new FormData(this)
-            // if(checkForm('review', formData)){
+            if(checkForm('review', formData)){
                 formData.append("id", viewkeyValue)
                 fetch("/add-review", {
                     method : "POST",
@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", function(event){
                     alert(data.alert)
                     document.getElementById("review-form").reset()
                 })
-            // }
+            }
+            else 
+                throw new Error("Invalid Form Submission")
         })
     } catch (error) {
         console.log("Not signed in")
