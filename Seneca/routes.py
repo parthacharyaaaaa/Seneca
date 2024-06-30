@@ -36,6 +36,8 @@ def handle_CartIntegrityError(e):
     html_content = render_template('error.html',
     head='Cart Integrity Check Failed',
     message="Please refresh the page. This error may also be raised if an order was attempted again via browser cache methods. For further support, please visit the contact page.",
+    icon = url_for('static', filename='assets/cart-error.png'),
+    redirect = url_for('cart'),
     code=409)
     return jsonify({"cartError" : 1, "html" : html_content}), 409
     
@@ -43,7 +45,9 @@ def handle_CartIntegrityError(e):
 def error_404(e):
     return render_template('error.html',
     head = 'Page Not Found',
-    message="The page you're looking for doesn't exist. Please check the URL or return to the homepage.", 
+    message="The page you're looking for doesn't exist. Please check the URL or return to the homepage.",
+    icon = url_for('static', filename='assets/error.png'),
+    redirect = url_for('home'),
     code = 404)
 
 @app.errorhandler(FileNotFoundError)
@@ -51,6 +55,8 @@ def error_403(e):
     return render_template('error.html',
     head = "File Not Found",
     message = "The file you requested could not be found. Your order has been marked as 'Under Review', which means that our support team has been notified of this discrepency and this error has been recorded in our database. Expect resolution shortly.",
+    redirect = url_for('home'),
+    icon = url_for('static', filename='assets/file-error.png'),
     code = 500)
 
 @app.errorhandler(500)

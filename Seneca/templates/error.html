@@ -1,5 +1,5 @@
 {% extends 'baseTemplate.html' %}
-{% block title %} {% endblock %}
+{% block title %} Error {% endblock %}
 {% block additionalDependencies %}
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='error.css')}}">
 {% endblock %}
@@ -7,12 +7,12 @@
 {% block content %}
     <section class="wrapper">
         <div class="details">
-            <span class="error-head">{{head}}</span>
+            <span class="error-head">{{head}} :(</span>
             <span class="error-body">{{message}}</span>
-            <span class="error-code">{{code}}</span>
+            <span class="error-code">Error Code: {{code}}</span>
+            <br><br><br><br>
+            <a href="{{redirect}}" type="button">Back To Seneca</a>
         </div>
-        <figure>
-            <img src="" alt="error-icon">
-        </figure>
+        <img src="{{icon}}" alt="error-icon" id="error-img">
     </section>
 {% endblock %}
