@@ -84,8 +84,8 @@ class BillingCheck:
             print("Invalid Flag")
             return False
         
-        if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.billingEmail) == None:
-            return False
+        # if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.billingEmail) == None:
+        #     return False
 
         if self.flag == "mail":
             if re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', self.shippingAddress) == None:

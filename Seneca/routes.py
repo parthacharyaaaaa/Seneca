@@ -19,23 +19,25 @@ from Seneca import login_manager
 
 from datetime import timedelta, datetime
 import concurrent.futures
-
+class CartIntegrityError(HTTPException):
+    code=699
+    description = "Penis"
 #Login redirection endpoint
 @login_manager.user_loader
 def loadUser(user_id):
     return User.query.filter_by(id=user_id).first()
 
-
 @app.errorhandler(CSRFError)
 def HandleCSRFError(e):
     return jsonify({'CSRFError': 'CSRF protection failed'}), 400
 
-@app.errorhandler(IntegrityError)
-def handle_IntegrityError(e):
-    return render_template('error.html',
-    head="Cart Integrity Check Failed",
-    message="Please refresh the page. This error may also be raised in case an order was attempted again via browser cache methods (pressing the back button and trying to place an order again)",
+@app.errorhandler(CartIntegrityError)
+def handle_CartIntegrityError(e):
+    html_content = render_template('error.html',
+    head='Cart Integrity Check Failed',
+    message="Please refresh the page. This error may also be raised if an order was attempted again via browser cache methods. For further support, please visit the contact page.",
     code=409)
+    return jsonify({"cartError" : 1, "html" : html_content}), 409
     
 @app.errorhandler(NotFound)
 def error_404(e):
@@ -469,11 +471,12 @@ def processOrder():
         signedIn = current_user.is_authenticated
         try:
             order = Order_History(user = current_user.id if signedIn else None, date = datetime.now(), status = "Processing", price = price, bill=current_user.email_id if signedIn else request.form['billing_email'], method="Download" if action == "download" else "mail", quantity=len(temp_storage), mail_to= None if action == "download" else request.form['shipping-address'], mail_message=None if action == "download" else request.form['gift-message'])
+            db.session.add(order)
+            db.session.commit()
         except:
-            raise IntegrityError
+            raise CartIntegrityError
+
         #MUST FIX 25/6/24: ERROR RAISED IN SQLALCHEMY AND NOT TO THIS CONTROL? WHAT? I WANT TO KILL MYSELF DAWG
-        db.session.add(order)
-        db.session.commit()
 
         for item in temp_storage.keys():
             orderItem = Order_Item(order.id, int(item), temp_storage[item]['price'] - temp_storage[item]['discount'])

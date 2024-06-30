@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var formData = new FormData(document.getElementById('checkout-form'))
         formData.append("flag", "download")
         formData.append("validation", 1)
-        
+
         let billing_email
         try {
             billing_email = document.getElementById('billing-email').value
@@ -24,7 +24,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data.alert)
+                console.log(data)
+                if (data.cartError){
+                    document.body.innerHTML = data.html
+                    throw new Error("Invalid cart")
+                }
                 if (data.alert) {
                     alert(data.alert)
                 }
@@ -41,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var formData = new FormData(document.getElementById('checkout-form'))
         formData.append("flag", "mail")
         formData.append("validation", 1)
-        
+
         let billing_email
         try {
             billing_email = document.getElementById('billing-email').value
@@ -57,8 +61,18 @@ document.addEventListener("DOMContentLoaded", function (event) {
             },
             body: formData
         })
-            .then(response => response.json())
+            .then(response => {
+                console.log(response)
+                if (response.redirected)
+                    window.location.href = response.url
+                else
+                    return response.json()
+            })
             .then(data => {
+                if (data.cartError){
+                    document.body.innerHTML = data.html
+                    throw new Error("Invalid cart")
+                }
                 if (data.alert) {
                     console.log(data.alert)
                     alert("Alert: " + data.alert)
