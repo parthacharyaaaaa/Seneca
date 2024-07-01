@@ -39,8 +39,8 @@ if __name__ == "__main__":
   app.run(port=2000)
 #Port can, of course, be changed.
 ```
-6) Configuration:
-The relevan configurations for the Flask app have been written within the app factory itself. It is important to set the configurations under the config section in the ```__init__.py``` file before attempting to run the application
+6) Additional Configuration:
+The relevant configurations for the Flask app have been written within the app factory itself. It is important to set the configurations under the config section in the ```__init__.py``` file before attempting to run the application. Make sure to edit the env_path variable used to load the env file, and adjust/remove the string slicing part.
 
 8) Run the application:
 ```sh
@@ -66,6 +66,10 @@ Once you have set up the Seneca application, navigate to `http://127.0.0.1:2000`
 - Review and rate products based on your experience, and read the reviews and ratings of different Seneca users
 - Place orders, either directly downloading a .zip file of the books you have added to your cart, or mailing the .zip file to an email address.
 - Email notifications, which include welcome messages sent upon account creation, as well as detailed email receipts of purchases for record-keeping
+- CSRF protection implemented via Flask-Form as well as separately using Flask-WTF-CSRF
+- Robust input validation via HTML attributes, Javascript validation on form submission, backend validation through extensive custom field classes inherited from Flask-WTforms and constraint checks via Flask-SQLAlchemy
+- Extensive error handlers for different HTTP and SQLite3 errors.
+- Order reconciliation mechanism to ensure registering an order discrpenecy (especially a file error in preparing the order) into an errors table for review, as well as dispatching email messages to an admin id (configured in the .env file) as well as the user's email address.
 
 ## Closing thoughts
 Seneca is far from perfect, but through this project, I have improved considerably from the last Flask application I had made (which was my first ever 'project', per say). For any feedback about Seneca, either any suggestions, bug reports, or whatever it might be, my email is:
