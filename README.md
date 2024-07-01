@@ -39,7 +39,10 @@ if __name__ == "__main__":
   app.run(port=2000)
 #Port can, of course, be changed.
 ```
-6) Run the application:
+6) Configuration:
+The relevan configurations for the Flask app have been written within the app factory itself. It is important to set the configurations under the config section in the ```__init__.py``` file before attempting to run the application
+
+8) Run the application:
 ```sh
 flask run
 ```
