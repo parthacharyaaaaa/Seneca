@@ -21,7 +21,7 @@ from datetime import timedelta, datetime
 import concurrent.futures
 class CartIntegrityError(HTTPException):
     code=699
-    description = "Penis"
+
 #Login redirection endpoint
 @login_manager.user_loader
 def loadUser(user_id):
